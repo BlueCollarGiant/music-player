@@ -1,0 +1,5 @@
+/* You can add global styles to this file, and also import other style files */
+html {
+  /* This targets the root of the document (html) */
+  background-image: linear-gradient(to bottom right, #3b82f6, #7e22ce);
+}
