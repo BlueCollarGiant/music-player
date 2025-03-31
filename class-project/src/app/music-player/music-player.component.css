@@ -1,6 +1,6 @@
 .music-player-container {
   min-height: 100vh;
-  background-image: linear-gradient(to bottom right,#7e22ce, #3b82f6,);
+  background-color: #0f1631;
   color: white;
   padding: 1rem;
   display: flex;
@@ -45,7 +45,8 @@
 /* Song List Panel */
 .song-list-panel {
   flex: 1;
-  background-color: #0a1029;
+  background-image: linear-gradient(#6c6cff,#6b3636);
+  opacity: 75%;
   border-radius: 0.5rem;
   padding: 1rem;
 }
@@ -97,8 +98,11 @@
 
 .song-item {
   display: flex;
+  width: 100%;
   justify-content: space-between;
+  border: 2px solid rgba(10, 16, 41, 0.25) ;
   align-items: center;
+  border-radius: 5px;
 }
 
 .add-button {
