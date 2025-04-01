@@ -1,9 +1,16 @@
-
-<app-tab-menu
-  [tabs]="tabs"
-  [activeTab]="activeTab"
-  (tabChange)="setActiveTab($event)">
-</app-tab-menu>
+<div class="music-player-container">
+  <!-- Navigation Tabs -->
+  <div class="tabs-container">
+    <div class="tabs">
+      @for (tab of tabs; track tab) {
+        <button
+          [class.active]="activeTab === tab"
+          (click)="setActiveTab(tab)">
+          {{ tab }}
+        </button>
+      }
+    </div>
+  </div>
 
 <!-- Main Content -->
   <div class="main-content">
