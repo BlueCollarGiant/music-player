@@ -1,18 +1,11 @@
-<div class="music-player-container">
-  <!-- Navigation Tabs -->
-  <div class="tabs-container">
-    <div class="tabs">
-      @for (tab of tabs; track tab) {
-        <button
-          [class.active]="activeTab === tab"
-          (click)="setActiveTab(tab)">
-          {{ tab }}
-        </button>
-      }
-    </div>
-  </div>
 
-  <!-- Main Content -->
+<app-tab-menu
+  [tabs]="tabs"
+  [activeTab]="activeTab"
+  (tabChange)="setActiveTab($event)">
+</app-tab-menu>
+
+<!-- Main Content -->
   <div class="main-content">
     <!-- Song List -->
     <div class="song-list-panel">
@@ -35,7 +28,7 @@
               <div class="song-thumbnail"></div>
               <span>{{ song.name }}</span>
             </div>
-            <button class="add-button">Add</button>
+            <button class="remove-button">Remove</button>
           </div>
         }
       </div>
@@ -90,4 +83,4 @@
 
     <div class="time-display">3:27</div>
   </div>
-</div>
+

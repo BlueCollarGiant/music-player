@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TabMenuComponent } from './tab-menu/tab-menu.component';
 
 interface Song {
   id: number;
@@ -10,7 +11,7 @@ interface Song {
 @Component({
   selector: 'app-music-player',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TabMenuComponent],
   templateUrl: './music-player.component.html',
   styleUrls: ['./music-player.component.css']
 })
