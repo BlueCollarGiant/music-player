@@ -2,6 +2,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Song } from '../../Models/song.model';
+import { MusicPlayerService } from '../../../services/music-player.service';
+
 
 
 @Component({
@@ -11,6 +13,9 @@ import { Song } from '../../Models/song.model';
   styleUrl: './player-controls.component.css'
 })
 export class PlayerControlsComponent {
+  constructor(public musicService: MusicPlayerService) {}
+
+
   @Input() isPlaying!: boolean;
   @Input() currentProgress!: number;
   @Input() currentTrack!: Song;
