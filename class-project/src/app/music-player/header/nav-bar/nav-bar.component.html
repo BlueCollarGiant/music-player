@@ -1,1 +1,11 @@
-<p>nav-bar works!</p>
+<div class="nav-bar">
+  <div class="nav-buttons">
+    @for (tab of tabs; track tab) {
+      <button
+        [class.active]="activeTab === tab"
+        (click)="setActiveTab(tab)">
+        {{ tab }}
+      </button>
+    }
+  </div>
+</div>

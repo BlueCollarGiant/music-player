@@ -1,1 +1,43 @@
-<p>main-body works!</p>
+<!-- Main Content Area -->
+<div class="content">
+  <!-- Song List Panel (Left Side) -->
+  <div class="song-list">
+    <div class="header">
+      <div class="info">
+        <div class="thumbnail"></div>
+        <span>Song List</span>
+      </div>
+      <div class="actions">
+        <button class="btn">Add</button>
+        <button class="btn">Remove</button>
+      </div>
+    </div>
+
+    <!-- Song Items -->
+    <div class="items">
+      @for (song of songs.slice(1); track song.id) {
+        <div class="item">
+          <div class="info">
+            <div class="thumbnail"></div>
+            <span>{{ song.name }}</span>
+          </div>
+          <button class="btn-remove">Remove</button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Now Playing Panel (Right Side) -->
+  <div class="now-playing">
+    <div class="album-art"></div>
+    <h2 class="title">Current Song</h2>
+    <p class="artist">Current Artist</p>
+
+    <!-- Visualizer -->
+    <div class="visualizer">
+      @for (height of audioBars; track $index) {
+        <div class="bar" [style.height.%]="height"></div>
+      }
+    </div>
+  </div>
+</div>
