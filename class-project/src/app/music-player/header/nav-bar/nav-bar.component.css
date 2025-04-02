@@ -1,0 +1,27 @@
+/* ===== NAVIGATION BAR ===== */
+.nav-bar {
+  margin-bottom: 1.5rem;
+  background-color: #0f1631;
+  border-radius: 0.5rem;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 2rem;
+  border-bottom: 1px solid #1a2142;
+}
+
+.nav-buttons button {
+  padding: 0.5rem;
+  font-size: 1.25rem;
+  background: transparent;
+  border: none;
+  color: #a0a0a0;
+  cursor: pointer;
+  padding-bottom: 0.5rem;
+}
+
+.nav-buttons button.active {
+  color: white;
+  border-bottom: 2px solid #3b82f6;
+}
