@@ -1,5 +1,16 @@
-/* You can add global styles to this file, and also import other style files */
+
 html {
   /* This targets the root of the document (html) */
   background-color: #0f1631;
 }
+/* ===== ROOT CONTAINER ===== */
+.music-player {
+  min-height: 100vh;
+  background-color: #0f1631;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+
