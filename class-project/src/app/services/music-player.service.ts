@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Song } from '../music-player/Models/song.model';
 
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
   // Tabs for nav-bar
-  activeTab: string = 'Songs';
+  activeTab = signal<string>('Songs');
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
 
   // Playback needed by player-controls
@@ -32,7 +32,7 @@ export class MusicPlayerService {
   // Methods
 
   setActiveTab(tab: string): void {
-    this.activeTab = tab;
+    this.activeTab.set(tab);
   }
 
   togglePlayPause(): void {

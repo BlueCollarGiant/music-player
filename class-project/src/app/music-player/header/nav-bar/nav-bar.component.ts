@@ -1,6 +1,6 @@
 // In each component, ensure you have:
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { MusicPlayerService } from '../../../services/music-player.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './nav-bar.component.css'
 })
 export class NavBarComponent {
-  @Input() activeTab!: string;
+  constructor(public musicService: MusicPlayerService) {}
   @Output() tabChanged = new EventEmitter<string>();
 
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
