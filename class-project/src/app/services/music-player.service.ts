@@ -15,7 +15,7 @@ export class MusicPlayerService {
 
   // Song Library Core data for main-body
   songs = signal<Song[]>([
-    { id: 1, name: 'Song List', isHeader: true },
+    { id: 1, name: 'Song List', isHeader: true, duration: '0:00'},
     { id: 2, name: 'Blinding Lights', artist: 'The Weeknd', duration: '3:45' },
     { id: 3, name: 'Save Your Tears', artist: 'The Weeknd', duration: '3:36' },
     { id: 4, name: 'Levitating', artist: 'Dua Lipa', duration: '3:24' },
