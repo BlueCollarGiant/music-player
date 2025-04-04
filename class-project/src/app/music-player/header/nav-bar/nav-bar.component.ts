@@ -1,5 +1,5 @@
 // In each component, ensure you have:
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { MusicPlayerService } from '../../../services/music-player.service';
 
 @Component({

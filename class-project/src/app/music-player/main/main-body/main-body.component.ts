@@ -1,7 +1,7 @@
 // In each component, ensure you have:
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component,} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Song } from '../../Models/song.model';
+import { MusicPlayerService } from '../../../services/music-player.service';
 
 
 @Component({
@@ -11,7 +11,5 @@ import { Song } from '../../Models/song.model';
   styleUrl: './main-body.component.css'
 })
 export class MainBodyComponent {
-  @Input() songs: Song[] = [];
-  @Input() currentTrack!: Song;
-  @Input() audioBars!: number[];
+  constructor(public musicService: MusicPlayerService) {}
 }

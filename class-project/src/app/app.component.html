@@ -1,23 +1,7 @@
 <div class="music-player">
-  <app-nav-bar
-  (tabChanged)="musicService.setActiveTab($event)">
-</app-nav-bar>
-
-<app-main-body
-  [songs]="musicService.songs"
-  [currentTrack]="musicService.currentTrack"
-  [audioBars]="musicService.audioBars">
-</app-main-body>
-
-<app-player-controls
-  [isPlaying]="musicService.isPlaying"
-  [currentProgress]="musicService.currentProgress"
-  [currentTrack]="musicService.currentTrack"
-  [currentTime]="musicService.currentTrack.duration || '0:00'"
-  (playPause)="musicService.togglePlayPause()"
-  (previous)="musicService.previousSong()"
-  (next)="musicService.nextSong()"
-></app-player-controls>
+  <app-nav-bar (tabChanged)="musicService.setActiveTab($event)">
+  </app-nav-bar>
+  <app-main-body></app-main-body>
+  <app-player-controls></app-player-controls>
 </div>
-
 <router-outlet />
