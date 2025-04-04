@@ -2,7 +2,7 @@
   <div class="nav-buttons">
     @for (tab of tabs; track tab) {
       <button
-        [class.active]="activeTab === tab"
+        [class.active]="musicService.activeTab() === tab"
         (click)="setActiveTab(tab)">
         {{ tab }}
       </button>

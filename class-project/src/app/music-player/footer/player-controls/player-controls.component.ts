@@ -16,22 +16,14 @@ export class PlayerControlsComponent {
   constructor(public musicService: MusicPlayerService) {}
 
 
-  @Input() isPlaying!: boolean;
-  @Input() currentProgress!: number;
-  @Input() currentTrack!: Song;
-  @Input() currentTime!: string;
-  @Output() playPause = new EventEmitter<void>();
-  @Output() previous = new EventEmitter<void>();
-  @Output() next = new EventEmitter<void>();
-
   togglePlayPause() {
-    this.playPause.emit();
+    this.musicService.togglePlayPause();
   }
   goPrevious() {
-    this.previous.emit();
+    this.musicService.previousSong();
   }
 
   goNext() {
-    this.next.emit();
+    this.musicService.nextSong();
   }
 }

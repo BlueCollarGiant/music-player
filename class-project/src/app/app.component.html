@@ -1,3 +1,7 @@
-<app-music-player></app-music-player>
-
+<div class="music-player">
+  <app-nav-bar (tabChanged)="musicService.setActiveTab($event)">
+  </app-nav-bar>
+  <app-main-body></app-main-body>
+  <app-player-controls></app-player-controls>
+</div>
 <router-outlet />
