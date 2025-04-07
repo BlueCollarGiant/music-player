@@ -50,15 +50,21 @@ export class MusicPlayerService {
   }
 
   previousSong(): void {
+    const songList = this.songs();
     const currentIndex = this.songs().findIndex(s => s.name === this.currentTrack.name);
     let prevIndex = currentIndex - 1;
 
     // Skip header or wrap around
     if (prevIndex < 1) {
-      prevIndex = this.songs.length - 1;
+      prevIndex = songList.length - 1;
     }
 
-    this.selectSong(this.songs()[prevIndex]);
+    const prevSong = songList[prevIndex];
+    if (prevSong) {
+    this.selectSong(prevSong);
+    } else {
+      console.warn('No previous song found at index', prevIndex);
+    }
   }
 
   nextSong(): void {
