@@ -14,6 +14,7 @@ export class MusicPlayerService {
 
 
   // Song Library Core data for main-body
+  // i dont like this all in one service look into data file like we used in js
   songs = signal<Song[]>([
     { id: 1, name: 'Song List', isHeader: true, duration: '0:00'},
     { id: 2, name: 'Blinding Lights', artist: 'The Weeknd', duration: '3:45' },

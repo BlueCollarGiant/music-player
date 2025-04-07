@@ -1,7 +1,7 @@
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';//remove unused imports
 import { CommonModule } from '@angular/common';
-import { Song } from '../../Models/song.model';
+import { Song } from '../../Models/song.model'; //remove not used also look into why this isnt used.
 import { MusicPlayerService } from '../../../services/music-player.service';
 
 
