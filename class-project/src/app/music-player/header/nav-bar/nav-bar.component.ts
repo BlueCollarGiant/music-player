@@ -10,6 +10,7 @@ import { MusicPlayerService } from '../../../services/music-player.service';
 })
 export class NavBarComponent {
   constructor(public musicService: MusicPlayerService) {}
+//dont like this below figure out removal.
   @Output() tabChanged = new EventEmitter<string>();
 
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
