@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Song } from '../music-player/Models/song.model';
-
+import { songQue } from '../data/music-data';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
@@ -13,15 +13,8 @@ export class MusicPlayerService {
   currentProgress = signal<number>(33.3);
 
 
-  // Song Library Core data for main-body
-  // i don't like this all in one service look into data file like we used in js
-  private songList = signal<Song[]>([
-    { id: 1, name: 'Song List', isHeader: true, duration: '0:00'},
-    { id: 2, name: 'Blinding Lights', artist: 'The Weekend', duration: '3:45' },
-    { id: 3, name: 'Save Your Tears', artist: 'The Weekend', duration: '3:36' },
-    { id: 4, name: 'Levitating', artist: 'Dua Lang', duration: '3:24' },
-    { id: 5, name: 'Don\'t Start Now', artist: 'Dua Lang', duration: '3:03' }
-  ]);
+  // Song Library Core data for main-body look in data folder for data
+  private songList = signal<Song[]>([...songQue]);
 
   // Current Track
   currentTrack = signal<Song>(this.songs[1]); // controls the currently selected track
