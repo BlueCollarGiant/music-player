@@ -1,5 +1,5 @@
-// In each component, ensure you have:
-import { Component, Output, EventEmitter, inject } from '@angular/core';
+
+import { Component, inject } from '@angular/core';
 import { MusicPlayerService } from '../../../services/music-player.service';
 
 @Component({
