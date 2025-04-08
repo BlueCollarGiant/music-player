@@ -68,15 +68,16 @@ export class MusicPlayerService {
     }
   }
 
+  //fix this it should mirror previous song
   nextSong(): void {
     const currentIndex = this.songs.findIndex(s => s.name === this.currentTrack.name);
     let nextIndex = currentIndex + 1;
 
     // Skip header or wrap around
     if (nextIndex >= this.songs.length) {
-      nextIndex = 1;
+      nextIndex = this.songList.length + 1;
     }
-
+    const nextSong =
     this.selectSong(this.songs[nextIndex]);
   }
 
