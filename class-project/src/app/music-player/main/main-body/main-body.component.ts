@@ -1,5 +1,5 @@
 // In each component, ensure you have:
-import { Component,} from '@angular/core';
+import { Component, inject,} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MusicPlayerService } from '../../../services/music-player.service';
 
@@ -11,5 +11,5 @@ import { MusicPlayerService } from '../../../services/music-player.service';
   styleUrl: './main-body.component.css'
 })
 export class MainBodyComponent {
-  constructor(public musicService: MusicPlayerService) {}
+  public musicService = inject(MusicPlayerService);
 }

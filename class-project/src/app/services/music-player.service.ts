@@ -14,17 +14,17 @@ export class MusicPlayerService {
 
 
   // Song Library Core data for main-body
-  // i dont like this all in one service look into data file like we used in js
-  songs = signal<Song[]>([
+  // i don't like this all in one service look into data file like we used in js
+  private songList = signal<Song[]>([
     { id: 1, name: 'Song List', isHeader: true, duration: '0:00'},
-    { id: 2, name: 'Blinding Lights', artist: 'The Weeknd', duration: '3:45' },
-    { id: 3, name: 'Save Your Tears', artist: 'The Weeknd', duration: '3:36' },
-    { id: 4, name: 'Levitating', artist: 'Dua Lipa', duration: '3:24' },
-    { id: 5, name: 'Don\'t Start Now', artist: 'Dua Lipa', duration: '3:03' }
+    { id: 2, name: 'Blinding Lights', artist: 'The Weekend', duration: '3:45' },
+    { id: 3, name: 'Save Your Tears', artist: 'The Weekend', duration: '3:36' },
+    { id: 4, name: 'Levitating', artist: 'Dua Lang', duration: '3:24' },
+    { id: 5, name: 'Don\'t Start Now', artist: 'Dua Lang', duration: '3:03' }
   ]);
 
   // Current Track
-  currentTrack = signal<Song>(this.songs()[1]); // controls the currently selected track
+  currentTrack = signal<Song>(this.songs[1]); // controls the currently selected track
 
   // Audio Visualizer Bars
   audioBars = signal<number[]>(Array(30).fill(0).map(() => Math.max(15, Math.floor(Math.random() * 100))));
@@ -51,8 +51,8 @@ export class MusicPlayerService {
   }
 
   previousSong(): void {
-    const songList = this.songs();
-    const currentIndex = this.songs().findIndex(s => s.name === this.currentTrack.name);
+    const songList = this.songs;
+    const currentIndex = this.songs.findIndex(s => s.name === this.currentTrack.name);
     let prevIndex = currentIndex - 1;
 
     // Skip header or wrap around
@@ -68,16 +68,17 @@ export class MusicPlayerService {
     }
   }
 
+  //fix this it should mirror previous song
   nextSong(): void {
-    const currentIndex = this.songs().findIndex(s => s.name === this.currentTrack.name);
+    const currentIndex = this.songs.findIndex(s => s.name === this.currentTrack.name);
     let nextIndex = currentIndex + 1;
 
     // Skip header or wrap around
     if (nextIndex >= this.songs.length) {
-      nextIndex = 1;
+      nextIndex = this.songList.length + 1;
     }
-
-    this.selectSong(this.songs()[nextIndex]);
+    const nextSong =
+    this.selectSong(this.songs[nextIndex]);
   }
 
   setVolume(level: number): void {
@@ -87,6 +88,9 @@ export class MusicPlayerService {
   seekTo(position: number): void {
     this.currentProgress.set(position);
     // Optional: implement actual audio seek here
+  }
+  get songs() {
+    return this.songList();
   }
 }
 

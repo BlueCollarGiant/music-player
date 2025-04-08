@@ -15,7 +15,7 @@
 
     <!-- Song Items -->
     <div class="items">
-      @for (song of musicService.songs().slice(1); track song.id) {
+      @for (song of musicService.songs.slice(1); track song.id) {
         <div class="item">
           <div class="info">
             <div class="thumbnail"></div>
