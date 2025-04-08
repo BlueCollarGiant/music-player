@@ -1,0 +1,26 @@
+<!-- Song List Panel (Left Side) -->
+<div class="song-list">
+  <div class="header">
+    <div class="info">
+      <div class="thumbnail"></div>
+      <span>Song List</span>
+    </div>
+    <div class="actions">
+      <button class="btn">Add</button>
+      <button class="btn">Remove</button>
+    </div>
+  </div>
+
+  <!-- Song Items -->
+  <div class="items">
+    @for (song of musicService.displaySongList().slice(1); track song.id) {
+      <div class="item">
+        <div class="info">
+          <div class="thumbnail"></div>
+          <span>{{ song.name }}</span>
+        </div>
+        <button class="btn-remove">Remove</button>
+      </div>
+    }
+  </div>
+</div>

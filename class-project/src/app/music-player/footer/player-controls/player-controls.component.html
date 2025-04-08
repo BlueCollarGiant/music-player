@@ -3,8 +3,8 @@
   <div class="current-track">
     <div class="thumbnail"></div>
     <div class="info">
-      <h3>{{ musicService.currentTrack().name }}</h3>
-      <p>{{ musicService.currentTrack().artist }}</p>
+      <h3>{{ musicService.currentTrack()?.name }}</h3>
+      <p>{{ musicService.currentTrack()?.artist }}</p>
     </div>
   </div>
 
@@ -46,5 +46,5 @@
     </div>
   </div>
 
-  <div class="time">{{ musicService.currentTrack().duration || '0:00' }}</div>
+  <div class="time">{{ musicService.currentTrack()?.duration || '0:00' }}</div>
 </div>

@@ -1,6 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { Song } from '../music-player/Models/song.model';
-
+import { songQue } from '../data/music-data';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
@@ -13,18 +13,25 @@ export class MusicPlayerService {
   currentProgress = signal<number>(33.3);
 
 
-  // Song Library Core data for main-body
-  // i don't like this all in one service look into data file like we used in js
-  private songList = signal<Song[]>([
-    { id: 1, name: 'Song List', isHeader: true, duration: '0:00'},
-    { id: 2, name: 'Blinding Lights', artist: 'The Weekend', duration: '3:45' },
-    { id: 3, name: 'Save Your Tears', artist: 'The Weekend', duration: '3:36' },
-    { id: 4, name: 'Levitating', artist: 'Dua Lang', duration: '3:24' },
-    { id: 5, name: 'Don\'t Start Now', artist: 'Dua Lang', duration: '3:03' }
-  ]);
+  // Song Library Core data for main-body look in data folder for data
+  private songList = signal<Song[]>([...songQue]);
+
+  readonly displaySongList = computed(() => {
+    const current = this.songList();
+    const MIN_SONGS = 8;
+    const placeholdersNeeded = MIN_SONGS - current.length;
+
+    const placeholders = Array.from({ length: placeholdersNeeded > 0 ? placeholdersNeeded: 0}, (_, i) => ({
+      id: 1000 + i,
+    name: '+ Add a Song',
+    isPlaceholder: true,
+    duration: '--:--'
+    }));
+    return [...current, ...placeholders];
+  });
 
   // Current Track
-  currentTrack = signal<Song>(this.songs[1]); // controls the currently selected track
+  currentTrack = signal<Song | null>(this.songs[1] ?? null); // if this.songs[1] is undefined fall back to null
 
   // Audio Visualizer Bars
   audioBars = signal<number[]>(Array(30).fill(0).map(() => Math.max(15, Math.floor(Math.random() * 100))));
