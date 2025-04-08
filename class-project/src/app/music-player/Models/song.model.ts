@@ -4,4 +4,5 @@ export interface Song {
   artist?: string;
   duration: string;
   isHeader?: boolean;
+  isPlaceholder?: boolean;
 }
