@@ -31,7 +31,7 @@ export class MusicPlayerService {
   });
 
   // Current Track
-  currentTrack = signal<Song>(this.songs[1]); // controls the currently selected track
+  currentTrack = signal<Song | null>(this.songs[1] ?? null); // if this.songs[1] is undefined fall back to null
 
   // Audio Visualizer Bars
   audioBars = signal<number[]>(Array(30).fill(0).map(() => Math.max(15, Math.floor(Math.random() * 100))));
