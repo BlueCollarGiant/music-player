@@ -13,7 +13,7 @@
 
   <!-- Song Items -->
   <div class="items">
-    @for (song of musicService.displaySongList().slice(1); track song.id) {
+    @for (song of playlistLogic.displaySongList().slice(1); track song.id) {
       <div class="item">
         <div class="info">
           <div class="thumbnail"></div>

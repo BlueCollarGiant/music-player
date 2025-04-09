@@ -4,6 +4,9 @@ import { songQue } from '../data/music-data';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
+displaySongList() {
+throw new Error('Method not implemented.');
+}
   // Tabs for nav-bar
   activeTab = signal<string>('Songs');
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
@@ -16,19 +19,7 @@ export class MusicPlayerService {
   // Song Library Core data for main-body look in data folder for data
   private songList = signal<Song[]>([...songQue]);
 
-  readonly displaySongList = computed(() => {
-    const current = this.songList();
-    const MIN_SONGS = 8;
-    const placeholdersNeeded = MIN_SONGS - current.length;
 
-    const placeholders = Array.from({ length: placeholdersNeeded > 0 ? placeholdersNeeded: 0}, (_, i) => ({
-      id: 1000 + i,
-    name: '+ Add a Song',
-    isPlaceholder: true,
-    duration: '--:--'
-    }));
-    return [...current, ...placeholders];
-  });
 
   // Current Track
   currentTrack = signal<Song | null>(this.songs[1] ?? null); // if this.songs[1] is undefined fall back to null
