@@ -2,8 +2,8 @@
 <div class="song-list">
   <div class="header">
     <div class="info">
-      <div class="thumbnail"></div>
-      <span>Song List</span>
+      <!--<div class="thumbnail"></div>-->
+      <span>Your Sound Starts Here</span>
     </div>
     <div class="actions">
       <button class="btn">Add</button>
@@ -19,7 +19,9 @@
           <div class="thumbnail"></div>
           <span>{{ song.name }}</span>
         </div>
-        <button class="btn-remove">Remove</button>
+        @if (!song.isPlaceholder) {
+          <button class="btn-remove">Remove</button>
+        }
       </div>
     }
   </div>
