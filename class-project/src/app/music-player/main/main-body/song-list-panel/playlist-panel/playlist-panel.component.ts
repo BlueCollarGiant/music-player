@@ -12,4 +12,9 @@ import { PlayListLogic } from '../../../../../services/play-list-logic.service';
 export class PlaylistPanelComponent {
   public musicService = inject(MusicPlayerService);
   public playlistLogic = inject(PlayListLogic)
+
+
+
+
+
 }

@@ -6,8 +6,7 @@
       <span>Your Sound Starts Here</span>
     </div>
     <div class="actions">
-      <button class="btn">Add</button>
-      <button class="btn">Remove</button>
+      <button class="btn" (click)="playlistLogic.addSong()">Add</button>
     </div>
   </div>
 
@@ -19,9 +18,9 @@
           <div class="thumbnail"></div>
           <span>{{ song.name }}</span>
         </div>
-        @if (!song.isPlaceholder) {
-          <button class="btn-remove">Remove</button>
-        }
+        <!--@if (!song.isPlaceholder) {-->
+          <button class="btn-remove" (click)="playlistLogic.removeSong()">Remove</button>
+      <!--}-->
       </div>
     }
   </div>
