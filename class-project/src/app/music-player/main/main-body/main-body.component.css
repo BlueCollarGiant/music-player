@@ -25,7 +25,8 @@ app-playlist-panel {
 .album-art {
   width: 16rem;
   height: 16rem;
-  background-image: linear-gradient(to bottom right, #3b82f6, #7e22ce);
+  background-image: url('');
+  /*linear-gradient(to bottom right, #3b82f6, #7e22ce);*/
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
 }
