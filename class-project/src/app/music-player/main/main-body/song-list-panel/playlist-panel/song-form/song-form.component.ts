@@ -1,0 +1,17 @@
+import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
+import { PlayListLogic } from "../../../../../../services/play-list-logic.service";
+import { MusicPlayerService } from "../../../../../../services/music-player.service";
+
+@Component({
+  selector: 'app-song-form',
+  imports: [CommonModule],
+  templateUrl: './song-form.component.html',
+  styleUrl: './song-form.component.css'
+})
+export class SongFormComponent {
+  public musicService = inject(MusicPlayerService);
+  public playlistLogic = inject(PlayListLogic)
+
+
+}
