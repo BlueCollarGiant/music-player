@@ -26,8 +26,8 @@ export class PlayListLogic {
 
   // methods section
 
-  addSong(){
-    console.log('additem')
+  addSong(song: Song){
+    this.songList.update(current => [... current, song]);
   }
 
   removeSong() {
