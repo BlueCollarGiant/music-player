@@ -28,10 +28,12 @@ export class PlayListLogic {
   // methods section
 
   addSong(song: Song){
-    this.songList.update(current => [... current, song]);
+    this.songList.update(current => {
+      const validTracks = current.filter(entry => entry && !entry.isHeader);
+      return [... validTracks, song]});
   }
 
-  removeSong() {
-    console.log("remove song")
+  removeSong(id: number) {
+    this.songList.update(current => current.filter(entry => entry.id !== id));
   }
 }

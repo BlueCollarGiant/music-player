@@ -1,6 +1,7 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { Song } from '../music-player/Models/song.model';
 import { songQue } from '../data/music-data';
+import { PlayListLogic } from './play-list-logic.service';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
@@ -17,7 +18,7 @@ throw new Error('Method not implemented.');
 
 
   // Song Library Core data for main-body look in data folder for data
-  private songList = signal<Song[]>([...songQue]);
+  private playlist = inject(PlayListLogic);
 
 
 
@@ -73,7 +74,7 @@ throw new Error('Method not implemented.');
 
     // Skip header or wrap around
     if (nextIndex >= this.songs.length) {
-      nextIndex = this.songList.length + 1;
+      nextIndex = this.playlist.displaySongList().length + 1;
     }
     const nextSong =
     this.selectSong(this.songs[nextIndex]);
@@ -88,7 +89,7 @@ throw new Error('Method not implemented.');
     // Optional: implement actual audio seek here
   }
   get songs() {
-    return this.songList();
+    return this.playlist.displaySongList();
   }
 }
 

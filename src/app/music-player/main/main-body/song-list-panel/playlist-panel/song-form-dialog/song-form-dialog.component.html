@@ -1,14 +1,38 @@
 <div class="form-container">
   <h2 class="form-header">Add your new Song</h2>
-  <form action="" method="post" class="form-main">
-    Song Name: <input type="text" name="Song">
-    <br>
-    Artist Name: <input type="text" name="Artist">
-    <br>
-    time: <input type="text">
-    <br><br>
-    <button>cancel</button>
-    <input type="submit">
+
+  <form (submit)="submit($event)" class="form-main">
+    <label>
+      Song Name:
+      <input
+        type="text"
+        [value]="songName()"
+        (input)="songName.set($any($event.target).value)"
+      />
+    </label>
+    <br />
+
+    <label>
+      Artist Name:
+      <input
+        type="text"
+        [value]="artistName()"
+        (input)="artistName.set($any($event.target).value)"
+      />
+    </label>
+    <br />
+
+    <label>
+      Duration:
+      <input
+        type="text"
+        [value]="duration()"
+        (input)="duration.set($any($event.target).value)"
+      />
+    </label>
+    <br /><br />
+
+    <button type="button" (click)="cancel()">Cancel</button>
+    <button type="submit">Submit</button>
   </form>
 </div>
-
