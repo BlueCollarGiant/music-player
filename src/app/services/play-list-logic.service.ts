@@ -17,6 +17,7 @@ export class PlayListLogic {
     const placeholders = Array.from({ length: placeholdersNeeded > 0 ? placeholdersNeeded: 0}, (_, i) => ({
       id: 1000 + i,
     name: '+ Add a Song',
+    artist:'',
     isPlaceholder: true,
     duration: '--:--'
     }));

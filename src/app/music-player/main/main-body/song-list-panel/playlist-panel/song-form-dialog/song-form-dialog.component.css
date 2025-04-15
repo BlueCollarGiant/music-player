@@ -1,0 +1,21 @@
+
+::ng-deep .mat-mdc-dialog-surface  {
+  background: linear-gradient(to bottom right, #3b82f6, #7e22ce);
+  color: red;
+  border: none;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.form-container {
+  background-color: black;
+  padding: 0.5rem 1.5rem;
+}

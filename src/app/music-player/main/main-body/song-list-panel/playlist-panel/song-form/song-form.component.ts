@@ -29,7 +29,8 @@ export class SongFormComponent {
 
   openDialog(enterAnimationDuration: string, exitAnimationDuration: string): void {
     this.dialog.open(SongFormDialogComponent, {
-      width: '300px',
+      width: '1000px',
+      height: '500px',
       enterAnimationDuration,
       exitAnimationDuration,
     });
