@@ -1,19 +1,5 @@
 <!-- Main Content Area -->
 <div class="content">
   <app-playlist-panel/>
-
-
-  <!-- Now Playing Panel (Right Side) -->
-  <div class="now-playing">
-    <div class="album-art"></div>
-    <h2 class="title">Current Song</h2>
-    <p class="artist">Current Artist</p>
-
-    <!-- Visualizer -->
-    <div class="visualizer">
-      @for (height of musicService.audioBars(); track $index) {
-        <div class="bar" [style.height.%]="height"></div>
-      }
-    </div>
-  </div>
+  <app-right-panel/>
 </div>
