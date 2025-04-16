@@ -5,6 +5,8 @@ import { Song } from "../music-player/Models/song.model";
 
 @Injectable({ providedIn: 'root' })
 export class PlayListLogic {
+
+
   // inject Song from musicService
   private songList = signal<Song[]>([...songQue]);
 
@@ -17,6 +19,7 @@ export class PlayListLogic {
     const placeholders = Array.from({ length: placeholdersNeeded > 0 ? placeholdersNeeded: 0}, (_, i) => ({
       id: 1000 + i,
     name: '+ Add a Song',
+    artist:'',
     isPlaceholder: true,
     duration: '--:--'
     }));
@@ -26,11 +29,26 @@ export class PlayListLogic {
 
   // methods section
 
-  addSong(){
-    console.log('additem')
+  addSong(song: Song){
+    this.songList.update(current => {
+      const index = current.findIndex(entry => entry.isPlaceholder);
+
+      const updated = [...current]; //create copy of current song list so dont mess up original
+
+      if (index !== -1) { // checks if found placeholder
+
+
+        updated[index] = song; // take index placeholder was found replace with song we made
+
+      } else {
+        updated.push(song);
+      }
+
+    return updated; //update signal obviously
+    });
   }
 
-  removeSong() {
-    console.log("remove song")
+  removeSong(id: number) {
+    this.songList.update(current => current.filter(entry => entry.id !== id));
   }
 }

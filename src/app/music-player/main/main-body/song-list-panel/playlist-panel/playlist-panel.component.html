@@ -6,21 +6,21 @@
       <span>Your Sound Starts Here</span>
     </div>
     <div class="actions">
-      <button class="btn"  (click)="playlistLogic.addSong()">Add</button>
+      <app-song-form></app-song-form> <!--this is the song form and song form modal if you dont remember future me-->
     </div>
   </div>
 
   <!-- Song Items -->
   <div class="items">
-    @for (song of playlistLogic.displaySongList().slice(1); track song.id) {
-      <div class="item">
+    @for (song of playlistLogic.displaySongList(); track song.id) {
+      <div class="item" [class.active]="song.id === musicService.currentTrack()?.id">
         <div class="info">
           <div class="thumbnail"></div>
           <span>{{ song.name }}</span>
         </div>
-        <!--@if (!song.isPlaceholder) {-->
-          <button class="btn-remove" (click)="playlistLogic.removeSong()">Remove</button>
-      <!--}-->
+        @if (!song.isPlaceholder) {
+          <button class="btn-remove" (click)="playlistLogic.removeSong(song.id)">Remove</button>
+      }
       </div>
     }
   </div>

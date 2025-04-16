@@ -14,12 +14,19 @@
   margin-right: 2rem;
 }
 
+
 .current-track .thumbnail {
+  position: relative;
   width: 3.5rem;
   height: 3.5rem;
-  background-image: linear-gradient(to bottom right, #3b82f6, #7e22ce);
   margin-right: 1rem;
+  background-color: #1a2142; /* replaces gradient with darker look */
+  border-radius: 0.375rem;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 10px #3b82f6;
+  overflow: hidden;
 }
+
 
 .current-track h3 {
   font-weight: 500;
@@ -72,4 +79,43 @@
 
 .time {
   color: #a0a0a0;
+}
+
+/* Floating Music Notes dont touch i finally got this to work */
+.current-track .thumbnail::before,
+.current-track .thumbnail::after {
+  content: '🎵';
+  position: absolute;
+  bottom: -1rem;
+  opacity: 0;
+  font-size: 1rem;
+  animation: floatNote 3s infinite ease-in-out;
+  pointer-events: none;
+}
+
+.current-track .thumbnail::before {
+  left: 5px;
+  animation-delay: 0s;
+}
+
+.current-track .thumbnail::after {
+  right: 5px;
+  animation-delay: 1.5s;
+}
+
+@keyframes floatNote {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-3rem);
+    opacity: 0;
+  }
 }

@@ -1,17 +1,28 @@
 import { CommonModule } from "@angular/common";
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { PlayListLogic } from "../../../../../../services/play-list-logic.service";
 import { MusicPlayerService } from "../../../../../../services/music-player.service";
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialog,} from '@angular/material/dialog';
+import { SongFormDialogComponent } from "../song-form-dialog/song-form-dialog.component";
 
 @Component({
   selector: 'app-song-form',
-  imports: [CommonModule],
+  imports: [CommonModule, MatButtonModule],
   templateUrl: './song-form.component.html',
-  styleUrl: './song-form.component.css'
+  styleUrls: ['./song-form.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SongFormComponent {
   public musicService = inject(MusicPlayerService);
   public playlistLogic = inject(PlayListLogic)
+  readonly dialog = inject(MatDialog);
 
+  openDialog(): void {
+    this.dialog.open(SongFormDialogComponent, {
+      width: '1000px',
+      height: '500px',
+      disableClose: false // Forces the user to submit or cancel manually when set to true
+    });
 
-}
+}}

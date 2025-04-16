@@ -1,12 +1,10 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Song } from '../music-player/Models/song.model';
-import { songQue } from '../data/music-data';
+import { PlayListLogic } from './play-list-logic.service';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
-displaySongList() {
-throw new Error('Method not implemented.');
-}
+
   // Tabs for nav-bar
   activeTab = signal<string>('Songs');
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
@@ -17,12 +15,12 @@ throw new Error('Method not implemented.');
 
 
   // Song Library Core data for main-body look in data folder for data
-  private songList = signal<Song[]>([...songQue]);
+  private playlist = inject(PlayListLogic);
 
 
 
   // Current Track
-  currentTrack = signal<Song | null>(this.songs[1] ?? null); // if this.songs[1] is undefined fall back to null
+  currentTrack = signal<Song | null>(this.playlist.displaySongList()[1] ?? null); // if this.songs[1] is undefined fall back to null
 
   // Audio Visualizer Bars
   audioBars = signal<number[]>(Array(30).fill(0).map(() => Math.max(15, Math.floor(Math.random() * 100))));
@@ -36,31 +34,27 @@ throw new Error('Method not implemented.');
 
   togglePlayPause(): void {
     this.isPlaying.set(!this.isPlaying());
-    // Add real audio API logic here later
+    // this makes my play button switch
   }
 
-  selectSong(song: Song): void {
-    if (song.isHeader) return;
-    this.currentTrack.set({
-      ...song,
-      duration: song.duration || '3:45'
-    });
-    // Load and optionally autoplay the song here
-  }
 
   previousSong(): void {
-    const songList = this.songs;
-    const currentIndex = this.songs.findIndex(s => s.name === this.currentTrack.name);
+    const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
+    const current = this.currentTrack();
+
+    if (!current) return;
+
+    const currentIndex = tracks.findIndex(song => song.id === current.id);
     let prevIndex = currentIndex - 1;
 
     // Skip header or wrap around
-    if (prevIndex < 1) {
-      prevIndex = songList.length - 1;
+    if (prevIndex < 0) {
+      prevIndex = tracks.length - 1; //wrap to last one
     }
 
-    const prevSong = songList[prevIndex];
+    const prevSong = tracks[prevIndex];
     if (prevSong) {
-    this.selectSong(prevSong);
+    this.currentTrack.set(prevSong);
     } else {
       console.warn('No previous song found at index', prevIndex);
     }
@@ -68,28 +62,28 @@ throw new Error('Method not implemented.');
 
   //fix this it should mirror previous song
   nextSong(): void {
-    const currentIndex = this.songs.findIndex(s => s.name === this.currentTrack.name);
+    const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
+    const current = this.currentTrack();
+
+    if (!current) return;
+
+    const currentIndex = tracks.findIndex(song => song.id === current.id);
     let nextIndex = currentIndex + 1;
 
     // Skip header or wrap around
-    if (nextIndex >= this.songs.length) {
-      nextIndex = this.songList.length + 1;
+    if (nextIndex >= tracks.length) {
+      nextIndex = 0; //wrap to the first song
     }
-    const nextSong =
-    this.selectSong(this.songs[nextIndex]);
+    const nextSong = tracks[nextIndex];
+    if (nextSong) {
+    this.currentTrack.set(nextSong);
+    } else {
+      console.warn('No more songs found at index', nextIndex);
+    }
+
   }
 
-  setVolume(level: number): void {
-    // Optional: use this later for volume slider
-  }
 
-  seekTo(position: number): void {
-    this.currentProgress.set(position);
-    // Optional: implement actual audio seek here
-  }
-  get songs() {
-    return this.songList();
-  }
 }
 
 
