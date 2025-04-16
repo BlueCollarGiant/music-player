@@ -1,0 +1,5 @@
+<div class="visualizer">
+  @for (height of musicService.audioBars(); track $index) {
+    <div class="bar" [style.height.%]="height"></div>
+  }
+</div>
