@@ -18,11 +18,18 @@ export class SongFormComponent {
   public playlistLogic = inject(PlayListLogic)
   readonly dialog = inject(MatDialog);
 
-  openDialog(): void {
+  /*openDialog(): void {
     this.dialog.open(SongFormDialogComponent, {
       width: '1000px',
       height: '500px',
       disableClose: false // Forces the user to submit or cancel manually when set to true
+    });*/
+    openDialog(): void {
+    this.dialog.open(SongFormDialogComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      autoFocus: false
     });
+
 
 }}
