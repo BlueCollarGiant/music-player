@@ -20,7 +20,8 @@ export class MusicPlayerService {
 
 
   // Current Track
-  currentTrack = signal<Song | null>(this.playlist.displaySongList()[1] ?? null); // if this.songs[1] is undefined fall back to null
+  //currentTrack = signal<Song | null>(this.playlist.displaySongList()[1] ?? null); // if this.songs[1] is undefined fall back to null
+  currentTrack = signal<Song | null>(null);//test
 
   // Audio Visualizer Bars
   audioBars = signal<number[]>(Array(30).fill(0).map(() => Math.max(15, Math.floor(Math.random() * 100))));
@@ -64,6 +65,11 @@ export class MusicPlayerService {
   nextSong(): void {
     const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
     const current = this.currentTrack();
+
+    //if no current track, start at first real song
+    if(!current && tracks.length > 0) {
+      this.currentTrack.set(tracks[0])
+    }
 
     if (!current) return;
 
