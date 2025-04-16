@@ -1,12 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { MusicPlayerService } from '../../../../../services/music-player.service';
-import { CommonModule } from '@angular/common';
 import { PlayListLogic } from '../../../../../services/play-list-logic.service';
 import { SongFormComponent } from './song-form/song-form.component';
+import { SharedModule } from '../../../../../shared/shared.module';
 
 @Component({
   selector: 'app-playlist-panel',
-  imports: [CommonModule, SongFormComponent],
+  imports: [SharedModule, SongFormComponent],
   templateUrl: './playlist-panel.component.html',
   styleUrl: './playlist-panel.component.css'
 })
