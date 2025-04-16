@@ -1,4 +1,4 @@
-import { computed, effect, Injectable, signal } from "@angular/core";
+import { computed, Injectable, signal } from "@angular/core";
 import { songQue } from "../data/music-data";
 import { Song } from "../music-player/Models/song.model";
 
@@ -6,11 +6,7 @@ import { Song } from "../music-player/Models/song.model";
 @Injectable({ providedIn: 'root' })
 export class PlayListLogic {
 
-  constructor() {
-    effect(()=> {
-      console.log('🎵 Updated Playlist:', this.songList())
-    })
-  }
+
   // inject Song from musicService
   private songList = signal<Song[]>([...songQue]);
 

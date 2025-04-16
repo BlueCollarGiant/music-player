@@ -1,4 +1,4 @@
-import { Component, inject , effect} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MusicPlayerService } from '../../../../../services/music-player.service';
 import { CommonModule } from '@angular/common';
 import { PlayListLogic } from '../../../../../services/play-list-logic.service';
@@ -13,12 +13,8 @@ import { SongFormComponent } from './song-form/song-form.component';
 export class PlaylistPanelComponent {
   public musicService = inject(MusicPlayerService);
   public playlistLogic = inject(PlayListLogic)
-constructor() {
-  effect(() => {
-    console.log('🎧 PlaylistPanel sees:', this.playlistLogic.displaySongList());
-  });
 
-}
+
 
 
 }
