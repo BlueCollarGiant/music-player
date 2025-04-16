@@ -1,11 +1,16 @@
-import { computed, Injectable, signal } from "@angular/core";
+import { computed, inject, Injectable, Injector, signal } from "@angular/core";
 import { songQue } from "../data/music-data";
 import { Song } from "../music-player/Models/song.model";
+import { MusicPlayerService } from "./music-player.service";
 
 
 @Injectable({ providedIn: 'root' })
 export class PlayListLogic {
 
+  private injector = inject(Injector);
+  private get musicService(): MusicPlayerService {
+  return this.injector.get(MusicPlayerService);
+}
 
   // inject Song from musicService
   private songList = signal<Song[]>([...songQue]);
@@ -46,9 +51,12 @@ export class PlayListLogic {
 
     return updated; //update signal obviously
     });
+    // Auto-select if no real current track is active
+    if (!this.musicService.currentTrack() || this.musicService.currentTrack()?.isPlaceholder) {
+    this.musicService.currentTrack.set(song);
   }
-
-  removeSong(id: number) {
+  }
+  removeSong(id: number): void {
     this.songList.update(current => current.filter(entry => entry.id !== id));
   }
 }
