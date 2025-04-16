@@ -4,9 +4,7 @@ import { PlayListLogic } from './play-list-logic.service';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
-displaySongList() {
-throw new Error('Method not implemented.');
-}
+
   // Tabs for nav-bar
   activeTab = signal<string>('Songs');
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
@@ -22,7 +20,7 @@ throw new Error('Method not implemented.');
 
 
   // Current Track
-  currentTrack = signal<Song | null>(this.songs[1] ?? null); // if this.songs[1] is undefined fall back to null
+  currentTrack = signal<Song | null>(this.playlist.displaySongList()[1] ?? null); // if this.songs[1] is undefined fall back to null
 
   // Audio Visualizer Bars
   audioBars = signal<number[]>(Array(30).fill(0).map(() => Math.max(15, Math.floor(Math.random() * 100))));
@@ -41,7 +39,7 @@ throw new Error('Method not implemented.');
 
 
   previousSong(): void {
-    const tracks = this.songs.filter(song => !song.isPlaceholder);
+    const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
     const current = this.currentTrack();
 
     if (!current) return;
@@ -64,7 +62,7 @@ throw new Error('Method not implemented.');
 
   //fix this it should mirror previous song
   nextSong(): void {
-    const tracks = this.songs.filter(song => !song.isPlaceholder);
+    const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
     const current = this.currentTrack();
 
     if (!current) return;
@@ -85,9 +83,7 @@ throw new Error('Method not implemented.');
 
   }
 
-  get songs() {
-    return this.playlist.displaySongList();
-  }
+
 }
 
 
