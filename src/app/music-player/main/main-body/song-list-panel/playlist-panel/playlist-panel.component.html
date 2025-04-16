@@ -14,15 +14,15 @@
 
   <!-- Song Items -->
   <div class="items">
-    @for (song of playlistLogic.displaySongList().slice(1); track song.id) {
+    @for (song of playlistLogic.displaySongList(); track song.id) {
       <div class="item">
         <div class="info">
           <div class="thumbnail"></div>
           <span>{{ song.name }}</span>
         </div>
-        <!--@if (!song.isPlaceholder) {-->
+        @if (!song.isPlaceholder) {
           <button class="btn-remove" (click)="playlistLogic.removeSong(song.id)">Remove</button>
-      <!--}-->
+      }
       </div>
     }
   </div>
