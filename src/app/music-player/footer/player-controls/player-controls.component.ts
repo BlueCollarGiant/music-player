@@ -1,13 +1,13 @@
 
 import { Component, inject} from '@angular/core';//remove unused imports
-import { CommonModule } from '@angular/common';
 import { MusicPlayerService } from '../../../services/music-player.service';
+import { SharedModule } from '../../../shared/shared.module';
 
 
 
 @Component({
   selector: 'app-player-controls',
-  imports: [CommonModule],
+  imports: [SharedModule],
   templateUrl: './player-controls.component.html',
   styleUrl: './player-controls.component.css'
 })
