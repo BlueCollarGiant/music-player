@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { MusicPlayerService } from '../../../../../../services/music-player.service';
 import { PlayListLogic } from '../../../../../../services/play-list-logic.service';
 import { MatDialogRef } from '@angular/material/dialog';
+import { TimeService } from '../../../../../../services/time.service';
 
 @Component({
   selector: 'app-song-form-dialog',
@@ -12,7 +13,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 export class SongFormDialogComponent {
   public musicService = inject(MusicPlayerService);
   public playlistLogic = inject(PlayListLogic)
-
+  public timeService = inject(TimeService);
   // Inject the dialog reference for closing
 dialogRef = inject(MatDialogRef<SongFormDialogComponent>);
 
@@ -28,7 +29,7 @@ duration = signal('');
     this.playlistLogic.addSong({
       name: this.songName(),
       artist: this.artistName(),
-      duration: this.duration(),
+      duration: this.timeService.duration(),
       id: Date.now() // or however you generate unique IDs
     });
 
