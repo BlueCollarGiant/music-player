@@ -15,7 +15,8 @@ export class PlayerControlsComponent {
   public musicService = inject(MusicPlayerService);
 
 
-  togglePlayPause() {
+  togglePlayPause(): void {
+    const playing = this.musicService.isPlaying();
     this.musicService.togglePlayPause();
   }
   goPrevious() {
@@ -25,4 +26,12 @@ export class PlayerControlsComponent {
   goNext() {
     this.musicService.nextSong();
   }
+  startPlayback(): void {
+    this.musicService.play();
+  }
+
+  pausePlayback(): void {
+    this.musicService.pause();
+  }
+
 }

@@ -1,0 +1,10 @@
+<!-- Now Playing Panel (Right Side) -->
+<div class="now-playing">
+  <div class="album-art"></div>
+  <div class="song-info-container">
+    <h2 class="title">Current Song</h2>
+    <p class="artist">Current Artist</p>
+  </div>
+  <!-- Visualizer -->
+  <app-visualizer [isPlaying]="musicService.isPlaying()"/>
+</div>

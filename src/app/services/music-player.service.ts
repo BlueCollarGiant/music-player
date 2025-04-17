@@ -4,13 +4,13 @@ import { PlayListLogic } from './play-list-logic.service';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
-
+  readonly playbackStarted = signal(false);
   // Tabs for nav-bar
   activeTab = signal<string>('Songs');
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
 
   // Playback needed by player-controls
-  isPlaying = signal<boolean>(false);
+  readonly isPlaying = signal<boolean>(false);
   currentProgress = signal<number>(33.3);
 
 
@@ -88,7 +88,13 @@ export class MusicPlayerService {
     }
 
   }
+  play(): void {
+    this.playbackStarted.set(true);
+  }
 
+  pause(): void {
+    this.playbackStarted.set(false);
+  }
 
 }
 
