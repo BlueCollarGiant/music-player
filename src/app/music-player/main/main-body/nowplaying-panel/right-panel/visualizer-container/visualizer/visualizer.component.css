@@ -29,7 +29,7 @@
 
 .bar {
   width: 4px;
-  height: 6%;
+  height: 65%;
   margin: 0 1px;
   background: linear-gradient(to bottom, #3b82f6, #7e22ce);
   border-radius: 9999px;
@@ -45,6 +45,10 @@
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   animation-direction: alternate;
+}
+.bar.paused {
+  height: 10px; /* 🔥 Set your desired collapsed height here */
+  opacity: 0.6; /* Optional: dim it */
 }
 @keyframes wave {
   0% {

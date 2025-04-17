@@ -8,6 +8,7 @@
     <i
       class="bar"
       [class.playing]="isPlaying()"
+      [class.paused]="!isPlaying()"
       [style.animation-delay]="(i * 30) + 'ms'"
       [style.animation-duration]="(800 + (i % 4) * 200) + 'ms'"
     ></i>

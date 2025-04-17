@@ -17,7 +17,6 @@ export class PlayerControlsComponent {
 
   togglePlayPause(): void {
     const playing = this.musicService.isPlaying();
-    console.log(playing ? 'Pause' : 'Play');
     this.musicService.togglePlayPause();
   }
   goPrevious() {

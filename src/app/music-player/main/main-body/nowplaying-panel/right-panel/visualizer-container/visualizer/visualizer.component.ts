@@ -14,11 +14,6 @@ export class VisualizerComponent {
 
 
 
-  constructor() {
-    effect(() => {
-      const playing = this.isPlaying(); // Signal<boolean>(), called to get the value
-      console.log(playing ? 'Play: true' : 'Pause: false');
-    });
-  }
+
 
 }
