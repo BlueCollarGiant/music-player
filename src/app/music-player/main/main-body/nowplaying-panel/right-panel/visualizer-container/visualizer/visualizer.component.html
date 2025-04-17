@@ -1,5 +1,15 @@
-<div class="visualizer">
+<!--<div class="visualizer">
   @for (height of musicService.audioBars(); track $index) {
     <div class="bar" [style.height.%]="height"></div>
+  }
+</div>-->
+<div class="sound-wave">
+  @for (bar of bars; let i = $index; track $index) {
+    <i
+      class="bar"
+      [class.playing]="isPlaying()"
+      [style.animation-delay]="(i * 30) + 'ms'"
+      [style.animation-duration]="(800 + (i % 4) * 200) + 'ms'"
+    ></i>
   }
 </div>

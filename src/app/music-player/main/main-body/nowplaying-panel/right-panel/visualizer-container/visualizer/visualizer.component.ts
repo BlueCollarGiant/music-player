@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject, input,Signal } from '@angular/core';
 import { MusicPlayerService } from '../../../../../../../services/music-player.service';
 
 @Component({
@@ -8,5 +8,17 @@ import { MusicPlayerService } from '../../../../../../../services/music-player.s
   styleUrl: './visualizer.component.css'
 })
 export class VisualizerComponent {
-  public musicService = inject(MusicPlayerService);
+
+  readonly isPlaying = input.required<boolean>();
+  readonly bars = Array.from({ length: 40 });
+
+
+
+  constructor() {
+    effect(() => {
+      const playing = this.isPlaying(); // Signal<boolean>(), called to get the value
+      console.log(playing ? 'Play: true' : 'Pause: false');
+    });
+  }
+
 }

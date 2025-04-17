@@ -1,5 +1,5 @@
 /* ===== visualizer (RIGHT PANEL) ===== */
-.visualizer {
+/*.visualizer {
   width: 100%;
   height: 3rem;
   display: flex;
@@ -11,4 +11,52 @@
 .visualizer .bar {
   width: 0.25rem;
   background-color: #3b82f6;
+}*/
+.sound-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sound-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  width: 100%;
+  gap: 1px;
+}
+
+.bar {
+  width: 4px;
+  height: 6%;
+  margin: 0 1px;
+  background: linear-gradient(to bottom, #3b82f6, #7e22ce);
+  border-radius: 9999px;
+  transform-origin: center center; /* 🔥 Grow/shrink from the center */
+  animation: none;
+  box-shadow: 0 0 6px rgba(123, 97, 255, 0.4);
+}
+
+
+
+.bar.playing {
+  animation-name: wave;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes wave {
+  0% {
+    transform: scaleY(0.2);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(0.2);
+    opacity: 0.5;
+  }
 }
