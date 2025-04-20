@@ -1,10 +1,13 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Song } from '../music-player/Models/song.model';
 import { PlayListLogic } from './play-list-logic.service';
+import { TimeService } from './time.service';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
   readonly playbackStarted = signal(false);
+  //inject time service
+  private timeService = inject(TimeService);
   // Tabs for nav-bar
   activeTab = signal<string>('Songs');
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
@@ -56,6 +59,7 @@ export class MusicPlayerService {
     const prevSong = tracks[prevIndex];
     if (prevSong) {
     this.currentTrack.set(prevSong);
+    this.timeService.parseTime(prevSong.duration);
     } else {
       console.warn('No previous song found at index', prevIndex);
     }
@@ -83,6 +87,7 @@ export class MusicPlayerService {
     const nextSong = tracks[nextIndex];
     if (nextSong) {
     this.currentTrack.set(nextSong);
+    this.timeService.parseTime(nextSong.duration);
     } else {
       console.warn('No more songs found at index', nextIndex);
     }

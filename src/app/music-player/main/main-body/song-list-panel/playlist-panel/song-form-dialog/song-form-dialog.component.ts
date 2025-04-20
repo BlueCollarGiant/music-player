@@ -22,10 +22,17 @@ songName = signal('');
 artistName = signal('');
 duration = signal('');
 
+ngOnInit(): void {
+  this.timeService.setHours('0');
+  this.timeService.setMinutes('0');
+  this.timeService.setSeconds('0');
+}
+
 
 
   submit(event: Event): void {
     event.preventDefault();  //prevent page reload
+    this.timeService.updateDuration();
     this.playlistLogic.addSong({
       name: this.songName(),
       artist: this.artistName(),
@@ -33,6 +40,15 @@ duration = signal('');
       id: Date.now() // or however you generate unique IDs
     });
 
+
+    const song = {
+      name: this.songName(),
+      artist: this.artistName(),
+      duration: this.timeService.duration(),
+      id: Date.now()
+    };
+
+    console.log('🎯 Submitting song:', song);
     this.dialogRef.close();
   }
 

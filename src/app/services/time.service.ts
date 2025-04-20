@@ -32,6 +32,7 @@ export class TimeService {
   }
 
   parseTime(input: string): void {
+    console.log('Parsing time:', input);
     const [h, m, s] = input.split(':').map(n => parseInt(n, 10) || 0);
     this.hours.set(h);
     this.minutes.set(m);
