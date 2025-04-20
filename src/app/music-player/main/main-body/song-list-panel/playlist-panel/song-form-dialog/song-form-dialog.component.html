@@ -4,13 +4,13 @@
   <form (submit)="submit($event)" class="form-main">
     <label>
       Song Name:
-      <input type="text" [value]="songName()" (input)="songName.set($any($event.target).value)" />
+      <input type="text" [value]="songName()" (input)="songName.set($any($event.target).value)" required/>
     </label>
     <br />
 
     <label>
       Artist Name:
-      <input type="text" [value]="artistName()" (input)="artistName.set($any($event.target).value)" />
+      <input type="text" [value]="artistName()" (input)="artistName.set($any($event.target).value)" required/>
     </label>
     <br />
 
@@ -25,7 +25,7 @@
       <br /><br />
 
       <button type="button" (click)="cancel()">Cancel</button>
-      <button type="submit">Submit</button>
+      <button type="submit" [disabled]="!songName() || !artistName()">Submit</button> <!--disabled the submit button till artist and song filled out as a guard-->
     </label>
   </form>
 </div>
