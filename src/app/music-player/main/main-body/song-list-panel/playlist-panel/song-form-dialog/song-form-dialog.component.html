@@ -1,31 +1,25 @@
 <div class="form-container">
   <h2 class="form-header">What song would you like to add?</h2>
-
   <form (submit)="submit($event)" class="form-main">
     <label>
       Song Name:
-      <input type="text" [value]="songName()" (input)="songName.set($any($event.target).value)" required/>
+      <input type="text" [value]="songName()" (input)="songName.set($any($event.target).value)" required />
     </label>
     <br />
-
     <label>
       Artist Name:
-      <input type="text" [value]="artistName()" (input)="artistName.set($any($event.target).value)" required/>
+      <input type="text" [value]="artistName()" (input)="artistName.set($any($event.target).value)" required />
     </label>
     <br />
-
     <label>
       Time:
-      <input type="number" min="0" max="99" placeholder="hh"
-        (input)="timeService.setHours($any($event.target).value)" />
-      <input type="number" min="0" max="59" placeholder="mm"
-        (input)="timeService.setMinutes($any($event.target).value)" />
-      <input type="number" min="0" max="59" placeholder="ss"
-        (input)="timeService.setSeconds($any($event.target).value)" />
+      <input type="number" min="0" max="99" placeholder="hh" (input)="timeService.setHours($any($event.target).value)" />
+      <input type="number" min="0" max="59" placeholder="mm" (input)="timeService.setMinutes($any($event.target).value)" />
+      <input type="number" min="0" max="59" placeholder="ss" (input)="timeService.setSeconds($any($event.target).value)" />
       <br /><br />
-
       <button type="button" (click)="cancel()">Cancel</button>
-      <button type="submit" [disabled]="!songName() || !artistName()">Submit</button> <!--disabled the submit button till artist and song filled out as a guard-->
+      <button type="submit" [disabled]="!songName() || !artistName()">Submit</button>
+      <!--disabled the submit button till artist and song filled out as a guard-->
     </label>
   </form>
 </div>

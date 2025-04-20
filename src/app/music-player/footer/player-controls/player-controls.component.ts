@@ -12,9 +12,10 @@ import { SharedModule } from '../../../shared/shared.module';
   styleUrl: './player-controls.component.css'
 })
 export class PlayerControlsComponent {
+  //-----Injections section-----//
   public musicService = inject(MusicPlayerService);
 
-
+  //-----Methods section-----//
   togglePlayPause(): void {
     const playing = this.musicService.isPlaying();
     this.musicService.togglePlayPause();

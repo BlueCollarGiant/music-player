@@ -22,6 +22,7 @@ songName = signal('');
 artistName = signal('');
 duration = signal('');
 
+// ----- on startup setup-----//
 ngOnInit(): void {
   this.timeService.setHours('0');
   this.timeService.setMinutes('0');
@@ -29,7 +30,7 @@ ngOnInit(): void {
 }
 
 
-
+// -----Methods area-----//
   submit(event: Event): void {
     event.preventDefault();  //prevent page reload
     this.timeService.updateDuration();
@@ -39,15 +40,6 @@ ngOnInit(): void {
       duration: this.timeService.duration(),
       id: Date.now() // or however you generate unique IDs
     });
-
-
-    const song = {
-      name: this.songName(),
-      artist: this.artistName(),
-      duration: this.timeService.duration(),
-      id: Date.now()
-    };
-
     this.dialogRef.close();
   }
 
