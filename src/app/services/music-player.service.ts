@@ -14,7 +14,8 @@ export class MusicPlayerService {
 
   // Playback needed by player-controls
   readonly isPlaying = signal<boolean>(false);
-  currentProgress = signal<number>(33.3);
+  currentProgress = signal<number>(0);
+  private intervalRef: any = null;
 
 
   // Song Library Core data for main-body look in data folder for data
@@ -37,10 +38,45 @@ export class MusicPlayerService {
   }
 
   togglePlayPause(): void {
-    this.isPlaying.set(!this.isPlaying());
+    const nowPlaying = !this.isPlaying();
     // this makes my play button switch
-  }
+    this.isPlaying.set(nowPlaying);
 
+  if (nowPlaying) {
+    this.startProgressBar();
+  } else {
+    clearInterval(this.intervalRef);
+  }
+}
+private startProgressBar(): void {
+  const song = this.currentTrack();
+  if (!song || !song.duration) return;
+
+  const totalSeconds = this.durationToSeconds(song.duration);
+  if (totalSeconds <= 0) return;
+
+  const startingPercent = this.currentProgress();
+  let elapsed = (startingPercent / 100) * totalSeconds;
+
+  clearInterval(this.intervalRef); // clear any existing timer
+
+  this.intervalRef = setInterval(() => {
+    elapsed += 0.1;
+
+    const percent = Math.min((elapsed / totalSeconds) * 100, 100);
+    this.currentProgress.set(percent);
+
+    if (percent >= 100) {
+      clearInterval(this.intervalRef); // stop at full
+    }
+  }, 100);
+}
+
+
+  private durationToSeconds(duration: string): number {
+    const [h, m, s] = duration.split(':').map(n => parseInt(n, 10) || 0);
+    return h * 3600 + m * 60 + s;
+  }
 
   previousSong(): void {
     const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
@@ -60,6 +96,9 @@ export class MusicPlayerService {
     if (prevSong) {
     this.currentTrack.set(prevSong);
     this.timeService.parseTime(prevSong.duration);
+    this.currentProgress.set(0);
+    clearInterval(this.intervalRef);
+    this.isPlaying.set(false);
     } else {
       console.warn('No previous song found at index', prevIndex);
     }
@@ -88,6 +127,9 @@ export class MusicPlayerService {
     if (nextSong) {
     this.currentTrack.set(nextSong);
     this.timeService.parseTime(nextSong.duration);
+    this.currentProgress.set(0);
+    clearInterval(this.intervalRef);
+    this.isPlaying.set(false);
     } else {
       console.warn('No more songs found at index', nextIndex);
     }
