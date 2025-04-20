@@ -3,7 +3,7 @@ import { songQue } from "../data/music-data";
 import { Song } from "../music-player/Models/song.model";
 import { MusicPlayerService } from "./music-player.service";
 
-
+const LOCAL_STORAGE_KEY = 'music-player-playlist'; // local storage
 @Injectable({ providedIn: 'root' })
 export class PlayListLogic {
 
@@ -11,9 +11,30 @@ export class PlayListLogic {
   private get musicService(): MusicPlayerService {
   return this.injector.get(MusicPlayerService);
 }
+  // ✅ Save only real songs
+  private saveToLocalStorage(songs: Song[]): void {
+    if (typeof window === 'undefined') return;
+    const realSongs = songs.filter(song => !song.isPlaceholder);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(realSongs));
+  }
+
+    // ✅ Load on startup
+    private loadFromLocalStorage(): Song[] | null {
+      if (typeof window === 'undefined') return null;
+      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (raw) {
+        try {
+          return JSON.parse(raw) as Song[];
+        } catch (e) {
+          console.error('❌ Failed to parse localStorage playlist:', e);
+        }
+      }
+      return null;
+    }
 
   // inject Song from musicService
-  private songList = signal<Song[]>([...songQue]);
+  private songList = signal<Song[]>(this.loadFromLocalStorage() || [...songQue]);
+
 
   //Placeholder Logic
   readonly displaySongList = computed(() => {
@@ -48,6 +69,7 @@ export class PlayListLogic {
       } else {
         updated.push(song);
       }
+      this.saveToLocalStorage(updated);
 
     return updated; //update signal obviously
     });
@@ -57,6 +79,12 @@ export class PlayListLogic {
   }
   }
   removeSong(id: number): void {
-    this.songList.update(current => current.filter(entry => entry.id !== id));
-  }
+    this.songList.update(current => {
+      const update = current.filter(entry => entry.id !== id);
+      this.saveToLocalStorage(update);
+    return update;
+  });
+}
+
+
 }
