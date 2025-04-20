@@ -7,6 +7,8 @@ export class TimeService {
   seconds = signal(0);
   duration = signal('0:00:00');
 
+  //-----Methods area-----//
+
   setHours(value: string): void {
     this.hours.set(+value || 0);
     this.updateDuration();
@@ -32,7 +34,7 @@ export class TimeService {
   }
 
   parseTime(input: string): void {
-    console.log('Parsing time:', input);
+
     const [h, m, s] = input.split(':').map(n => parseInt(n, 10) || 0);
     this.hours.set(h);
     this.minutes.set(m);

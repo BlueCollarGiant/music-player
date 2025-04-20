@@ -48,7 +48,6 @@ ngOnInit(): void {
       id: Date.now()
     };
 
-    console.log('🎯 Submitting song:', song);
     this.dialogRef.close();
   }
 
