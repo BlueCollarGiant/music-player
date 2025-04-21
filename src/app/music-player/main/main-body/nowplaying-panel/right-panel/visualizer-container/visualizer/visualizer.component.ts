@@ -1,5 +1,5 @@
-import { Component, effect, inject, input,Signal } from '@angular/core';
-import { MusicPlayerService } from '../../../../../../../services/music-player.service';
+import { Component, input } from '@angular/core';
+
 
 @Component({
   selector: 'app-visualizer',

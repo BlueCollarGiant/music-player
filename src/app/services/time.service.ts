@@ -2,10 +2,10 @@ import { Injectable, signal } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class TimeService {
-  hours = signal(0);
-  minutes = signal(0);
-  seconds = signal(0);
-  duration = signal('0:00:00');
+  private hours = signal(0);
+  private minutes = signal(0);
+  private seconds = signal(0);
+  public duration = signal('0:00:00');
 
   //-----Methods area-----//
 
@@ -41,4 +41,5 @@ export class TimeService {
     this.seconds.set(s);
     this.updateDuration();
   }
+
 }
