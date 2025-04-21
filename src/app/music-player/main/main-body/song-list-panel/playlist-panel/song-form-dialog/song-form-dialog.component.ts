@@ -33,6 +33,7 @@ ngOnInit(): void {
 // -----Methods area-----//
   submit(event: Event): void {
     event.preventDefault();  //prevent page reload
+    (document.activeElement as HTMLElement)?.blur();
     this.timeService.updateDuration();
     this.playlistLogic.addSong({
       name: this.songName(),

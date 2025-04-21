@@ -1,4 +1,4 @@
-// In each component, ensure you have:
+
 import { Component, inject,} from '@angular/core';
 import { MusicPlayerService } from '../../../services/music-player.service';
 import { PlaylistPanelComponent } from './song-list-panel/playlist-panel/playlist-panel.component';
