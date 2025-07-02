@@ -46,3 +46,16 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# ========== RAILS BACKEND ==========
+
+/backend/vendor/bundle
+/backend/log/*
+!/backend/log/.keep
+/backend/tmp/*
+!/backend/tmp/.keep
+/backend/storage/*
+!/backend/storage/.keep
+.byebug_history
+/backend/.bundle/
+/backend/config/master.key
