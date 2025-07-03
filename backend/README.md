@@ -1,24 +1,18 @@
 # README
+# Music Player Rails API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This Rails 7 API-only service powers the Music Player app. It serves JSON data to the Angular frontend.
 
-Things you may want to cover:
+## Getting Started
 
-* Ruby version
+Follow these steps to set up the backend locally:
 
-* System dependencies
+### 1. Requirements
+- Ruby 3.0.x (recommended)
+- Rails 7.1.x
+- PostgreSQL
+- Bundler
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+### 2. Install dependencies
+```bash
+bundle install --path vendor/bundle
