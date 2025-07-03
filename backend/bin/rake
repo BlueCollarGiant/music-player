@@ -1,5 +1,20 @@
 #!/usr/bin/env ruby
-load File.expand_path("spring", __dir__)
+
+# Try to load Spring, Rails' development preloader.
+# Spring makes running rake tasks faster by keeping the app loaded in memory.
+# This block ensures that if Spring isn't installed (like in production or CI),
+# it won't crash—Rails will just run normally without it.
+begin
+  load File.expand_path("spring", __dir__)
+rescue LoadError
+  # Spring not available – continue without preloader
+end
+
+# Load the Rails boot file to set up the environment and load the app.
 require_relative "../config/boot"
+
+# Require Rake, the task runner used by Rails for db:migrate and other commands.
 require "rake"
+
+# Start running the rake tasks passed from the command line.
 Rake.application.run
