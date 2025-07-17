@@ -112,7 +112,7 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (2.13.0)
-    jwt (3.1.2)
+    jwt (2.10.2)
       base64
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
@@ -273,7 +273,7 @@ DEPENDENCIES
   bcrypt (~> 3.1.20)
   bootsnap (>= 1.4.4)
   byebug
-  jwt
+  jwt (~> 2.7)
   listen (~> 3.3)
   omniauth
   omniauth-google-oauth2
