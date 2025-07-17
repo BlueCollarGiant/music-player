@@ -15,7 +15,8 @@ class SessionsController < ApplicationController
         if user.authenticate(params[:password])
             #if successful reset the counter
             user.update(failed_login_attempts: 0)
-            render json: {message: "Logged in successfully", user: { id: user.id, email: user.email } }, status: :ok
+            token = JsonWebToken.encode(user_id: user.id)
+            render json: {message: "Logged in successfully", user: { id: user.id, email: user.email }, token: token }, status: :ok
         else
             #if wrong password add one to count
             user.increment!(:failed_login_attempts)

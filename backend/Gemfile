@@ -39,4 +39,13 @@ end
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
-gem "bcrypt", "~> 3.1.20"
+
+
+
+# --- Authentication ---
+gem "bcrypt", "~> 3.1.20"             # For password hashing (already using)
+gem 'jwt'                            # For token-based authentication (JWT)
+
+# --- Google OAuth2 via Omniauth ---
+gem 'omniauth'                       # Base gem for OmniAuth
+gem 'omniauth-google-oauth2'         # Google OAuth2 strategy for OmniAuth
