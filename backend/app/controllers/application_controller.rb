@@ -8,7 +8,7 @@ class ApplicationController < ActionController::API
 
     def authenticate_user!
         header = request.headers['Authorization']
-        token = header.split('').last if header.present?
+        token = header.split(' ').last if header.present?
 
         begin
             decoded = JsonWebToken.decode(token)
