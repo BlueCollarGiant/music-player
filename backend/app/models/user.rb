@@ -8,6 +8,8 @@ class User < ApplicationRecord
 
     private
 
+    ##
+    # Sets the role attribute to "user" if it is not already assigned.
     def set_default_role
         self.role ||= "user"
     end

@@ -1,4 +1,9 @@
 class SessionsController < ApplicationController
+    ##
+    # Handles user login by authenticating credentials and managing account lockout after multiple failed attempts.
+    #
+    # Responds with appropriate JSON messages and HTTP status codes based on authentication success, account lock status, or invalid credentials.
+    # On successful login, returns a JWT token and user information. If failed attempts reach three, the account is locked and a relevant error is returned.
     def create
         user = User.find_by(email: params[:email])
 
