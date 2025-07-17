@@ -3,7 +3,7 @@ class PasswordResetsController < ApplicationController
     user = User.find_by(email: params[:email])
 
     if user.nil?
-      render json: { errors: ["Email not found"] }, status: :not_found
+      render json: { message: "Password reset instructions sent if email exists." }, status: :ok
       return
     end
 
