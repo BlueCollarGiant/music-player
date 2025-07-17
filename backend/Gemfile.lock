@@ -275,8 +275,8 @@ DEPENDENCIES
   byebug
   jwt (~> 2.7)
   listen (~> 3.3)
-  omniauth
-  omniauth-google-oauth2
+  omniauth (~> 2.1)
+  omniauth-google-oauth2 (~> 1.1)
   pg (~> 1.1)
   puma (~> 6.0)
   rails (~> 7.0)

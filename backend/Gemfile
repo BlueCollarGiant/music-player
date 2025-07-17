@@ -48,5 +48,5 @@ gem "bcrypt", "~> 3.1.20"             # For password hashing (already using)
 gem 'jwt', '~> 2.7'                  # For token-based authentication (JWT)
 
 # --- Google OAuth2 via Omniauth ---
-gem 'omniauth'                       # Base gem for OmniAuth
-gem 'omniauth-google-oauth2'         # Google OAuth2 strategy for OmniAuth
+gem 'omniauth', '~> 2.1'                       # Base gem for OmniAuth
+gem 'omniauth-google-oauth2', '~> 1.1'         # Google OAuth2 strategy for OmniAuth
