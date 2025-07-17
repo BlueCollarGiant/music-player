@@ -1,4 +1,7 @@
 class PasswordResetsController < ApplicationController
+  ##
+  # Handles password reset requests by generating a reset token and creating a password reset record for the user associated with the provided email.
+  # Responds with an error if the email is not found, or with a success message if instructions are sent.
   def create
     user = User.find_by(email: params[:email])
 
