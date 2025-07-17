@@ -1,3 +1,8 @@
 Rails.application.routes.draw do
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  get "user_profiles/show"
+  get "user_profiles/update"
+  get "user_profiles/destroy"
+  resources :users, only: [:create, :show]
+  post "/login", to: "sessions#create"
+  resources :password_resets, only: [:create]
 end
