@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   # Auth routes
-  post "/signup", to: "auth#signup"
+  
   post "/login", to: "sessions#create"
 
   # User routes
