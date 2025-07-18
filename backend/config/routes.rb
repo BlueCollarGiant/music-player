@@ -1,8 +1,14 @@
 Rails.application.routes.draw do
-  get "user_profiles/show"
-  get "user_profiles/update"
-  get "user_profiles/destroy"
-  resources :users, only: [:create, :show]
+  # Auth routes
+  
   post "/login", to: "sessions#create"
+
+  # User routes
+  resources :users, only: [:create, :show]
+
+  # Password reset
   resources :password_resets, only: [:create]
+
+  # User Profile routes (automatically handles show, update, destroy, etc.)
+  resources :user_profiles, only: [:show, :update, :destroy]
 end
