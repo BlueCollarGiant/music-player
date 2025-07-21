@@ -1,0 +1,28 @@
+=> 
+[[32m#<User:0x0000710f476c67c8[0m
+  id: [34m[1m2[0m,
+  email: [31m[1m"[0m[31mnewuser@example.com[0m[31m[1m"[0m,
+  password_digest: [31m[1m"[0m[31m[FILTERED][0m[31m[1m"[0m,
+  created_at: [31m[1m"[0m[31m2025-07-10 19:36:51.252753000 +0000[0m[31m[1m"[0m,
+  updated_at: [31m[1m"[0m[31m2025-07-10 19:36:51.252753000 +0000[0m[31m[1m"[0m,
+  failed_login_attempts: [34m[1m0[0m,
+  is_locked: [36m[1mfalse[0m,
+  role: [36m[1mnil[0m[32m>[0m,
+ [32m#<User:0x0000710f476c6688[0m
+  id: [34m[1m3[0m,
+  email: [31m[1m"[0m[31myour@email.com[0m[31m[1m"[0m,
+  password_digest: [31m[1m"[0m[31m[FILTERED][0m[31m[1m"[0m,
+  created_at: [31m[1m"[0m[31m2025-07-17 16:17:13.434851000 +0000[0m[31m[1m"[0m,
+  updated_at: [31m[1m"[0m[31m2025-07-17 16:17:13.434851000 +0000[0m[31m[1m"[0m,
+  failed_login_attempts: [34m[1m0[0m,
+  is_locked: [36m[1mfalse[0m,
+  role: [36m[1mnil[0m[32m>[0m,
+ [32m#<User:0x0000710f476c6548[0m
+  id: [34m[1m6[0m,
+  email: [31m[1m"[0m[31madmin@musicplayer.com[0m[31m[1m"[0m,
+  password_digest: [31m[1m"[0m[31m[FILTERED][0m[31m[1m"[0m,
+  created_at: [31m[1m"[0m[31m2025-07-21 19:53:24.312009000 +0000[0m[31m[1m"[0m,
+  updated_at: [31m[1m"[0m[31m2025-07-21 19:53:24.312009000 +0000[0m[31m[1m"[0m,
+  failed_login_attempts: [34m[1m0[0m,
+  is_locked: [36m[1mfalse[0m,
+  role: [31m[1m"[0m[31madmin[0m[31m[1m"[0m[32m>[0m]

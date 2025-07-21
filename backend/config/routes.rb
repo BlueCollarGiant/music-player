@@ -19,4 +19,13 @@ Rails.application.routes.draw do
       get :username_history
     end
   end
+
+  # Admin routes
+  scope '/admin' do
+    get 'dashboard', to: 'admin#dashboard'
+    get 'users', to: 'admin#users'
+    get 'users/search', to: 'admin#search_users'
+    post 'users/:id/promote', to: 'admin#promote_user'
+    post 'users/:id/demote', to: 'admin#demote_user'
+  end
 end
