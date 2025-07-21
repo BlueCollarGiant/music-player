@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_profile_id: 1
+  old_username: MyString
+  current_username: MyString
+  change_date: 2025-07-17 19:48:08
+
+two:
+  user_profile_id: 1
+  old_username: MyString
+  current_username: MyString
+  change_date: 2025-07-17 19:48:08

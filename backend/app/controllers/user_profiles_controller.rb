@@ -1,13 +1,18 @@
 class UserProfilesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_user_profile, only: [:show, :update, :destroy]
-  before_action only: [:show, :update, :destroy] do
+  before_action :set_user_profile, only: [:show, :update, :destroy, :username_history]
+  before_action only: [:show, :update, :destroy, :username_history] do
     authorize_self_or_admin!(@user_profile.user_id)
   end
   
   
   def show
-    render json: @user_profile
+    render json: @user_profile, include: :user_name_change_logs
+  end
+
+  def username_history
+    change_logs = @user_profile.user_name_change_logs.recent
+    render json: change_logs
   end
 
   def update
@@ -32,6 +37,6 @@ class UserProfilesController < ApplicationController
   end
 
   def user_profile_params
-    params.require(:user_profile).permit(:username, :avatar, :spotify_linked, :soundcloud_linked, :youtube_linked )
+    params.require(:user_profile).permit(:username)
   end
 end
