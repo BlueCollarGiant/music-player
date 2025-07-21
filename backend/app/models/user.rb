@@ -7,8 +7,11 @@ class User < ApplicationRecord
     validates :email, presence: true, uniqueness: true
     validates :password, presence: true, length: { minimum: 6}, if: :password
 
+    # Virtual attribute for username during signup
+    attr_accessor :username
+
     before_validation :set_default_role, on: :create
-    after_create :create_user_profile
+    after_create :create_user_profile_with_username
 
     private
 
@@ -16,7 +19,9 @@ class User < ApplicationRecord
         self.role ||= "user"
     end
 
-    def create_user_profile
-        build_user_profile.save!
+    def create_user_profile_with_username
+        profile = build_user_profile
+        profile.username = @username if @username.present?
+        profile.save!
     end
 end
