@@ -51,4 +51,10 @@ gem 'jwt', '~> 2.7'                  # For token-based authentication (JWT)
 
 # --- Google OAuth2 via Omniauth ---
 gem 'omniauth', '~> 2.1'                       # Base gem for OmniAuth
+gem 'omniauth-rails_csrf_protection', '~> 1.0' # CSRF protection for OmniAuth
 gem 'omniauth-google-oauth2', '~> 1.1'         # Google OAuth2 strategy for OmniAuth
+
+# --- Music Platform OAuth ---
+gem 'omniauth-spotify', '~> 0.0.13'            # Spotify OAuth2 strategy for OmniAuth
+gem 'rspotify', '~> 2.12'                      # Spotify Web API wrapper
+# gem 'omniauth-soundcloud', '~> 1.0'          # SoundCloud OAuth (version conflict with rspotify)

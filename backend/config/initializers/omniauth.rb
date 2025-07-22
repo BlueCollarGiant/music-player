@@ -22,6 +22,14 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       approval_prompt: 'force'
     }
 
+  # Spotify OAuth for music platform integration
+  provider :spotify,
+    ENV['SPOTIFY_CLIENT_ID'],
+    ENV['SPOTIFY_CLIENT_SECRET'],
+    {
+      scope: 'user-read-private user-read-email playlist-read-private playlist-read-collaborative'
+    }
+
   # TODO: Add these when we install the respective gems
   # SoundCloud OAuth for music platform integration
   # provider :soundcloud,

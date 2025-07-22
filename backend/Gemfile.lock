@@ -72,6 +72,8 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     base64 (0.3.0)
     bcrypt (3.1.20)
     benchmark (0.4.1)
@@ -84,6 +86,7 @@ GEM
     connection_pool (2.5.3)
     crass (1.0.6)
     date (3.4.1)
+    domain_name (0.6.20240107)
     dotenv (3.1.8)
     dotenv-rails (3.1.8)
       dotenv (= 3.1.8)
@@ -108,6 +111,8 @@ GEM
     globalid (1.2.1)
       activesupport (>= 6.1)
     hashie (5.0.0)
+    http-cookie (1.0.8)
+      domain_name (~> 0.5)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     io-console (0.8.0)
@@ -131,6 +136,10 @@ GEM
       net-pop
       net-smtp
     marcel (1.0.4)
+    mime-types (3.7.0)
+      logger
+      mime-types-data (~> 3.2025, >= 3.2025.0507)
+    mime-types-data (3.2025.0715)
     mini_mime (1.1.5)
     minitest (5.25.5)
     msgpack (1.8.0)
@@ -147,6 +156,7 @@ GEM
       timeout
     net-smtp (0.5.1)
       net-protocol
+    netrc (0.11.0)
     nio4r (2.7.4)
     nokogiri (1.18.8-aarch64-linux-gnu)
       racc (~> 1.4)
@@ -184,6 +194,11 @@ GEM
     omniauth-oauth2 (1.8.0)
       oauth2 (>= 1.4, < 3)
       omniauth (~> 2.0)
+    omniauth-rails_csrf_protection (1.0.2)
+      actionpack (>= 4.2)
+      omniauth (~> 2.0)
+    omniauth-spotify (0.0.13)
+      omniauth-oauth2 (~> 1.1)
     pg (1.5.9)
     pp (0.6.2)
       prettyprint
@@ -191,6 +206,7 @@ GEM
     psych (5.2.6)
       date
       stringio
+    public_suffix (6.0.2)
     puma (6.6.0)
       nio4r (~> 2.0)
     racc (1.8.1)
@@ -247,6 +263,14 @@ GEM
       psych (>= 4.0.0)
     reline (0.6.1)
       io-console (~> 0.5)
+    rest-client (2.0.2)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
+    rspotify (2.12.4)
+      addressable (~> 2.8.0)
+      omniauth-oauth2 (>= 1.6)
+      rest-client (~> 2.0.2)
     securerandom (0.4.1)
     snaky_hash (2.0.3)
       hashie (>= 0.1.0, < 6)
@@ -285,10 +309,13 @@ DEPENDENCIES
   listen (~> 3.3)
   omniauth (~> 2.1)
   omniauth-google-oauth2 (~> 1.1)
+  omniauth-rails_csrf_protection (~> 1.0)
+  omniauth-spotify (~> 0.0.13)
   pg (~> 1.1)
   puma (~> 6.0)
   rack-cors
   rails (~> 7.0)
+  rspotify (~> 2.12)
   spring
   tzinfo-data
 
