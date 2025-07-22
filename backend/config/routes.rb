@@ -17,6 +17,8 @@ Rails.application.routes.draw do
   resources :user_profiles, only: [:show, :update, :destroy] do
     member do
       get :username_history
+      post :upload_avatar
+      get :avatar_history
     end
   end
 

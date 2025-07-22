@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_profile: one
+  current_avatar: MyString
+  change_date: 2025-07-21 19:35:20
+
+two:
+  user_profile: two
+  current_avatar: MyString
+  change_date: 2025-07-21 19:35:20

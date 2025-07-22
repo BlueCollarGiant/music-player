@@ -3,6 +3,7 @@ class User < ApplicationRecord
 
     has_one :user_profile, dependent: :destroy
     has_many :user_name_change_logs, through: :user_profile
+    has_many :user_avatars, through: :user_profile
     has_many :password_resets, dependent: :destroy
     
     validates :email, presence: true, uniqueness: true
