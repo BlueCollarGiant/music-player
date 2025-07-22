@@ -24,7 +24,7 @@ class UserProfilesController < ApplicationController
   end
 
   def username_history
-    limit = params[:limit].to_i.nonzero? || 25
+    limit = sanitized_limit
     change_logs = @user_profile.user_name_change_logs.recent.limit(limit)
     
     formatted_logs = change_logs.map { |log| format_username_log(log) }
@@ -53,8 +53,8 @@ class UserProfilesController < ApplicationController
 
   # POST /user_profiles/:id/upload_avatar
   def upload_avatar
-    if params[:avatar].present?
-      @user_profile.avatar.attach(params[:avatar])
+    if user_profile_params[:avatar].present?
+      @user_profile.avatar.attach(user_profile_params[:avatar])
       if @user_profile.save
         render json: {
           message: "Avatar uploaded successfully",
@@ -70,7 +70,7 @@ class UserProfilesController < ApplicationController
 
   # GET /user_profiles/:id/avatar_history (Admin only)
   def avatar_history
-    limit = params[:limit].to_i.nonzero? || 25
+    limit = sanitized_limit
     history = @user_profile.user_avatars.recent.limit(limit)
     
     formatted_history = history.map { |log| format_avatar_log(log) }
@@ -121,5 +121,12 @@ class UserProfilesController < ApplicationController
       change_date: log.change_date,
       formatted_date: log.change_date.strftime("%B %d, %Y at %I:%M %p")
     }
+  end
+
+  # Helper method to prevent DoS attacks via excessive limit requests
+  def sanitized_limit(default: 25, max: 100)
+    requested = params[:limit].to_i
+    return default if requested <= 0
+    [requested, max].min
   end
 end

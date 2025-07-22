@@ -50,12 +50,10 @@ class UserProfile < ApplicationRecord
                       avatar.attachment&.created_at&.> 1.second.ago
                     end
     
-    # Only log if this is a new avatar attachment or change (and not the default avatar)
+    # Only log user-initiated avatar changes (excludes default avatars assigned automatically)
+    # Default avatar logging is handled separately in attach_default_avatar for admin tracking
     if avatar_changed && avatar.filename.to_s != DEFAULT_AVATAR_FILENAME
-      user_avatars.build(
-        current_avatar: avatar.filename.to_s,
-        change_date: Time.current
-      )
+      log_avatar_change_entry(avatar.filename.to_s)
     end
   end
 
@@ -75,18 +73,31 @@ class UserProfile < ApplicationRecord
   def attach_default_avatar
     unless avatar.attached?
       if File.exist?(DEFAULT_AVATAR_PATH)
-        avatar.attach(
-          io: File.open(DEFAULT_AVATAR_PATH),
-          filename: DEFAULT_AVATAR_FILENAME,
-          content_type: 'image/png'
-        )
+        File.open(DEFAULT_AVATAR_PATH) do |file|
+          avatar.attach(
+            io: file,
+            filename: DEFAULT_AVATAR_FILENAME,
+            content_type: 'image/png'
+          )
+        end
         
-        # Log the default avatar assignment
-        user_avatars.create!(
-          current_avatar: DEFAULT_AVATAR_FILENAME,
-          change_date: Time.current
-        )
+        # Log the default avatar assignment (for admin tracking purposes)
+        begin
+          log_avatar_change_entry(DEFAULT_AVATAR_FILENAME)
+        rescue ActiveRecord::RecordInvalid => e
+          Rails.logger.error "Failed to log default avatar assignment: #{e.message}"
+        end
+      else
+        Rails.logger.warn "Default avatar not found at #{DEFAULT_AVATAR_PATH}"
       end
     end
+  end
+
+  # Helper method for consistent avatar change logging
+  def log_avatar_change_entry(filename)
+    user_avatars.build(
+      current_avatar: filename,
+      change_date: Time.current
+    )
   end
 end
