@@ -2,6 +2,10 @@ class UserProfile < ApplicationRecord
   # Define username pattern as a constant for clarity
   USERNAME_PATTERN = /\A[a-zA-Z0-9_]+\z/
   
+  # Default avatar configuration
+  DEFAULT_AVATAR_PATH = Rails.root.join('public', 'assets', 'avatars', 'default-avatar.png')
+  DEFAULT_AVATAR_FILENAME = 'default-avatar.png'
+  
   belongs_to :user
   has_many :user_name_change_logs, dependent: :destroy
   has_many :user_avatars, dependent: :destroy
@@ -39,8 +43,15 @@ class UserProfile < ApplicationRecord
   def log_avatar_change
     return unless avatar.attached?
     
-    # Only log if this is a new avatar attachment or change
-    if avatar.attachment&.created_at&.> 1.second.ago
+    # Use Rails built-in change detection if available, otherwise fallback to timing
+    avatar_changed = if avatar.respond_to?(:changed_for_autosave?)
+                      avatar.changed_for_autosave?
+                    else
+                      avatar.attachment&.created_at&.> 1.second.ago
+                    end
+    
+    # Only log if this is a new avatar attachment or change (and not the default avatar)
+    if avatar_changed && avatar.filename.to_s != DEFAULT_AVATAR_FILENAME
       user_avatars.build(
         current_avatar: avatar.filename.to_s,
         change_date: Time.current
@@ -63,12 +74,17 @@ class UserProfile < ApplicationRecord
 
   def attach_default_avatar
     unless avatar.attached?
-      default_avatar_path = Rails.root.join('public', 'assets', 'avatars', 'default-avatar.png')
-      if File.exist?(default_avatar_path)
+      if File.exist?(DEFAULT_AVATAR_PATH)
         avatar.attach(
-          io: File.open(default_avatar_path),
-          filename: 'default-avatar.png',
+          io: File.open(DEFAULT_AVATAR_PATH),
+          filename: DEFAULT_AVATAR_FILENAME,
           content_type: 'image/png'
+        )
+        
+        # Log the default avatar assignment
+        user_avatars.create!(
+          current_avatar: DEFAULT_AVATAR_FILENAME,
+          change_date: Time.current
         )
       end
     end
