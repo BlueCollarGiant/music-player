@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::API
+    # Include session and cookie support for OmniAuth
+    include ActionController::Cookies
     
     before_action :authenticate_user!
 

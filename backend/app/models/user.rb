@@ -18,6 +18,19 @@ class User < ApplicationRecord
 
     # OAuth class method to find or create user from OAuth data
     def self.from_omniauth(auth)
+        # First, try to find existing user by email (manual signup user)
+        existing_user = find_by(email: auth.info.email)
+        
+        if existing_user
+            # Update existing user with OAuth info if not already set
+            existing_user.update(
+                provider: auth.provider,
+                uid: auth.uid
+            ) if existing_user.provider.blank?
+            return existing_user
+        end
+        
+        # Create new OAuth user
         where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
             user.email = auth.info.email
             user.provider = auth.provider

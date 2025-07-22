@@ -84,6 +84,42 @@ class UserProfilesController < ApplicationController
     }
   end
 
+  # GET /user_profiles/platform_connections
+  def platform_connections
+    connections = current_user.platform_connections.active
+    
+    render json: {
+      platform_connections: connections.map do |conn|
+        {
+          id: conn.id,
+          platform: conn.platform,
+          connected_at: conn.connected_at,
+          expires_at: conn.expires_at,
+          supports_refresh: conn.supports_refresh?,
+          long_lived_token: conn.long_lived_token?
+        }
+      end
+    }
+  end
+
+  # DELETE /user_profiles/platform_connections/:platform
+  def unlink_platform
+    # Normalize platform name to lowercase to prevent casing errors
+    platform = params[:platform]&.downcase
+    connection = current_user.platform_connections.find_by(platform: platform)
+    
+    if connection
+      connection.destroy
+      render json: { 
+        message: "#{platform.capitalize} connection removed successfully" 
+      }, status: :ok
+    else
+      render json: { 
+        error: "No #{platform} connection found" 
+      }, status: :not_found
+    end
+  end
+
   private
 
   def set_user_profile

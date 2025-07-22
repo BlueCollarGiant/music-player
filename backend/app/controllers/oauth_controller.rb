@@ -40,6 +40,8 @@ class OauthController < ApplicationController
     user = User.from_omniauth(auth)
     
     if user.persisted?
+      # Store user in session for subsequent platform connections
+      session[:current_user_id] = user.id
       render_oauth_success(user, 'Google')
     else
       render_oauth_error(user)
@@ -98,6 +100,7 @@ class OauthController < ApplicationController
     # Generate JWT token (same as manual login)
     token = JsonWebToken.encode(user_id: user.id)
     
+    # Return JSON response with token and user info
     render json: {
       message: "#{provider_name} OAuth login successful",
       token: token,
@@ -105,7 +108,8 @@ class OauthController < ApplicationController
         id: user.id,
         email: user.email,
         role: user.role,
-        oauth_provider: user.provider
+        oauth_provider: user.provider,
+        user_profile_id: user.user_profile.id
       },
       user_profile: {
         id: user.user_profile.id,
@@ -122,18 +126,31 @@ class OauthController < ApplicationController
 
   # Platform connection helpers
   def authenticate_user_for_platform_connection
-    # For platform connections, user must be authenticated
-    # This could be done via JWT token in Authorization header
+    # For platform connections during OAuth flow, we need to get the user from session
+    # or from a temporary token stored during the Google login flow
+    
+    # Try to get user from session (set during Google OAuth - this is the primary method
+    # for platform connections immediately following Google authentication)
+    if session[:current_user_id]
+      current_user = User.find_by(id: session[:current_user_id])
+      return current_user if current_user
+    end
+    
+    # Try to get user from Authorization header (for API calls from frontend)
     token = request.headers['Authorization']&.gsub('Bearer ', '')
     
     if token.present?
       decoded_token = JsonWebToken.decode(token)
       current_user = User.find(decoded_token[:user_id]) if decoded_token
+      return current_user if current_user
     end
     
+    # If no user found, this might be a first-time OAuth flow
+    # In this case, we should redirect to Google OAuth first
     unless current_user
       render json: { 
-        error: "Authentication required for platform connections" 
+        error: "Authentication required. Please login with Google first.",
+        login_url: "/auth/google_oauth2"
       }, status: :unauthorized
       return nil
     end
@@ -161,6 +178,7 @@ class OauthController < ApplicationController
   end
 
   def render_platform_connection_success(connection, platform_name)
+    # Return JSON response for platform connection success
     render json: {
       message: "#{platform_name} platform connected successfully",
       platform_connection: {
