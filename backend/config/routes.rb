@@ -1,14 +1,13 @@
 Rails.application.routes.draw do
   # Auth routes
-  
   post "/login", to: "sessions#create"
 
+  # OAuth routes - unified callback handling for multiple providers
+  get '/auth/:provider/callback', to: 'oauth#callback'
+  get '/auth/failure', to: 'oauth#failure'
+
   # User routes
-  resources :users, only: [:create, :show] do
-    member do
-      get :username_history
-    end
-  end
+  resources :users, only: [:create, :show]
 
   # Password reset
   resources :password_resets, only: [:create]
