@@ -59,3 +59,7 @@ Thumbs.db
 .byebug_history
 /backend/.bundle/
 /backend/config/master.key
+
+# Environment variables (actual .env files ignored, .env.example tracked)
+/backend/.env
+*.env

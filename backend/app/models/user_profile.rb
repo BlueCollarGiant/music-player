@@ -22,6 +22,7 @@ class UserProfile < ApplicationRecord
 
   before_update :log_username_change, if: :username_changed?
   before_save :log_avatar_change
+  after_create :attach_default_avatar
 
   private
 
@@ -57,6 +58,19 @@ class UserProfile < ApplicationRecord
     acceptable_types = ["image/jpeg", "image/png", "image/jpg"]
     unless acceptable_types.include?(avatar.blob.content_type)
       errors.add(:avatar, "must be a JPEG or PNG")
+    end
+  end
+
+  def attach_default_avatar
+    unless avatar.attached?
+      default_avatar_path = Rails.root.join('public', 'assets', 'avatars', 'default-avatar.png')
+      if File.exist?(default_avatar_path)
+        avatar.attach(
+          io: File.open(default_avatar_path),
+          filename: 'default-avatar.png',
+          content_type: 'image/png'
+        )
+      end
     end
   end
 end
