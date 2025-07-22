@@ -5,6 +5,7 @@ class User < ApplicationRecord
     has_many :user_name_change_logs, through: :user_profile
     has_many :user_avatars, through: :user_profile
     has_many :password_resets, dependent: :destroy
+    has_many :platform_connections, dependent: :destroy
     
     validates :email, presence: true, uniqueness: true
     validates :password, presence: true, length: { minimum: 6}, if: :password_required?
