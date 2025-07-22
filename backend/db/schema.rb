@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_07_22_003518) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_22_214549) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -53,6 +53,21 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_22_003518) do
     t.index ["user_id"], name: "index_password_resets_on_user_id"
   end
 
+  create_table "platform_connections", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "platform"
+    t.string "platform_user_id"
+    t.text "access_token"
+    t.text "refresh_token"
+    t.datetime "expires_at"
+    t.text "scopes"
+    t.datetime "connected_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "platform"], name: "index_platform_connections_on_user_and_platform", unique: true
+    t.index ["user_id"], name: "index_platform_connections_on_user_id"
+  end
+
   create_table "user_avatars", force: :cascade do |t|
     t.bigint "user_profile_id", null: false
     t.string "current_avatar"
@@ -82,18 +97,22 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_22_003518) do
 
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
-    t.string "password_digest", null: false
+    t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "failed_login_attempts", default: 0, null: false
     t.boolean "is_locked", default: false, null: false
     t.string "role"
+    t.string "provider"
+    t.string "uid"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "password_resets", "users"
+  add_foreign_key "platform_connections", "users"
   add_foreign_key "user_avatars", "user_profiles"
   add_foreign_key "user_name_change_logs", "user_profiles"
   add_foreign_key "user_profiles", "users"
