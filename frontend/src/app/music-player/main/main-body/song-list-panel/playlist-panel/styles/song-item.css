@@ -1,0 +1,90 @@
+/* ===== SONG ITEM STYLING ===== */
+
+/* --- Subsection: Base Item Styles --- */
+.item {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  border: 2px solid var(--color-border);
+  align-items: center;
+  border-radius: 5px; /* TODO: Standardize with CSS variables */
+  padding: var(--spacing-md);
+  min-height: 4rem;
+  box-sizing: border-box;
+  transition: var(--transition);
+  margin: 0;
+}
+
+/* --- Subsection: Item States --- */
+.item.clickable {
+  cursor: pointer;
+}
+
+.item.clickable:hover {
+  border-color: var(--color-border-hover);
+  background-color: var(--color-background-overlay);
+  transform: translateY(-1px);
+}
+
+.item.placeholder {
+  opacity: 0.7;
+  border-style: dashed;
+  border-color: var(--color-dashed-border);
+  background: var(--color-placeholder-bg);
+  cursor: default;
+}
+
+.item.active {
+  background-color: var(--color-active-bg);
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--box-shadow-glow);
+  transform: translateY(-1px);
+  color: var(--color-text);
+}
+
+/* --- Subsection: Thumbnail --- */
+.thumbnail {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: var(--color-primary);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.item.active .thumbnail {
+  background-color: var(--color-primary-dark);
+}
+
+/* --- Subsection: Responsive Item Sizing --- */
+.song-list.small .item {
+  padding: var(--spacing-lg);
+  min-height: 4.5rem;
+  border-width: 2px;
+}
+
+.song-list.medium .item {
+  padding: var(--spacing-md);
+  min-height: 4rem;
+}
+
+.song-list.large .item {
+  padding: var(--spacing-sm);
+  min-height: 3.5rem;
+  font-size: 0.9rem;
+}
+
+/* --- Subsection: Hover Effects by Size --- */
+.song-list.small .item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover-lg);
+}
+
+.song-list.medium .item:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--box-shadow-hover-sm);
+}
+
+.song-list.large .item:hover {
+  background-color: var(--color-background-overlay);
+}

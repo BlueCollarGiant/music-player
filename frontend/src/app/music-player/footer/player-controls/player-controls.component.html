@@ -1,14 +1,9 @@
 <!-- Player Controls (Bottom) -->
 <div class="controls">
-  <div class="current-track">
-    <div class="thumbnail"></div>
-    <div class="info">
-      <h3>{{ musicService.currentTrack()?.name }}</h3>
-      <p>{{ musicService.currentTrack()?.artist }}</p>
-    </div>
-  </div>
-
   <div class="playback">
+    <!-- Music Note Button (Current Track Indicator) -->
+    <div class="thumbnail"></div>
+
     <!-- Previous Button -->
     <button class="btn-control" (click)="goPrevious()" aria-label="Previous Song">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

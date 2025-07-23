@@ -9,7 +9,15 @@ import { Song } from '../../../../Models/song.model';
   selector: 'app-playlist-panel',
   imports: [SharedModule, SongFormComponent],
   templateUrl: './playlist-panel.component.html',
-  styleUrl: './playlist-panel.component.css'
+  styleUrls: [
+    './styles/design-system.css',
+    './styles/global-utils.css',
+    './styles/song-list-container.css',
+    './styles/song-item.css',
+    './styles/playlist-dropdown.css',
+    './styles/music-animations.css',
+    './styles/mobile-responsive.css'
+  ]
 })
 export class PlaylistPanelComponent {
   public musicService = inject(MusicPlayerService);

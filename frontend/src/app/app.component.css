@@ -12,4 +12,10 @@
 
 .footer-container {
   margin-top: auto;
+  padding: 0.5rem; /* Match youtube-container padding */
+}
+
+.footer-container app-player-controls {
+  width: 100%;
+  padding: 1rem; /* Match content padding */
 }
