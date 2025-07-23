@@ -1,8 +1,9 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface User {
   id: number;
@@ -60,6 +61,7 @@ export interface AuthResponse {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   // Authentication state signals
   private currentUser = signal<User | null>(null);
@@ -81,7 +83,10 @@ export class AuthService {
   public connectedPlatformNames = computed(() => this.platformConnections().map(conn => conn.platform));
 
   constructor() {
-    this.initializeAuthState();
+    // Only initialize auth state in browser environment
+    if (isPlatformBrowser(this.platformId)) {
+      this.initializeAuthState();
+    }
   }
 
   // Initialize authentication state from stored token
@@ -396,10 +401,16 @@ export class AuthService {
 
   // Utility methods
   private getStoredToken(): string | null {
+    if (!isPlatformBrowser(this.platformId)) {
+      return null;
+    }
     return localStorage.getItem('auth_token');
   }
 
   private storeToken(token: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
     localStorage.setItem('auth_token', token);
   }
 
@@ -415,7 +426,9 @@ export class AuthService {
     this.currentUser.set(null);
     this.userProfile.set(null);
     this.platformConnections.set([]);
-    localStorage.removeItem('auth_token');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('auth_token');
+    }
   }
 
   // Refresh user data

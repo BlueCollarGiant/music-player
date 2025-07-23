@@ -1,5 +1,9 @@
 <!-- Song List Panel (Left Side) -->
-<div class="song-list">
+<div class="song-list" 
+     [class.empty]="isEmpty()"
+     [class.small]="isSmall()"
+     [class.medium]="isMedium()"
+     [class.large]="isLarge()">
   <div class="header">
     <div class="info">
       <!--<div class="thumbnail"></div>-->
@@ -17,17 +21,20 @@
     </div>
   </div>
 
-  <!-- Song Items - Reduced height -->
-  <div class="items">
+  <!-- Song Items - Responsive to playlist size -->
+  <div class="items" [attr.data-count]="realSongCount()">
     @for (song of playlistLogic.displaySongList(); track song.id) {
-      <div class="item" [class.active]="song.id === musicService.currentTrack()?.id">
+      <div class="item" 
+           [class.active]="song.id === musicService.currentTrack()?.id"
+           (click)="selectSong(song)"
+           [class.clickable]="!song.isPlaceholder">
         <div class="info">
           <div class="thumbnail"></div>
           <span>{{ song.name }}</span>
         </div>
         @if (!song.isPlaceholder) {
-          <button class="btn-remove" (click)="playlistLogic.removeSong(song.id)">Remove</button>
-      }
+          <button class="btn-remove" (click)="removeSong($event, song.id)">Remove</button>
+        }
       </div>
     }
   </div>

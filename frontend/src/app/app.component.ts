@@ -28,9 +28,9 @@ export class AppComponent {
     this.currentRoute.set(this.router.url);
   }
 
-  // Only show player controls on the music player page
+  // Only show player controls on music platform pages
   showPlayerControls(): boolean {
-    return this.currentRoute() === '/player';
+    return this.currentRoute() === '/player' || this.currentRoute() === '/youtube';
   }
 }
 

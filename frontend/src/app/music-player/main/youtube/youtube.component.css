@@ -1,35 +1,156 @@
-/* ===== YOUTUBE MUSIC INTERFACE ===== */
+/* ===== MODERN YOUTUBE MUSIC INTERFACE ===== */
+.youtube-container {
+  height: 100%;
+  padding: 0.5rem;
+  position: relative;
+}
+
 .content {
   display: flex;
   flex: 1;
-  gap: 1rem;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(20,20,20,0.6) 100%);
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  height: calc(100vh - 200px); /* Account for header and footer */
+  position: relative;
 }
 
 app-playlist-panel {
   display: block;
   flex: 1;
+  background: rgba(255,255,255,0.05);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, flex 0.3s ease;
+  min-width: 300px;
+  max-width: none;
+}
+
+/* Dynamic flex behavior based on playlist content */
+app-playlist-panel:has(.song-list.empty) {
+  flex: 0.8;
+  max-width: 400px;
+}
+
+app-playlist-panel:has(.song-list.small) {
+  flex: 0.9;
+  max-width: 450px;
+}
+
+app-playlist-panel:has(.song-list.medium) {
+  flex: 1;
+}
+
+app-playlist-panel:has(.song-list.large) {
+  flex: 1.2;
+  min-width: 350px;
+}
+
+app-playlist-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 }
 
 app-right-panel {
   display: block;
   flex: 1;
+  background: rgba(255,255,255,0.05);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* ===== MOBILE RESPONSIVE - STACK CONTENT VERTICALLY ===== */
+app-right-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+/* Modern glass morphism effects */
+.content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    rgba(255,0,0,0.1) 0%, 
+    rgba(255,255,255,0.05) 50%, 
+    rgba(255,0,0,0.1) 100%);
+  border-radius: 1rem;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ===== MOBILE RESPONSIVE - MODERN STACK ===== */
 @media (max-width: 768px) {
+  .youtube-container {
+    padding: 0.25rem;
+  }
+
   .content {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
+    padding: 0.75rem;
+    height: auto;
+    min-height: calc(100vh - 180px);
   }
   
   app-playlist-panel {
     flex: unset;
     order: 1;
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+  }
+  
+  /* Mobile playlist responsive heights */
+  app-playlist-panel:has(.song-list.empty) {
+    min-height: 280px;
+  }
+  
+  app-playlist-panel:has(.song-list.small) {
+    min-height: 320px;
+  }
+  
+  app-playlist-panel:has(.song-list.medium) {
+    min-height: 400px;
+  }
+  
+  app-playlist-panel:has(.song-list.large) {
+    min-height: 450px;
+    max-height: 70vh;
   }
   
   app-right-panel {
     order: 2;
-    align-self: center;
-    max-width: 100%;
+    align-self: stretch;
+    min-height: 40vh;
+  }
+
+  app-playlist-panel:hover,
+  app-right-panel:hover {
+    transform: none; /* Disable hover effects on mobile */
+  }
+}
+
+/* Dark theme enhancements */
+@media (prefers-color-scheme: dark) {
+  .content {
+    background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(30,30,30,0.8) 100%);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  
+  app-playlist-panel,
+  app-right-panel {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
   }
 }

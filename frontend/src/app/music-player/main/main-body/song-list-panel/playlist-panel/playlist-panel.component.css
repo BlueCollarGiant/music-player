@@ -8,6 +8,31 @@
   padding: 1rem;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+/* ===== RESPONSIVE PLAYLIST STATES ===== */
+.song-list.empty {
+  /* Empty state - minimal height, centered content */
+  min-height: 300px;
+  justify-content: center;
+  text-align: center;
+}
+
+.song-list.small {
+  /* Small playlist (1-3 songs) - compact layout */
+  min-height: 250px;
+}
+
+.song-list.medium {
+  /* Medium playlist (4-8 songs) - standard layout */
+  min-height: 400px;
+}
+
+.song-list.large {
+  /* Large playlist (8+ songs) - full height with scroll */
+  min-height: 500px;
+  max-height: 70vh;
 }
 
 .song-list .header {
@@ -93,7 +118,77 @@
   flex-direction: column;
   gap: 0.75rem;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  padding-right: 0.5rem; /* Further reduced for better visibility */
+  padding-left: 0.25rem;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+/* ===== RESPONSIVE ITEMS BEHAVIOR ===== */
+/* Empty state */
+.song-list.empty .items {
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+}
+
+.song-list.empty .items::before {
+  content: "🎵 Add your first song to get started!";
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 2rem;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Small playlist */
+.song-list.small .items {
+  gap: 0.5rem;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Medium playlist */
+.song-list.medium .items {
+  gap: 0.75rem;
+  max-height: 300px;
+}
+
+/* Large playlist */
+.song-list.large .items {
+  gap: 0.5rem;
+  max-height: 400px;
+  padding-right: 1.75rem; /* Extra symmetrical padding for large lists */
+  padding-left: 0.5rem;
+}
+
+/* Data attribute responsive styling */
+.items[data-count="0"] .item.placeholder {
+  opacity: 0.6;
+  transform: scale(0.95);
+}
+
+.items[data-count="1"] .item:first-child {
+  border-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.items[data-count="2"], .items[data-count="3"] {
+  gap: 0.6rem;
+}
+
+.items[data-count^="1"], .items[data-count^="2"] {
+  /* 10+ songs */
+  gap: 0.4rem;
+}
+
+.items[data-count^="1"] .item, .items[data-count^="2"] .item {
+  /* Compact items for large playlists */
+  padding: 0.5rem;
+  min-height: 3rem;
 }
 
 /* Custom scrollbar for items */
@@ -117,17 +212,79 @@
 
 .item {
   display: flex;
-  width: 100%;
+  width: 100%; /* FULL width inside container */
   justify-content: space-between;
   border: 2px solid rgba(10, 16, 41, 0.25);
   align-items: center;
   border-radius: 5px;
+  padding: 0.75rem;
+  min-height: 4rem;
+  box-sizing: border-box; /* This is CRUCIAL */
+  transition: all 0.3s ease;
+}
+
+/* Clickable items */
+.item.clickable {
+  cursor: pointer;
+  margin: 0; /* REMOVE margin-right completely */
+}
+
+.item.clickable:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+/* Placeholder item styling */
+.item:has(.info span:contains("+ Add a Song")),
+.item.placeholder {
+  opacity: 0.7;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.02);
+  cursor: default;
 }
 
 .item.active {
   background-color: rgba(30, 64, 175, 0.4); /* Blue glow background */
   border: 2px solid #3b82f6;
-  box-shadow: 0 0 10px #3b82f6;
+  box-shadow: 0 0 8px #3b82f6; /* Reduced glow to prevent overflow */
+  transform: translateY(-1px);
+  margin: 0; /* Remove margin that causes overflow */
+  color: white; /* Keep text white */
+}
+
+/* Responsive item sizing */
+.song-list.small .item {
+  padding: 1rem;
+  min-height: 4.5rem;
+  border-width: 2px;
+}
+
+.song-list.medium .item {
+  padding: 0.75rem;
+  min-height: 4rem;
+}
+
+.song-list.large .item {
+  padding: 0.5rem;
+  min-height: 3.5rem;
+  font-size: 0.9rem;
+}
+
+/* Hover effects scale with playlist size */
+.song-list.small .item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.song-list.medium .item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.song-list.large .item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .btn-remove {
@@ -178,6 +335,91 @@
   100% {
     transform: translateY(-3rem);
     opacity: 0;
+  }
+}
+
+/* ===== MOBILE RESPONSIVE PLAYLIST ===== */
+@media (max-width: 768px) {
+  .song-list {
+    padding: 1rem; /* Increased mobile padding */
+    min-height: unset !important;
+  }
+  
+  .song-list.empty {
+    min-height: 220px;
+  }
+  
+  .song-list.small {
+    min-height: 280px;
+  }
+  
+  .song-list.medium {
+    min-height: 350px;
+  }
+  
+  .song-list.large {
+    min-height: 400px;
+    max-height: 65vh;
+  }
+  
+  .items {
+    margin-top: 1rem;
+    gap: 0.75rem; /* Increased gap for better mobile spacing */
+    padding-right: 0.5rem; /* Reduced for better mobile visibility */
+    padding-left: 0.25rem;
+  }
+  
+  .song-list.empty .items::before {
+    font-size: 1rem;
+    padding: 2rem 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .item {
+    padding: 1rem; /* Much more generous mobile padding */
+    min-height: 4rem; /* Taller items for easier touch interaction */
+    font-size: 1rem; /* Readable font size */
+    color: white; /* Keep text white on mobile */
+    width: 100%; /* Mobile must be full width */
+    margin: 0;    /* Prevent creep outside container */
+  }
+  
+  .song-list.small .item {
+    padding: 1.25rem;
+    min-height: 4.5rem;
+  }
+  
+  /* Disable hover effects on mobile but maintain active state glow containment */
+  .item:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    background-color: initial !important;
+  }
+  
+  .item.active {
+    padding: 1rem;
+    border-width: 2px;
+    background-color: rgba(30, 64, 175, 0.4) !important;
+    box-shadow: 0 0 8px #3b82f6 !important; /* Reduced glow for mobile */
+    color: white !important; /* Ensure white text */
+    margin: 0 !important; /* Ensure mobile active items stay contained */
+  }
+  
+  .item.active:hover {
+    background-color: rgba(30, 64, 175, 0.4) !important;
+    box-shadow: 0 0 8px #3b82f6 !important; /* Reduced glow */
+    margin: 0 !important; /* Maintain contained positioning */
+  }
+  
+  .thumbnail {
+    width: 2.5rem; /* Larger thumbnails for mobile */
+    height: 2.5rem;
+  }
+  
+  .btn-remove {
+    padding: 0.5rem 1rem; /* Better touch targets */
+    font-size: 0.9rem;
+    color: white; /* Keep button text white */
   }
 }
 
