@@ -1,0 +1,35 @@
+/* ===== YOUTUBE MUSIC INTERFACE ===== */
+.content {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+}
+
+app-playlist-panel {
+  display: block;
+  flex: 1;
+}
+
+app-right-panel {
+  display: block;
+  flex: 1;
+}
+
+/* ===== MOBILE RESPONSIVE - STACK CONTENT VERTICALLY ===== */
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  app-playlist-panel {
+    flex: unset;
+    order: 1;
+  }
+  
+  app-right-panel {
+    order: 2;
+    align-self: center;
+    max-width: 100%;
+  }
+}
