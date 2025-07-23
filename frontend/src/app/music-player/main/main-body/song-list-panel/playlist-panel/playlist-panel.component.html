@@ -8,11 +8,24 @@
     <div class="info">
       <!--<div class="thumbnail"></div>-->
       <div class="playlist-selector">
-        <select class="playlist-dropdown" (change)="onPlaylistChange($event)">
-          <option value="default">Your Sound Starts Here</option>
-          <option value="youtube">YouTube Playlist</option>
-          <option value="spotify">Spotify Playlist</option>
-          <option value="favorites">Favorites</option>
+        <select class="playlist-dropdown" (change)="onPlaylistChange($event)" [disabled]="isYouTubeMode && youtubeService.isLoading()">
+          @if (isYouTubeMode) {
+            @if (youtubeService.isLoading()) {
+              <option value="">Loading YouTube Playlists...</option>
+            } @else if (youtubeService.playlists().length === 0) {
+              <option value="">No YouTube Playlists Found</option>
+            } @else {
+              <option value="">Select YouTube Playlist</option>
+              @for (playlist of youtubeService.playlists(); track playlist.id) {
+                <option [value]="playlist.id">{{ playlist.title }} ({{ playlist.videoCount }} tracks)</option>
+              }
+            }
+          } @else {
+            <option value="default">Your Sound Starts Here</option>
+            <option value="youtube">YouTube Playlist</option>
+            <option value="spotify">Spotify Playlist</option>
+            <option value="favorites">Favorites</option>
+          }
         </select>
       </div>
     </div>
@@ -23,7 +36,7 @@
 
   <!-- Song Items - Responsive to playlist size -->
   <div class="items" [attr.data-count]="realSongCount()">
-    @for (song of playlistLogic.displaySongList(); track song.id) {
+    @for (song of getDisplaySongs(); track song.id) {
       <div class="item" 
            [class.active]="song.id === musicService.currentTrack()?.id"
            (click)="selectSong(song)"
@@ -32,7 +45,7 @@
           <div class="thumbnail"></div>
           <span>{{ song.name }}</span>
         </div>
-        @if (!song.isPlaceholder) {
+        @if (!song.isPlaceholder && !isYouTubeMode) {
           <button class="btn-remove" (click)="removeSong($event, song.id)">Remove</button>
         }
       </div>

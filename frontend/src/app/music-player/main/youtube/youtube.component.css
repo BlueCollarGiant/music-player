@@ -19,7 +19,8 @@
 }
 
 app-playlist-panel {
-  display: block;
+  display: flex;
+  flex-direction: column;
   flex: 1;
   background: rgba(255,255,255,0.05);
   border-radius: 0.75rem;
@@ -84,13 +85,14 @@ app-right-panel:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, 
-    rgba(255,0,0,0.1) 0%, 
-    rgba(255,255,255,0.05) 50%, 
-    rgba(255,0,0,0.1) 100%);
+  background: linear-gradient(135deg,  /* YouTube-inspired punchy red/pink */
+  rgba(100, 0, 180, 0.25) 45%, /* Deep neon violet */
+  rgba(0, 174, 255, 0.15) 55%, /* Electric blue */
+);
   border-radius: 1rem;
   pointer-events: none;
   z-index: -1;
+  
 }
 
 /* ===== MOBILE RESPONSIVE - MODERN STACK ===== */

@@ -7,7 +7,10 @@
     min-height: unset !important;
   }
   
-  .song-list.empty { min-height: 220px; }
+  .song-list.empty { 
+    min-height: 220px;
+    height: 100%;
+  }
   .song-list.small { min-height: 280px; }
   .song-list.medium { min-height: 350px; }
   .song-list.large { 
@@ -24,6 +27,7 @@
   }
   
   .song-list.empty .items::before {
+    content: "🎵 Choose your playlist to get started!";
     font-size: var(--font-size-base);
     padding: var(--spacing-2xl) var(--spacing-lg);
     margin: var(--spacing-sm) 0;
