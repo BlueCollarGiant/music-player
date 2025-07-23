@@ -1,6 +1,6 @@
 /* ===== NOW PLAYING (RIGHT PANEL) ===== */
 .now-playing {
-  width: 24rem;
+  width: 100%;
   background-color: #0a1029;
   border-radius: 0.5rem;
   padding: 1rem;
@@ -28,5 +28,31 @@
   color: #a0a0a0;
   margin-bottom: 2rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* ===== MOBILE RESPONSIVE - COMPACT RIGHT PANEL ===== */
+@media (max-width: 768px) {
+  .now-playing {
+    width: 100%;
+    max-width: 20rem;
+    padding: 0.75rem;
+    margin: 0 auto;
+  }
+  
+  .album-art {
+    width: 12rem;
+    height: 12rem;
+    margin-bottom: 1rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .artist {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
 }
 

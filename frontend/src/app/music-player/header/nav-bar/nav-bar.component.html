@@ -9,3 +9,35 @@
     }
   </div>
 </div>
+
+<!-- Mobile Hamburger Menu -->
+<div class="mobile-nav">
+  <button class="hamburger-button" (click)="toggleMobileMenu()">
+    <div class="hamburger-line"></div>
+    <div class="hamburger-line"></div>
+    <div class="hamburger-line"></div>
+  </button>
+  
+  @if (isMobileMenuOpen()) {
+    <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
+      <div class="mobile-menu" (click)="$event.stopPropagation()">
+        <div class="mobile-menu-header">
+          <div class="user-avatar">
+            <img src="/assets/avatars/default-avatar.png" alt="User Avatar" class="avatar-image">
+          </div>
+          <button class="close-menu" (click)="closeMobileMenu()">×</button>
+        </div>
+        
+        <div class="mobile-menu-tabs">
+          @for (tab of tabs; track tab) {
+            <button
+              [class.active]="musicService.activeTab() === tab"
+              (click)="setActiveTabMobile(tab)">
+              {{ tab }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
