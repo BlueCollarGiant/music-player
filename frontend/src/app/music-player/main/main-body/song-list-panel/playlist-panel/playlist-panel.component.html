@@ -29,9 +29,6 @@
         </select>
       </div>
     </div>
-    <div class="actions">
-      <app-song-form></app-song-form> <!--this is the song form and song form modal if you dont remember future me-->
-    </div>
   </div>
 
   <!-- Song Items - Responsive to playlist size -->
@@ -45,9 +42,6 @@
           <div class="thumbnail"></div>
           <span>{{ song.name }}</span>
         </div>
-        @if (!song.isPlaceholder && !isYouTubeMode) {
-          <button class="btn-remove" (click)="removeSong($event, song.id)">Remove</button>
-        }
       </div>
     }
   </div>

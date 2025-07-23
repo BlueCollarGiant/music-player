@@ -2,13 +2,12 @@ import { Component, inject, computed, Input, OnInit, effect } from '@angular/cor
 import { MusicPlayerService } from '../../../../../services/music-player.service';
 import { PlayListLogic } from '../../../../../services/play-list-logic.service';
 import { YouTubeService, YouTubePlaylist } from '../../../../../services/youtube.service';
-import { SongFormComponent } from './song-form/song-form.component';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { Song } from '../../../../Models/song.model';
 
 @Component({
   selector: 'app-playlist-panel',
-  imports: [SharedModule, SongFormComponent],
+  imports: [SharedModule],
   templateUrl: './playlist-panel.component.html',
   styleUrls: [
     './styles/design-system.css',
@@ -55,12 +54,6 @@ export class PlaylistPanelComponent implements OnInit {
       // Stop current playback
       this.musicService.isPlaying.set(false);
     }
-  }
-
-  removeSong(event: Event, songId: number) {
-    // Prevent the click from bubbling up to the item click
-    event.stopPropagation();
-    this.playlistLogic.removeSong(songId);
   }
 
   onPlaylistChange(event: Event) {

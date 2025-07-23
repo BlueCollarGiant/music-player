@@ -1,21 +1,5 @@
 /* ===== GLOBAL ELEMENTS & UTILS ===== */
 
-/* --- Subsection: Button Base Styles --- */
-.btn-remove {
-  background-color: transparent;
-  border: none;
-  color: var(--color-text);
-  padding: var(--spacing-sm) var(--spacing-xl);
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  text-shadow: var(--text-shadow);
-  transition: var(--transition);
-}
-
-.btn-remove:hover {
-  background-color: #232d5c; /* TODO: Add to CSS variables */
-}
-
 /* --- Subsection: Layout Utilities --- */
 .flex-between {
   display: flex;

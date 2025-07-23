@@ -40,56 +40,15 @@ export class PlayListLogic {
     return null;
   }
 
-  //-----Placeholder area -----//
+  //-----Display Logic -----//
 
-  //Placeholder Logic
+  // Display songs without placeholders - users can only view their playlists
   readonly displaySongList = computed(() => {
-    const current = this.songList();
-    const MIN_SONGS = 4;
-    const placeholdersNeeded = MIN_SONGS - current.length;
-
-    const placeholders = Array.from(
-      { length: placeholdersNeeded > 0 ? placeholdersNeeded : 0 },
-      (_, i) => ({
-        id: 1000 + i,
-        name: '+ Add a Song',
-        artist: '',
-        isPlaceholder: true,
-        duration: '--:--',
-      })
-    );
-    return [...current, ...placeholders];
+    return this.songList();
   });
 
   //-----Methods go here stop leaving them everywhere -----//
 
-  addSong(song: Song) {
-    this.songList.update((current) => {
-      const index = current.findIndex((entry) => entry.isPlaceholder);
-      const updated = [...current]; //create copy of current song list so dont mess up original
-
-      if (index !== -1) {
-        // checks if found placeholder
-        updated[index] = song; // take index placeholder was found replace with song we made
-      } else {
-        updated.push(song);
-      }
-      this.saveToLocalStorage(updated);
-      return updated; //update signal obviously
-    });
-    // this part is for Auto-select if no real current track is active
-    if (
-      !this.musicService.currentTrack() ||
-      this.musicService.currentTrack()?.isPlaceholder
-    ) {
-      this.musicService.currentTrack.set(song);
-    }
-  }
-  removeSong(id: number): void {
-    this.songList.update((current) => {
-      const update = current.filter((entry) => entry.id !== id);
-      this.saveToLocalStorage(update);
-      return update;
-    });
-  }
+  // Note: Song management is now handled through playlist selection only
+  // Users cannot manually add/remove individual songs
 }

@@ -75,10 +75,4 @@
     width: 2.5rem;
     height: 2.5rem;
   }
-  
-  .btn-remove {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    font-size: 0.9rem;
-    color: var(--color-text);
-  }
 }
