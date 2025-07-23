@@ -3,7 +3,7 @@
 /* --- Subsection: Main Container --- */
 .song-list {
   flex: 1;
-  background-image: linear-gradient(#6c6cff, #6b3636);
+  background-image: linear-gradient(#6c6cff, #04f8f8);
   opacity: 75%;
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-lg);

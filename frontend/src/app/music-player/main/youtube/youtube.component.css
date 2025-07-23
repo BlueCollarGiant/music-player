@@ -57,14 +57,18 @@ app-playlist-panel:hover {
 }
 
 app-right-panel {
-  display: block;
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  height: 100%;
+  max-height: 100%;
   background: rgba(255,255,255,0.05);
   border-radius: 0.75rem;
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.1);
-  overflow: hidden;
+  overflow: hidden; /* prevent children from bleeding out */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
 }
 
 app-right-panel:hover {
@@ -130,9 +134,14 @@ app-right-panel:hover {
   }
   
   app-right-panel {
+    display: flex;
+    flex-direction: column;
     order: 2;
     align-self: stretch;
     min-height: 40vh;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
   }
 
   app-playlist-panel:hover,
