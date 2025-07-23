@@ -100,22 +100,11 @@ class OauthController < ApplicationController
     # Generate JWT token (same as manual login)
     token = JsonWebToken.encode(user_id: user.id)
     
-    # Return JSON response with token and user info
-    render json: {
-      message: "#{provider_name} OAuth login successful",
-      token: token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        oauth_provider: user.provider,
-        user_profile_id: user.user_profile.id
-      },
-      user_profile: {
-        id: user.user_profile.id,
-        username: user.user_profile.username
-      }
-    }, status: :ok
+    # For web app OAuth flow, redirect back to frontend with token
+    frontend_url = Rails.env.development? ? 'http://localhost:4200' : ENV['FRONTEND_URL']
+    redirect_url = "#{frontend_url}/auth/callback?token=#{token}&provider=#{provider_name.downcase}"
+    
+    redirect_to redirect_url, allow_other_host: true
   end
 
   def render_oauth_error(user)
@@ -178,18 +167,11 @@ class OauthController < ApplicationController
   end
 
   def render_platform_connection_success(connection, platform_name)
-    # Return JSON response for platform connection success
-    render json: {
-      message: "#{platform_name} platform connected successfully",
-      platform_connection: {
-        id: connection.id,
-        platform: connection.platform,
-        connected_at: connection.connected_at,
-        expires_at: connection.expires_at,
-        supports_refresh: connection.supports_refresh?,
-        long_lived_token: connection.long_lived_token?
-      }
-    }, status: :ok
+    # For platform connections, redirect back to frontend with success message
+    frontend_url = Rails.env.development? ? 'http://localhost:4200' : ENV['FRONTEND_URL']
+    redirect_url = "#{frontend_url}/auth/callback?platform=#{connection.platform}&status=connected"
+    
+    redirect_to redirect_url, allow_other_host: true
   end
 
   def render_platform_connection_error(connection)

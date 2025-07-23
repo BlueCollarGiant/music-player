@@ -3,14 +3,21 @@
   <div class="header">
     <div class="info">
       <!--<div class="thumbnail"></div>-->
-      <span>Your Sound Starts Here</span>
+      <div class="playlist-selector">
+        <select class="playlist-dropdown" (change)="onPlaylistChange($event)">
+          <option value="default">Your Sound Starts Here</option>
+          <option value="youtube">YouTube Playlist</option>
+          <option value="spotify">Spotify Playlist</option>
+          <option value="favorites">Favorites</option>
+        </select>
+      </div>
     </div>
     <div class="actions">
       <app-song-form></app-song-form> <!--this is the song form and song form modal if you dont remember future me-->
     </div>
   </div>
 
-  <!-- Song Items -->
+  <!-- Song Items - Reduced height -->
   <div class="items">
     @for (song of playlistLogic.displaySongList(); track song.id) {
       <div class="item" [class.active]="song.id === musicService.currentTrack()?.id">

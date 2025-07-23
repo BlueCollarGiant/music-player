@@ -14,7 +14,14 @@ export class PlaylistPanelComponent {
   public musicService = inject(MusicPlayerService);
   public playlistLogic = inject(PlayListLogic)
 
-
-
-
+  onPlaylistChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const selectedPlaylist = target.value;
+    
+    // TODO: Implement playlist switching logic
+    console.log('Selected playlist:', selectedPlaylist);
+    
+    // This is where we'll integrate with the OAuth playlist fetching
+    // For now, just log the selection
+  }
 }

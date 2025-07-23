@@ -45,7 +45,7 @@ export class PlayListLogic {
   //Placeholder Logic
   readonly displaySongList = computed(() => {
     const current = this.songList();
-    const MIN_SONGS = 8;
+    const MIN_SONGS = 4;
     const placeholdersNeeded = MIN_SONGS - current.length;
 
     const placeholders = Array.from(

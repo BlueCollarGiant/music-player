@@ -9,6 +9,11 @@ Rails.application.routes.draw do
 
   # User routes
   resources :users, only: [:create, :show]
+  
+  # API routes
+  scope '/api' do
+    get '/current_user', to: 'users#current'
+  end
 
   # Password reset
   resources :password_resets, only: [:create]

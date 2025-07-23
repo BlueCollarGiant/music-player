@@ -1,13 +1,22 @@
 <div class="nav-bar">
-  <div class="nav-buttons">
-    @for (tab of tabs; track tab) {
-      <button
-        [class.active]="musicService.activeTab() === tab"
-        (click)="setActiveTab(tab)">
-        {{ tab }}
-      </button>
-    }
+  <!-- Main Navigation Links -->
+  <div class="nav-links">
+    <a routerLink="/" class="nav-link" [class.active]="isHomeActive()">Home</a>
+    <a routerLink="/player" class="nav-link" [class.active]="isPlayerActive()">Music Player</a>
   </div>
+  
+  <!-- Music Player Tabs (only show on player page) -->
+  @if (isPlayerActive()) {
+    <div class="nav-buttons">
+      @for (tab of tabs; track tab) {
+        <button
+          [class.active]="musicService.activeTab() === tab"
+          (click)="setActiveTab(tab)">
+          {{ tab }}
+        </button>
+      }
+    </div>
+  }
 </div>
 
 <!-- Mobile Hamburger Menu -->
@@ -22,21 +31,71 @@
     <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
       <div class="mobile-menu" (click)="$event.stopPropagation()">
         <div class="mobile-menu-header">
-          <div class="user-avatar">
-            <img src="/assets/avatars/default-avatar.png" alt="User Avatar" class="avatar-image">
-          </div>
-          <button class="close-menu" (click)="closeMobileMenu()">×</button>
-        </div>
-        
-        <div class="mobile-menu-tabs">
-          @for (tab of tabs; track tab) {
-            <button
-              [class.active]="musicService.activeTab() === tab"
-              (click)="setActiveTabMobile(tab)">
-              {{ tab }}
-            </button>
+          <!-- User Authentication Section -->
+          @if (isUserLoggedIn()) {
+            <div class="user-avatar">
+              <img [src]="userAvatar() || '/assets/avatars/default-avatar.png'" alt="User Avatar" class="avatar-image">
+              <span class="username">{{ username() }}</span>
+            </div>
+          } @else {
+            <div class="auth-section">
+              <h3>Get Started</h3>
+              <div class="auth-buttons">
+                <!-- Manual Login/Signup (for users without Gmail) -->
+                <button class="auth-btn login-btn" (click)="openManualLogin()">
+                  <span class="btn-icon">📧</span>
+                  Login / Sign Up
+                </button>
+                <!-- OAuth Login (for Gmail users) -->
+                <button class="auth-btn oauth-btn" (click)="loginWithGoogle()">
+                  <span class="btn-icon">🔑</span>
+                  Login with Google
+                </button>
+              </div>
+            </div>
           }
         </div>
+        
+        <!-- Platform Connection Section (only show if logged in) -->
+        @if (isUserLoggedIn()) {
+          <div class="platform-section">
+            <h4>Connect Platforms</h4>
+            <div class="platform-buttons">
+              <button class="platform-btn youtube-btn" [class.connected]="isPlatformConnected('youtube')" (click)="connectPlatform('youtube')">
+                <span class="platform-icon">📺</span>
+                YouTube {{ isPlatformConnected('youtube') ? '✓' : '' }}
+              </button>
+              <button class="platform-btn spotify-btn" [class.connected]="isPlatformConnected('spotify')" (click)="connectPlatform('spotify')">
+                <span class="platform-icon">🎵</span>
+                Spotify {{ isPlatformConnected('spotify') ? '✓' : '' }}
+              </button>
+              <button class="platform-btn soundcloud-btn" [class.connected]="isPlatformConnected('soundcloud')" (click)="connectPlatform('soundcloud')">
+                <span class="platform-icon">☁️</span>
+                SoundCloud {{ isPlatformConnected('soundcloud') ? '✓' : '' }}
+              </button>
+            </div>
+          </div>
+        }
+        
+        <!-- Navigation Tabs (only show if logged in and on player page) -->
+        @if (isUserLoggedIn() && isPlayerActive()) {
+          <div class="mobile-menu-tabs">
+            @for (tab of tabs; track tab) {
+              <button
+                [class.active]="musicService.activeTab() === tab"
+                (click)="setActiveTabMobile(tab)">
+                {{ tab }}
+              </button>
+            }
+          </div>
+        }
+        
+        <!-- Logout option (only show if logged in) -->
+        @if (isUserLoggedIn()) {
+          <div class="logout-section">
+            <button class="logout-btn" (click)="logout()">Logout</button>
+          </div>
+        }
       </div>
     </div>
   }

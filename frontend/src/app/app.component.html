@@ -1,7 +1,16 @@
-<div class="music-player">
-  <app-nav-bar>
-  </app-nav-bar>
-  <app-main-body></app-main-body>
-  <app-player-controls></app-player-controls>
+<!-- Header and Footer always visible -->
+<div class="app-layout">
+  <app-nav-bar></app-nav-bar>
+  
+  <!-- Main content area - routed content goes here -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+  
+  <!-- Footer only shows on music player page -->
+  @if (showPlayerControls()) {
+    <div class="footer-container">
+      <app-player-controls></app-player-controls>
+    </div>
+  }
 </div>
-<router-outlet />

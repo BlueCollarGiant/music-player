@@ -1,6 +1,23 @@
 class UsersController < ApplicationController
     skip_before_action :authenticate_user!, only: [:create]
-    before_action :authenticate_user!, only: [:show]
+    before_action :authenticate_user!, only: [:show, :current]
+
+    # GET /api/current_user - Returns current authenticated user
+    def current
+        render json: {
+            user: {
+                id: @current_user.id,
+                email: @current_user.email,
+                role: @current_user.role,
+                oauth_provider: @current_user.provider,
+                is_admin: @current_user.is_admin?,
+                locked_at: @current_user.locked_at,
+                failed_attempts: @current_user.failed_attempts,
+                created_at: @current_user.created_at,
+                updated_at: @current_user.updated_at
+            }
+        }, status: :ok
+    end
 
     # GET /users/:id
     def show
