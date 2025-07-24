@@ -7,13 +7,11 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    # Allow requests from any origin in development for testing
-    # Note: Using wildcard origin without credentials for development testing
-    origins '*'
+    origins 'http://localhost:4200'  # Explicit origin only
 
     resource '*',
       headers: :any,
       methods: [:get, :post, :put, :patch, :delete, :options, :head],
-      credentials: false
+      credentials: true              # Allow cookies for CSRF/session/OAuth
   end
 end

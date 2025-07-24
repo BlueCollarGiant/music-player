@@ -1,8 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpInterceptor,
+  HttpRequest,
+  HttpHandler,
+  HttpEvent,
+  HttpErrorResponse
+} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 
 @Injectable()
@@ -10,22 +15,35 @@ export class AuthInterceptor implements HttpInterceptor {
   private router = inject(Router);
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Get token from localStorage
+    // Get Bearer token from localStorage
     const token = localStorage.getItem('auth_token');
-    
-    // Clone request and add authorization header if token exists
-    let authReq = req;
+
+    // Get CSRF token from cookie
+    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    const csrfToken = match ? decodeURIComponent(match[1]) : '';
+
+    // Clone and modify request
+    let modifiedReq = req;
+
+    // Set Authorization if available
     if (token && !req.headers.has('Authorization')) {
-      authReq = req.clone({
-        headers: req.headers.set('Authorization', `Bearer ${token}`)
+      modifiedReq = modifiedReq.clone({
+        headers: modifiedReq.headers.set('Authorization', `Bearer ${token}`)
       });
     }
 
-    // Handle response and catch authentication errors
-    return next.handle(authReq).pipe(
+    // Always set CSRF token and content-type
+    modifiedReq = modifiedReq.clone({
+      headers: modifiedReq.headers
+        .set('Content-Type', 'application/json')
+        .set('X-CSRF-TOKEN', csrfToken),
+      withCredentials: true // Rails requires this to send cookies
+    });
+
+    // Handle response
+    return next.handle(modifiedReq).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          // Token is invalid or expired
           localStorage.removeItem('auth_token');
           this.router.navigate(['/']);
         }

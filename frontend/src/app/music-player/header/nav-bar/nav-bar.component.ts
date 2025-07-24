@@ -44,7 +44,15 @@ export class NavBarComponent {
       window.addEventListener('openHamburgerMenu', () => {
         this.isMobileMenuOpen.set(true);
       });
-    }
+       // Add debugging to watch auth state changes
+    setInterval(() => {
+      console.log('Nav bar debug:');
+      console.log('  isAuthenticated:', this.isUserLoggedIn());
+      console.log('  username:', this.username());
+      console.log('  avatar:', this.userAvatar());
+      console.log('  authService.currentUser:', this.authService.currentUser());
+    }, 3000);
+  }
   }
 
   // Route checking methods
@@ -81,7 +89,7 @@ export class NavBarComponent {
   }
 
   openManualLogin() {
-    // TODO: Open manual login/signup modal for users without Gmail
+    // Open manual login/signup modal for users without Gmail
     console.log('Opening manual login/signup modal...');
     // For now, just show an alert - you can implement a modal later
     alert('Manual login/signup form coming soon! For now, please use Google login.');

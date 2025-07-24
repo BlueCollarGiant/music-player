@@ -42,7 +42,7 @@ class SessionsController < ApplicationController
 
     if user
       token = JsonWebToken.encode(user_id: user.id)
-      redirect_to "http://localhost:4200/landing?/callback?token=#{token}"
+      redirect_to "http://localhost:4200/landing?token=#{token}"
     else
       redirect_to "http://localhost:4200/landing?error=unauthorized"
     end

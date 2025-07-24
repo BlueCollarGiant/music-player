@@ -1,16 +1,9 @@
-# Configure OmniAuth settings
+# Completely disable CSRF protection for OmniAuth
 OmniAuth.config.allowed_request_methods = [:post, :get]
 OmniAuth.config.silence_get_warning = true
+OmniAuth.config.request_validation_phase = nil
+OmniAuth.config.before_request_phase = nil
 
-# Disable CSRF protection for OmniAuth in development
-if Rails.env.development?
-  OmniAuth.config.request_validation_phase = nil
-  OmniAuth.config.before_request_phase do |env|
-    env['omniauth.origin'] = nil
-  end
-end
-
-# Fix CSRF issues in development
 Rails.application.config.middleware.use OmniAuth::Builder do
   provider :google_oauth2,
     ENV['GOOGLE_CLIENT_ID'],
@@ -20,7 +13,8 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       prompt: 'select_account',
       image_aspect_ratio: 'square',
       image_size: 50,
-      access_type: 'online'
+      access_type: 'online',
+      provider_ignores_state: true  # Add this
     }
 
   provider :google_oauth2,
@@ -32,13 +26,15 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       prompt: 'select_account',
       access_type: 'offline',
       approval_prompt: 'auto',
-      include_granted_scopes: true
+      include_granted_scopes: true,
+      provider_ignores_state: true  # Add this
     }
 
   provider :spotify,
     ENV['SPOTIFY_CLIENT_ID'],
     ENV['SPOTIFY_CLIENT_SECRET'],
     {
-      scope: 'user-read-private user-read-email playlist-read-private playlist-read-collaborative'
+      scope: 'user-read-private user-read-email playlist-read-private playlist-read-collaborative',
+      provider_ignores_state: true  # Add this
     }
 end

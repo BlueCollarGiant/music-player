@@ -1,3 +1,4 @@
+
 class UserProfilesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_user_profile, only: [:show, :update, :destroy, :username_history, :upload_avatar, :avatar_history]
@@ -7,7 +8,6 @@ class UserProfilesController < ApplicationController
   before_action only: [:avatar_history] do
     authorize_admin!
   end
-  
   
   def show
     render json: {

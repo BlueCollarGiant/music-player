@@ -62,6 +62,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  public isMobileMenuOpen = signal(false);
 
   // Authentication state signals
   public currentUser = signal<User | null>(null);
@@ -109,7 +110,8 @@ export class AuthService {
     try {
       // Get current user from a simple endpoint that just validates the token
       const userResponse = await fetch('/api/current_user', {
-        headers: this.getAuthHeaders(token)
+        headers: this.getAuthHeaders(token),
+        credentials: 'include'
       });
 
       if (!userResponse.ok) {
@@ -151,13 +153,26 @@ export class AuthService {
     if (!authToken) return;
 
     try {
-      const response = await fetch('/user_profiles/show', {
-        headers: this.getAuthHeaders(authToken)
+      // First get the current user to find their ID
+      const userResponse = await fetch('/api/current_user', {
+        headers: this.getAuthHeaders(authToken),
+        credentials: 'include'
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        this.userProfile.set(data.user_profile);
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        const userId = userData.user.id;
+
+        // Now get the user's profile using their ID
+        const profileResponse = await fetch(`/user_profiles/${userId}`, {
+          headers: this.getAuthHeaders(authToken),
+          credentials: 'include'
+        });
+
+        if (profileResponse.ok) {
+          const data = await profileResponse.json();
+          this.userProfile.set(data.user_profile);
+        }
       }
     } catch (error) {
       console.error('Failed to load user profile:', error);
@@ -171,7 +186,8 @@ export class AuthService {
 
     try {
       const response = await fetch('/user_profiles/platform_connections', {
-        headers: this.getAuthHeaders(authToken)
+        headers: this.getAuthHeaders(authToken),
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -203,19 +219,21 @@ export class AuthService {
   // Manual Authentication Methods (for users without Gmail)
   public async loginWithEmail(email: string, password: string): Promise<void> {
     this.isLoading.set(true);
-    
+
     try {
       const response = await fetch('/sessions', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this.getCSRFToken()
         },
         body: JSON.stringify({
           session: {
             email: email,
             password: password
           }
-        })
+        }),
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -241,7 +259,8 @@ export class AuthService {
       const response = await fetch('/users', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this.getCSRFToken()
         },
         body: JSON.stringify({
           user: {
@@ -252,7 +271,8 @@ export class AuthService {
           user_profile: {
             username: username || email.split('@')[0]
           }
-        })
+        }),
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -273,11 +293,20 @@ export class AuthService {
 
   // Handle OAuth callback (call this when user returns from OAuth)
   public async handleOAuthCallback(token: string): Promise<void> {
-    if (token) {
-      this.storeToken(token);
-      await this.validateAndLoadUser(token);
-    }
+  if (token) {
+    this.storeToken(token);
+    await this.validateAndLoadUser(token);
+
+    //Trigger the signals again just in case anything didn't update
+    const user = this.currentUser();
+    const profile = this.userProfile();
+    const connections = this.platformConnections();
+
+    this.currentUser.set(user);         // re-set to trigger subscribers
+    this.userProfile.set(profile);
+    this.platformConnections.set(connections);
   }
+}
 
   // Platform connection methods
   public connectYouTube(): void {
@@ -287,13 +316,16 @@ export class AuthService {
     }
     window.location.href = '/auth/youtube';
   }
-
+  // Optional toggle method:
+    toggleMobileMenu() {
+      this.isMobileMenuOpen.update(open => !open);
+    }
   public connectSpotify(): void {
     if (!this.isAuthenticated()) {
       console.error('User must be logged in to connect platforms');
       return;
     }
-    // TODO: Add Spotify OAuth endpoint when implemented in backend
+    //  Add Spotify OAuth endpoint when implemented in backend
     window.location.href = '/auth/spotify';
   }
 
@@ -302,7 +334,7 @@ export class AuthService {
       console.error('User must be logged in to connect platforms');
       return;
     }
-    // TODO: Add SoundCloud OAuth endpoint when implemented in backend
+    // Add SoundCloud OAuth endpoint when implemented in backend
     window.location.href = '/auth/soundcloud';
   }
 
@@ -321,7 +353,11 @@ export class AuthService {
 
       const response = await fetch(`/user_profiles/platform_connections/${connection.id}`, {
         method: 'DELETE',
-        headers: this.getAuthHeaders(token)
+        headers: {
+          ...this.getAuthHeaders(token),
+          'X-CSRF-Token': this.getCSRFToken()
+        },
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -338,12 +374,13 @@ export class AuthService {
   // Logout
   public async logout(): Promise<void> {
     const token = this.getStoredToken();
-    
+
     try {
       if (token) {
         await fetch('/logout', {
           method: 'DELETE',
-          headers: this.getAuthHeaders(token)
+          headers: this.getAuthHeaders(token),
+          credentials: 'include'
         });
       }
     } catch (error) {
@@ -364,9 +401,11 @@ export class AuthService {
         method: 'PATCH',
         headers: {
           ...this.getAuthHeaders(token),
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this.getCSRFToken()
         },
-        body: JSON.stringify({ user_profile: profileData })
+        body: JSON.stringify({ user_profile: profileData }),
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -392,7 +431,8 @@ export class AuthService {
 
     try {
       const response = await fetch('/admin/users', {
-        headers: this.getAuthHeaders(token)
+        headers: this.getAuthHeaders(token),
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -445,5 +485,10 @@ export class AuthService {
     if (token) {
       await this.validateAndLoadUser(token);
     }
+  }
+
+  private getCSRFToken(): string {
+    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
   }
 }

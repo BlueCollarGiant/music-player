@@ -23,6 +23,7 @@ export class OauthCallbackComponent implements OnInit {
         this.message = 'Completing login...';
         await this.authService.handleOAuthCallback(params['token']);
         this.message = 'Success! Redirecting...';
+        window.dispatchEvent(new Event('openHamburgerMenu'));
         
         // Redirect to previous page or home
         const returnUrl = localStorage.getItem('pre_auth_url') || '/landing';
