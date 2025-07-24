@@ -4,7 +4,7 @@ class OauthController < ApplicationController
   # GET /auth/:provider/callback - unified handling for multiple OAuth providers
   def callback
     auth = request.env['omniauth.auth']
-    provider = params[:provider]
+    provider = params[:provider] || detect_provider_from_auth(auth)
     
     # Handle different OAuth providers
     case provider
@@ -179,5 +179,16 @@ class OauthController < ApplicationController
       error: "Failed to connect platform",
       errors: connection.errors.full_messages 
     }, status: :unprocessable_entity
+  end
+
+  # Helper to detect provider when not specified in params
+  def detect_provider_from_auth(auth)
+    return 'google_oauth2' if auth&.provider == 'google_oauth2'
+    return 'youtube' if auth&.info&.name&.include?('youtube') || auth&.extra&.raw_info&.hd&.include?('youtube')
+    return 'spotify' if auth&.provider == 'spotify'
+    return 'soundcloud' if auth&.provider == 'soundcloud'
+    
+    # Default fallback
+    auth&.provider || 'google_oauth2'
   end
 end

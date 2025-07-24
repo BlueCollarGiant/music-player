@@ -17,7 +17,7 @@
             } @else {
               <option value="">Select YouTube Playlist</option>
               @for (playlist of youtubeService.playlists(); track playlist.id) {
-                <option [value]="playlist.id">{{ playlist.title }} ({{ playlist.videoCount }} tracks)</option>
+                <option [value]="playlist.id">{{ playlist.title }} ({{ playlist.video_count }} tracks)</option>
               }
             }
           } @else {

@@ -64,7 +64,7 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
 
   // Authentication state signals
-  private currentUser = signal<User | null>(null);
+  public currentUser = signal<User | null>(null);
   private userProfile = signal<UserProfile | null>(null);
   private platformConnections = signal<PlatformConnection[]>([]);
   private isLoading = signal(false);
@@ -185,10 +185,18 @@ export class AuthService {
 
     // OAuth Login Methods
   public loginWithGoogle(): void {
+    // Save current URL for redirect after authentication
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('pre_auth_url', '/landing');
+    }
     window.location.href = '/auth/google_oauth2';
   }
 
   public loginWithYouTube(): void {
+    // Save current URL for redirect after YouTube connection
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('pre_auth_url', '/landing');
+    }
     window.location.href = '/auth/youtube';
   }
 

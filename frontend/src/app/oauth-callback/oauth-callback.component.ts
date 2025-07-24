@@ -4,48 +4,8 @@ import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-oauth-callback',
-  template: `
-    <div class="oauth-callback-container">
-      <div class="loading-spinner">
-        <div class="spinner"></div>
-        <p>{{ message }}</p>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .oauth-callback-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .loading-spinner {
-      text-align: center;
-      color: white;
-    }
-
-    .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top: 4px solid white;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    p {
-      font-size: 18px;
-      margin: 0;
-    }
-  `]
+  templateUrl: './oauth-callback.component.html',
+  styleUrls: ['./oauth-callback.component.css']
 })
 export class OauthCallbackComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -65,7 +25,7 @@ export class OauthCallbackComponent implements OnInit {
         this.message = 'Success! Redirecting...';
         
         // Redirect to previous page or home
-        const returnUrl = localStorage.getItem('pre_auth_url') || '/';
+        const returnUrl = localStorage.getItem('pre_auth_url') || '/landing';
         localStorage.removeItem('pre_auth_url');
         
         setTimeout(() => {
@@ -80,7 +40,7 @@ export class OauthCallbackComponent implements OnInit {
         await this.authService.refreshUserData();
         
         setTimeout(() => {
-          this.router.navigate(['/']);
+          this.router.navigate(['/landing']);
         }, 2000);
       }
       // Handle errors

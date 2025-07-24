@@ -214,6 +214,27 @@
     transform: translateY(-1px);
   }
 
+  .oauth-btn.connected {
+    background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
+    color: white;
+    cursor: default;
+  }
+
+  .oauth-btn.connected:hover {
+    background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
+    transform: none;
+  }
+
+  .btn-icon.success {
+    animation: checkmark-bounce 0.6s ease-in-out;
+  }
+
+  @keyframes checkmark-bounce {
+    0% { transform: scale(0.3); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
   .platform-section {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;

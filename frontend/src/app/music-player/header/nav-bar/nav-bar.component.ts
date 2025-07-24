@@ -89,6 +89,11 @@ export class NavBarComponent {
   }
 
   loginWithGoogle() {
+    // Prevent re-authentication if already logged in
+    if (this.isUserLoggedIn()) {
+      return;
+    }
+    
     // Google OAuth login
     this.authService.loginWithGoogle();
     this.closeMobileMenu();

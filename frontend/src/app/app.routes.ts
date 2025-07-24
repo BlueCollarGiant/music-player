@@ -7,7 +7,7 @@ import { YoutubeComponent } from './music-player/main/youtube/youtube.component'
 export const routes: Routes = [
   {
     path: '',
-    component: MainBodyComponent  // Clean main view
+    component: LandingComponent  // Landing page as default
   },
   {
     path: 'landing',

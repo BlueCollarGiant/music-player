@@ -47,9 +47,14 @@
                   Login / Sign Up
                 </button>
                 <!-- OAuth Login (for Gmail users) -->
-                <button class="auth-btn oauth-btn" (click)="loginWithGoogle()">
-                  <span class="btn-icon">🔑</span>
-                  Login with Google
+                <button class="auth-btn oauth-btn" [class.connected]="isUserLoggedIn()" (click)="loginWithGoogle()">
+                  @if (isUserLoggedIn()) {
+                    <span class="btn-icon success">✅</span>
+                    Connected with Google
+                  } @else {
+                    <span class="btn-icon">🔑</span>
+                    Login with Google
+                  }
                 </button>
               </div>
             </div>
