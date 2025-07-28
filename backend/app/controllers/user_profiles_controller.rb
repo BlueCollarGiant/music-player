@@ -1,4 +1,3 @@
-
 class UserProfilesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_user_profile, only: [:show, :update, :destroy, :username_history, :upload_avatar, :avatar_history]
@@ -84,38 +83,40 @@ class UserProfilesController < ApplicationController
     }
   end
 
-  # GET /user_profiles/platform_connections
-  def platform_connections
-    connections = current_user.platform_connections.active
+  # GET /user_profiles/youtube_connection
+  def youtube_connection
+    connection = current_user.youtube_connection
     
-    render json: {
-      platform_connections: connections.map do |conn|
-        {
-          id: conn.id,
-          platform: conn.platform,
-          connected_at: conn.connected_at,
-          expires_at: conn.expires_at,
-          supports_refresh: conn.supports_refresh?,
-          long_lived_token: conn.long_lived_token?
+    if connection
+      render json: {
+        youtube_connection: {
+          id: connection.id,
+          connected_at: connection.connected_at,
+          expires_at: connection.expires_at,
+          is_active: connection.active?,
+          needs_refresh: connection.needs_refresh?
         }
-      end
-    }
+      }
+    else
+      render json: {
+        youtube_connection: nil,
+        message: "No YouTube connection found"
+      }
+    end
   end
 
-  # DELETE /user_profiles/platform_connections/:platform
-  def unlink_platform
-    # Normalize platform name to lowercase to prevent casing errors
-    platform = params[:platform]&.downcase
-    connection = current_user.platform_connections.find_by(platform: platform)
+  # DELETE /user_profiles/youtube_connection
+  def unlink_youtube
+    connection = current_user.youtube_connection
     
     if connection
       connection.destroy
       render json: { 
-        message: "#{platform.capitalize} connection removed successfully" 
+        message: "YouTube connection removed successfully" 
       }, status: :ok
     else
       render json: { 
-        error: "No #{platform} connection found" 
+        error: "No YouTube connection found" 
       }, status: :not_found
     end
   end

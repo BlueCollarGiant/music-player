@@ -1,5 +1,5 @@
 class SessionsController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:create, :omniauth]
+  skip_before_action :authenticate_user!, only: [:create, :omniauth, :failure]
 
   def create
     user = User.find_by(email: params[:email])
@@ -36,15 +36,53 @@ class SessionsController < ApplicationController
     render json: { message: "Logged out successfully" }, status: :ok
   end
 
-  # Handles OAuth callback
+  # Handles OAuth callback from Google
   def omniauth
-    user = User.from_omniauth(request.env['omniauth.auth'])
+    auth = request.env['omniauth.auth']
+    user = User.from_omniauth(auth)
 
     if user
+      # Create or update YouTube connection with OAuth tokens
+      youtube_connection = user.youtube_connection || user.build_youtube_connection
+      
+      youtube_connection.update!(
+        access_token: auth.credentials.token,
+        refresh_token: auth.credentials.refresh_token,
+        expires_at: Time.at(auth.credentials.expires_at),
+        connected_at: Time.current,
+        provider_uid: auth.uid,
+        provider_info: {
+          name: auth.info.name,
+          email: auth.info.email,
+          image: auth.info.image
+        }
+      )
+
       token = JsonWebToken.encode(user_id: user.id)
-      redirect_to "http://localhost:4200/landing?token=#{token}"
+      
+      # Check if user has YouTube connection for frontend routing
+      has_youtube = youtube_connection.persisted? && youtube_connection.active?
+      
+      redirect_to "http://localhost:4200/landing?token=#{token}&youtube_connected=#{has_youtube}"
     else
-      redirect_to "http://localhost:4200/landing?error=unauthorized"
+      Rails.logger.error "OAuth authentication failed for provider: #{auth&.provider}"
+      redirect_to "http://localhost:4200/landing?error=auth_failed"
     end
+  rescue => e
+    Rails.logger.error "OAuth callback error: #{e.message}"
+    redirect_to "http://localhost:4200/landing?error=server_error"
+  end
+
+  # Handles OAuth failures
+  def failure
+    error_msg = params[:message] || 'unknown_error'
+    Rails.logger.error "OAuth failure: #{error_msg}"
+    redirect_to "http://localhost:4200/landing?error=oauth_failure&details=#{error_msg}"
+  end
+
+  private
+
+  def frontend_base_url
+    ENV.fetch('FRONTEND_URL', 'http://localhost:4200')
   end
 end

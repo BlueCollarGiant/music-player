@@ -30,9 +30,9 @@ Rails.application.routes.draw do
       get :avatar_history
     end
     collection do
-      get :current                    # Add this line - GET /user_profiles/current
-      get :platform_connections
-      delete 'platform_connections/:platform', action: :unlink_platform
+      get :current                      # GET /user_profiles/current
+      get :youtube_connection           # GET /user_profiles/youtube_connection
+      delete :youtube_connection        # DELETE /user_profiles/youtube_connection (calls unlink_youtube action)
     end
   end
 

@@ -13,8 +13,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       prompt: 'select_account',
       image_aspect_ratio: 'square',
       image_size: 50,
-      access_type: 'online',
-      provider_ignores_state: true  # Add this
+      access_type: 'online'
     }
 
   provider :google_oauth2,
@@ -26,15 +25,6 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       prompt: 'select_account',
       access_type: 'offline',
       approval_prompt: 'auto',
-      include_granted_scopes: true,
-      provider_ignores_state: true  # Add this
-    }
-
-  provider :spotify,
-    ENV['SPOTIFY_CLIENT_ID'],
-    ENV['SPOTIFY_CLIENT_SECRET'],
-    {
-      scope: 'user-read-private user-read-email playlist-read-private playlist-read-collaborative',
-      provider_ignores_state: true  # Add this
+      include_granted_scopes: true
     }
 end
