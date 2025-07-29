@@ -51,17 +51,29 @@
           <div class="platform-section">
             <h4>Connect Platforms</h4>
             <div class="platform-buttons">
-              <button class="platform-btn youtube-btn" [class.connected]="isPlatformConnected('youtube')" (click)="connectPlatform('youtube')">
+              <button class="platform-btn youtube-btn" [class.connected]="isPlatformConnected('youtube')" (click)="handlePlatformClick('youtube')">
                 <span class="platform-icon">📺</span>
-                YouTube {{ isPlatformConnected('youtube') ? '✓' : '' }}
+                @if (isPlatformConnected('youtube')) {
+                  YouTube ✓ (Click to disconnect)
+                } @else {
+                  YouTube (Click to connect)
+                }
               </button>
-              <button class="platform-btn spotify-btn" [class.connected]="isPlatformConnected('spotify')" (click)="connectPlatform('spotify')">
+              <button class="platform-btn spotify-btn" [class.connected]="isPlatformConnected('spotify')" (click)="handlePlatformClick('spotify')">
                 <span class="platform-icon">🎵</span>
-                Spotify {{ isPlatformConnected('spotify') ? '✓' : '' }}
+                @if (isPlatformConnected('spotify')) {
+                  Spotify ✓ (Click to disconnect)
+                } @else {
+                  Spotify (Click to connect)
+                }
               </button>
-              <button class="platform-btn soundcloud-btn" [class.connected]="isPlatformConnected('soundcloud')" (click)="connectPlatform('soundcloud')">
+              <button class="platform-btn soundcloud-btn" [class.connected]="isPlatformConnected('soundcloud')" (click)="handlePlatformClick('soundcloud')">
                 <span class="platform-icon">☁️</span>
-                SoundCloud {{ isPlatformConnected('soundcloud') ? '✓' : '' }}
+                @if (isPlatformConnected('soundcloud')) {
+                  SoundCloud ✓ (Click to disconnect)
+                } @else {
+                  SoundCloud (Click to connect)
+                }
               </button>
             </div>
           </div>

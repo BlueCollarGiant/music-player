@@ -63,18 +63,7 @@ export class NavBarComponent {
       window.addEventListener('openHamburgerMenu', () => {
         this.isMobileMenuOpen.set(true);
       });
-       // Add debugging to watch auth state changes
-    setInterval(() => {
-      console.log('Nav bar debug:');
-      console.log('  isAuthenticated:', this.isUserLoggedIn());
-      console.log('  username:', this.username());
-      console.log('  displayUsername:', this.displayUsername());
-      console.log('  isOAuthConnected:', this.isOAuthConnected());
-      console.log('  avatar:', this.userAvatar());
-      console.log('  authService.currentUser:', this.authService.currentUser());
-      console.log('  authService.profile:', this.authService.profile());
-    }, 3000);
-  }
+    }
   }
 
   // Route checking methods
@@ -161,5 +150,30 @@ export class NavBarComponent {
       }
     }
     this.closeMobileMenu();
+  }
+
+  async disconnectPlatform(platform: string) {
+    // Show confirmation dialog
+    const confirmed = confirm(`Are you sure you want to disconnect ${platform}? This will remove access to your ${platform} playlists.`);
+    
+    if (confirmed) {
+      try {
+        await this.authService.disconnectPlatform(platform);
+        console.log(`Successfully disconnected from ${platform}`);
+      } catch (error) {
+        console.error(`Failed to disconnect from ${platform}:`, error);
+        alert(`Failed to disconnect from ${platform}. Please try again.`);
+      }
+    }
+    this.closeMobileMenu();
+  }
+
+  // Handle platform button click - connect or disconnect based on current state
+  handlePlatformClick(platform: string) {
+    if (this.isPlatformConnected(platform)) {
+      this.disconnectPlatform(platform);
+    } else {
+      this.connectPlatform(platform);
+    }
   }
 }
