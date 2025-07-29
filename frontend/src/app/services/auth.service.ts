@@ -221,17 +221,15 @@ export class AuthService {
     this.isLoading.set(true);
 
     try {
-      const response = await fetch('/sessions', {
+      const response = await fetch('/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': this.getCSRFToken()
         },
         body: JSON.stringify({
-          session: {
-            email: email,
-            password: password
-          }
+          email: email,
+          password: password
         }),
         credentials: 'include'
       });

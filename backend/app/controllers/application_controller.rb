@@ -14,8 +14,9 @@ class ApplicationController < ActionController::Base
   # Authenticate all routes by default
   before_action :authenticate_user!
 
-  # Skip auth for frontend catch-all route and public endpoints
+  # Skip auth for frontend catch-all route, public endpoints, and OAuth routes
   skip_before_action :authenticate_user!, only: [:frontend_index, :health_check]
+  skip_before_action :authenticate_user!, if: -> { request.path.start_with?('/auth/') }
 
   # Health check endpoint for deployment monitoring
   def health_check
@@ -62,10 +63,12 @@ class ApplicationController < ActionController::Base
 
     begin
       decoded = JsonWebToken.decode(token)
+      return nil unless decoded.is_a?(Hash) && decoded[:user_id].present?
+      
       user = User.find_by(id: decoded[:user_id])
       
-      # Optional: Check if user is still active
-      user if user&.active?
+      # Return user if found (locking feature disabled for now)
+      user
     rescue JWT::ExpiredSignature
       Rails.logger.warn "Expired JWT token attempted"
       nil
@@ -74,6 +77,9 @@ class ApplicationController < ActionController::Base
       nil
     rescue ActiveRecord::RecordNotFound
       Rails.logger.warn "JWT token references non-existent user"
+      nil
+    rescue StandardError => e
+      Rails.logger.warn "JWT authentication error: #{e.message}"
       nil
     end
   end

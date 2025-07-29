@@ -46,23 +46,19 @@ class SessionsController < ApplicationController
       token = JsonWebToken.encode(user_id: user.id)
 
       if provider == "youtube"
-        # Only handle YouTube connection if provider is youtube
-        youtube_connection = user.youtube_connection || user.build_youtube_connection
+        # Handle YouTube platform connection
+        youtube_connection = user.platform_connections.find_or_initialize_by(platform: 'youtube')
 
         youtube_connection.update!(
+          platform_user_id: auth.uid,
           access_token: auth.credentials.token,
           refresh_token: auth.credentials.refresh_token,
-          expires_at: Time.at(auth.credentials.expires_at),
+          expires_at: auth.credentials.expires_at ? Time.at(auth.credentials.expires_at) : nil,
           connected_at: Time.current,
-          provider_uid: auth.uid,
-          provider_info: {
-            name: auth.info.name,
-            email: auth.info.email,
-            image: auth.info.image
-          }
+          scopes: auth.credentials.scope
         )
 
-        has_youtube = youtube_connection.persisted? && youtube_connection.active?
+        has_youtube = youtube_connection.persisted?
         redirect_to "#{frontend_base_url}/landing?token=#{token}&youtube_connected=#{has_youtube}"
       else
         # For Google login, just redirect with token

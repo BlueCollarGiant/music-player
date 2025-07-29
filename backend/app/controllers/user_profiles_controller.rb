@@ -121,6 +121,27 @@ class UserProfilesController < ApplicationController
     end
   end
 
+  # GET /user_profiles/platform_connections
+  def platform_connections
+    connections = current_user.platform_connections.includes(:user)
+    
+    formatted_connections = connections.map do |connection|
+      {
+        id: connection.id,
+        platform: connection.platform,
+        platform_user_id: connection.platform_user_id,
+        connected_at: connection.connected_at,
+        expires_at: connection.expires_at,
+        is_active: connection.expires_at.nil? || connection.expires_at > Time.current,
+        scopes: connection.scopes
+      }
+    end
+
+    render json: {
+      platform_connections: formatted_connections
+    }
+  end
+
   private
 
   def set_user_profile

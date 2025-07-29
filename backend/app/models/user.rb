@@ -17,34 +17,53 @@ class User < ApplicationRecord
     after_create :create_user_profile_with_username
 
     # OAuth class method to find or create user from OAuth data
-        def self.from_omniauth(auth)
-            # Try to find an existing user by email (manual or OAuth signup)
-            user = find_by(email: auth.info.email)
+    def self.from_omniauth(auth)
+        # Try to find an existing user by email (manual or OAuth signup)
+        user = find_by(email: auth.info.email)
 
-            if user
-                # If user exists but doesn't have provider/uid set (manual signup), update it
-                if user.provider.blank? || user.uid.blank?
+        if user
+            # If user exists but doesn't have provider/uid set (manual signup), update it
+            if user.provider.blank? || user.uid.blank?
                 user.update(provider: auth.provider, uid: auth.uid)
-                end
-            else
-                # No existing user — create one via OAuth
-                user = where(provider: auth.provider, uid: auth.uid).first_or_create do |u|
+            end
+        else
+            # Extract username from Google data
+            username = auth.info.name || auth.info.email&.split('@')&.first || "user_#{SecureRandom.hex(4)}"
+            username = username.gsub(/[^a-zA-Z0-9_\s]/, '_').strip
+            
+            # No existing user — create one via OAuth
+            user = where(provider: auth.provider, uid: auth.uid).first_or_create do |u|
                 u.email = auth.info.email
                 u.provider = auth.provider
                 u.uid = auth.uid
                 u.role = "user"
-                u.username = auth.info.email&.split('@')&.first&.gsub(/[^a-zA-Z0-9_]/, '_') || "user_#{SecureRandom.hex(4)}"
-                end
+                u.username = username
             end
-
-            # Ensure a user profile exists
-            UserProfile.find_or_create_by(user_id: user.id)
-
-            user
         end
+
+        # Ensure a user profile exists with proper username
+        profile = UserProfile.find_or_create_by(user_id: user.id) do |p|
+            # Use Google name if available, otherwise fall back to email-based username
+            p.username = auth.info.name || auth.info.email&.split('@')&.first || "user_#{SecureRandom.hex(4)}"
+        end
+        
+        # Update profile username if it's generic and we have better data from Google
+        if profile.username.start_with?('user_') && auth.info.name.present?
+            profile.update(username: auth.info.name)
+        end
+
+        user
+    end
     def is_admin?
         role == 'admin'
     end
+
+    # Check if user account is active (not locked)
+    # TODO: Implement account locking feature in future version
+    def active?
+        true  # Always return true for now, locking feature disabled
+    end
+    
     # Check if user is OAuth user
     def oauth_user?
         provider.present? && uid.present?

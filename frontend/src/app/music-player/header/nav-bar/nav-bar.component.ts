@@ -28,6 +28,25 @@ export class NavBarComponent {
   userAvatar = this.authService.avatarUrl;
   connectedPlatforms = this.authService.connectedPlatformNames;
 
+  // Computed property for display username (fallback to email prefix if generic)
+  displayUsername = computed(() => {
+    const currentUsername = this.username();
+    const currentUser = this.authService.currentUser();
+    
+    // If username is generic (starts with "user_") and we have email, use email prefix
+    if (currentUsername && currentUsername.startsWith('user_') && currentUser?.email) {
+      return currentUser.email.split('@')[0];
+    }
+    
+    return currentUsername || 'User';
+  });
+
+  // Check if user is connected via OAuth (has oauth_provider)
+  isOAuthConnected = computed(() => {
+    const currentUser = this.authService.currentUser();
+    return !!(currentUser?.oauth_provider);
+  });
+
   constructor() {
     // Track current route
     this.router.events.pipe(
@@ -44,15 +63,7 @@ export class NavBarComponent {
       window.addEventListener('openHamburgerMenu', () => {
         this.isMobileMenuOpen.set(true);
       });
-       // Add debugging to watch auth state changes
-    setInterval(() => {
-      console.log('Nav bar debug:');
-      console.log('  isAuthenticated:', this.isUserLoggedIn());
-      console.log('  username:', this.username());
-      console.log('  avatar:', this.userAvatar());
-      console.log('  authService.currentUser:', this.authService.currentUser());
-    }, 3000);
-  }
+    }
   }
 
   // Route checking methods
@@ -139,5 +150,30 @@ export class NavBarComponent {
       }
     }
     this.closeMobileMenu();
+  }
+
+  async disconnectPlatform(platform: string) {
+    // Show confirmation dialog
+    const confirmed = confirm(`Are you sure you want to disconnect ${platform}? This will remove access to your ${platform} playlists.`);
+    
+    if (confirmed) {
+      try {
+        await this.authService.disconnectPlatform(platform);
+        console.log(`Successfully disconnected from ${platform}`);
+      } catch (error) {
+        console.error(`Failed to disconnect from ${platform}:`, error);
+        alert(`Failed to disconnect from ${platform}. Please try again.`);
+      }
+    }
+    this.closeMobileMenu();
+  }
+
+  // Handle platform button click - connect or disconnect based on current state
+  handlePlatformClick(platform: string) {
+    if (this.isPlatformConnected(platform)) {
+      this.disconnectPlatform(platform);
+    } else {
+      this.connectPlatform(platform);
+    }
   }
 }
