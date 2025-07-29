@@ -1,25 +1,4 @@
-<div class="nav-bar">
-  <!-- Main Navigation Links -->
-  <div class="nav-links">
-    <a routerLink="/" class="nav-link" [class.active]="isHomeActive()">Home</a>
-    <a routerLink="/player" class="nav-link" [class.active]="isPlayerActive()">Music Player</a>
-  </div>
-  
-  <!-- Music Player Tabs (only show on player page) -->
-  @if (isPlayerActive()) {
-    <div class="nav-buttons">
-      @for (tab of tabs; track tab) {
-        <button
-          [class.active]="musicService.activeTab() === tab"
-          (click)="setActiveTab(tab)">
-          {{ tab }}
-        </button>
-      }
-    </div>
-  }
-</div>
-
-<!-- Mobile Hamburger Menu -->
+<!-- Hamburger Menu Navigation (for all screen sizes) -->
 <div class="mobile-nav">
   <button class="hamburger-button" (click)="toggleMobileMenu()">
     <div class="hamburger-line"></div>
