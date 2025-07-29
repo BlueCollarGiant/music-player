@@ -80,12 +80,12 @@ export class YouTubeService {
       next: (response) => {
         this.playlists.set(response.playlists);
         this.isLoading.set(false);
+        console.log('✅ YouTube playlists loaded successfully:', response.playlists);
       },
       error: (error) => {
-        console.error('Error loading YouTube playlists:', error);
+        console.error('❌ Error loading YouTube playlists:', error);
         this.isLoading.set(false);
-        // Set some mock data for development
-        this.setMockPlaylists();
+        this.playlists.set([]); // Clear playlists on error
       }
     });
   }
@@ -98,12 +98,12 @@ export class YouTubeService {
       next: (response) => {
         this.playlistTracks.set(response.tracks);
         this.isLoading.set(false);
+        console.log('✅ YouTube playlist tracks loaded successfully:', response.tracks);
       },
       error: (error) => {
-        console.error('Error loading playlist tracks:', error);
+        console.error('❌ Error loading playlist tracks:', error);
         this.isLoading.set(false);
-        // Set some mock data for development
-        this.setMockTracks();
+        this.playlistTracks.set([]); // Clear tracks on error
       }
     });
   }
@@ -114,62 +114,5 @@ export class YouTubeService {
   selectPlaylist(playlist: YouTubePlaylist): void {
     this.selectedPlaylist.set(playlist);
     this.loadPlaylistTracks(playlist.id);
-  }
-
-  /**
-   * Mock data for development (remove when backend is ready)
-   */
-  private setMockPlaylists(): void {
-    const mockPlaylists: YouTubePlaylist[] = [
-      {
-        id: 'mock-1',
-        title: 'My Favorites Mix',
-        description: 'A collection of my favorite songs',
-        video_count: 25
-      },
-      {
-        id: 'mock-2',
-        title: 'Chill Vibes',
-        description: 'Relaxing music for focus and study',
-        video_count: 18
-      },
-      {
-        id: 'mock-3',
-        title: 'Workout Hits',
-        description: 'High energy music for exercising',
-        video_count: 32
-      }
-    ];
-    this.playlists.set(mockPlaylists);
-  }
-
-  /**
-   * Mock tracks for development (remove when backend is ready)
-   */
-  private setMockTracks(): void {
-    const mockTracks: YouTubePlaylistTrack[] = [
-      {
-        id: '1',
-        title: 'Shape of You',
-        artist: 'Ed Sheeran',
-        duration: '3:53',
-        video_url: 'https://www.youtube.com/watch?v=JGwWNGJdvx8'
-      },
-      {
-        id: '2', 
-        title: 'Blinding Lights',
-        artist: 'The Weeknd',
-        duration: '3:20',
-        video_url: 'https://www.youtube.com/watch?v=4NRXx6U8ABQ'
-      },
-      {
-        id: '3',
-        title: 'Watermelon Sugar',
-        artist: 'Harry Styles', 
-        duration: '2:54',
-        video_url: 'https://www.youtube.com/watch?v=E07s5ZYygMg'
-      }
-    ];
-    this.playlistTracks.set(mockTracks);
   }
 }

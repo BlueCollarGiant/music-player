@@ -179,31 +179,14 @@ export class NavBarComponent {
     }
   }
 
-  // Test YouTube playlist functionality
-  testYouTubePlaylists() {
-    console.log('Testing YouTube playlist fetch...');
-    console.log('YouTube connected:', this.isPlatformConnected('youtube'));
-    
+  // Navigate to YouTube page
+  goToYouTube() {
     if (!this.isPlatformConnected('youtube')) {
       alert('YouTube not connected! Please connect YouTube first.');
       return;
     }
 
-    this.youtubeService.getUserPlaylists().subscribe({
-      next: (response) => {
-        console.log('✅ YouTube playlists fetched successfully!');
-        console.log('Total playlists:', response.total);
-        console.log('Playlists:', response.playlists);
-        alert(`Success! Found ${response.total} YouTube playlists. Check console for details.`);
-      },
-      error: (error) => {
-        console.error('❌ YouTube playlist fetch failed:', error);
-        console.error('Error status:', error.status);
-        console.error('Error message:', error.error);
-        alert(`Failed to fetch YouTube playlists: ${error.error?.message || error.message}`);
-      }
-    });
-    
+    this.router.navigate(['/youtube']);
     this.closeMobileMenu();
   }
 }
