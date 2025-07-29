@@ -12,7 +12,7 @@ class YoutubeController < ApplicationController
         playlists: playlists,
         total: playlists.length,
         user: {
-          channel_name: @youtube_connection.channel_name,
+          platform_user_id: @youtube_connection.platform_user_id,
           connected_at: @youtube_connection.connected_at
         }
       }
@@ -65,10 +65,9 @@ class YoutubeController < ApplicationController
   def connection_status
     render json: {
       connected: true,
-      channel_name: @youtube_connection.channel_name,
-      channel_id: @youtube_connection.channel_id,
+      platform_user_id: @youtube_connection.platform_user_id,
       connected_at: @youtube_connection.connected_at,
-      token_expires_at: @youtube_connection.token_expires_at
+      expires_at: @youtube_connection.expires_at
     }
   end
 
@@ -123,15 +122,14 @@ class YoutubeController < ApplicationController
     )
 
     response.items.map do |playlist|
-      {
-        id: playlist.id,
-        title: playlist.snippet.title,
-        description: playlist.snippet.description&.truncate(200),
-        video_count: playlist.content_details.item_count,
-        thumbnail_url: playlist.snippet&.thumbnails&.medium&.url,
-        created_at: playlist.snippet.published_at,
-        privacy_status: playlist.snippet.privacy_status
-      }
+        {
+          id: playlist.id,
+          title: playlist.snippet.title,
+          description: playlist.snippet.description&.truncate(200),
+          video_count: playlist.content_details.item_count,
+          thumbnail_url: playlist.snippet&.thumbnails&.medium&.url,
+          created_at: playlist.snippet.published_at
+        }
     end
   end
 
@@ -217,7 +215,7 @@ class YoutubeController < ApplicationController
       # Update the connection with new token
       @youtube_connection.update!(
         access_token: auth.access_token,
-        token_expires_at: Time.current + auth.expires_in.seconds
+        expires_at: Time.current + auth.expires_in.seconds
       )
       
       Rails.logger.info "Successfully refreshed YouTube token for user #{current_user.id}"

@@ -295,14 +295,8 @@ export class AuthService {
     this.storeToken(token);
     await this.validateAndLoadUser(token);
 
-    //Trigger the signals again just in case anything didn't update
-    const user = this.currentUser();
-    const profile = this.userProfile();
-    const connections = this.platformConnections();
-
-    this.currentUser.set(user);         // re-set to trigger subscribers
-    this.userProfile.set(profile);
-    this.platformConnections.set(connections);
+    // Force refresh platform connections after OAuth callback
+    await this.loadPlatformConnections(token);
   }
 }
 
@@ -365,7 +359,8 @@ export class AuthService {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
             },
             credentials: 'include'
           });
