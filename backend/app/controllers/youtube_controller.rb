@@ -75,10 +75,10 @@ class YoutubeController < ApplicationController
   private
 
   def ensure_youtube_connection
-    # Updated to use youtube_connections instead of platform_connections
-    @youtube_connection = current_user.youtube_connections.find_by(platform: 'youtube')
+    # Use the youtube_connection method from User model
+    @youtube_connection = current_user.youtube_connection
     
-    unless @youtube_connection&.active?
+    unless @youtube_connection
       render json: { 
         error: "YouTube not connected", 
         message: "Please connect your YouTube account to access playlists",
@@ -87,8 +87,8 @@ class YoutubeController < ApplicationController
       return
     end
 
-    # Check if token needs refresh
-    if @youtube_connection.token_expired?
+    # Check if token needs refresh (if the connection has these methods)
+    if @youtube_connection.respond_to?(:token_expired?) && @youtube_connection.token_expired?
       unless refresh_youtube_token
         render json: { 
           error: "YouTube token expired", 

@@ -5,6 +5,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { MusicPlayerService } from '../../../services/music-player.service';
 import { AuthService } from '../../../services/auth.service';
+import { YouTubeService } from '../../../services/youtube.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -15,6 +16,7 @@ import { AuthService } from '../../../services/auth.service';
 export class NavBarComponent {
   public musicService = inject(MusicPlayerService);
   public authService = inject(AuthService);
+  private youtubeService = inject(YouTubeService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
 
@@ -175,5 +177,33 @@ export class NavBarComponent {
     } else {
       this.connectPlatform(platform);
     }
+  }
+
+  // Test YouTube playlist functionality
+  testYouTubePlaylists() {
+    console.log('Testing YouTube playlist fetch...');
+    console.log('YouTube connected:', this.isPlatformConnected('youtube'));
+    
+    if (!this.isPlatformConnected('youtube')) {
+      alert('YouTube not connected! Please connect YouTube first.');
+      return;
+    }
+
+    this.youtubeService.getUserPlaylists().subscribe({
+      next: (response) => {
+        console.log('✅ YouTube playlists fetched successfully!');
+        console.log('Total playlists:', response.total);
+        console.log('Playlists:', response.playlists);
+        alert(`Success! Found ${response.total} YouTube playlists. Check console for details.`);
+      },
+      error: (error) => {
+        console.error('❌ YouTube playlist fetch failed:', error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.error);
+        alert(`Failed to fetch YouTube playlists: ${error.error?.message || error.message}`);
+      }
+    });
+    
+    this.closeMobileMenu();
   }
 }

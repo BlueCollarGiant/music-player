@@ -69,6 +69,19 @@ class User < ApplicationRecord
         provider.present? && uid.present?
     end
 
+    # Platform connection helper methods
+    def youtube_connection
+        platform_connections.find_by(platform: 'youtube')
+    end
+
+    def spotify_connection
+        platform_connections.find_by(platform: 'spotify')
+    end
+
+    def soundcloud_connection
+        platform_connections.find_by(platform: 'soundcloud')
+    end
+
     private
 
     def set_default_role

@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface YouTubePlaylist {
   id: string;
@@ -24,7 +25,8 @@ export interface YouTubePlaylistTrack {
   providedIn: 'root'
 })
 export class YouTubeService {
-  private apiUrl = '/api/youtube';
+  private apiUrl = 'http://localhost:3000/api/youtube';
+  private platformId = inject(PLATFORM_ID);
   
   // Signals for reactive state management
   public playlists = signal<YouTubePlaylist[]>([]);
@@ -35,11 +37,30 @@ export class YouTubeService {
   constructor(private http: HttpClient) {}
 
   /**
+   * Get authentication headers
+   */
+  private getAuthHeaders(): HttpHeaders {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+    }
+
+    return headers;
+  }
+
+  /**
    * Fetch user's YouTube playlists from backend
    */
   getUserPlaylists(): Observable<{ playlists: YouTubePlaylist[], total: number }> {
     this.isLoading.set(true);
-    return this.http.get<{ playlists: YouTubePlaylist[], total: number }>(`${this.apiUrl}/playlists`);
+    const headers = this.getAuthHeaders();
+    return this.http.get<{ playlists: YouTubePlaylist[], total: number }>(`${this.apiUrl}/playlists`, { headers });
   }
 
   /**
@@ -47,7 +68,8 @@ export class YouTubeService {
    */
   getPlaylistTracks(playlistId: string): Observable<{ tracks: YouTubePlaylistTrack[], playlist_id: string, total: number }> {
     this.isLoading.set(true);
-    return this.http.get<{ tracks: YouTubePlaylistTrack[], playlist_id: string, total: number }>(`${this.apiUrl}/playlists/${playlistId}/tracks`);
+    const headers = this.getAuthHeaders();
+    return this.http.get<{ tracks: YouTubePlaylistTrack[], playlist_id: string, total: number }>(`${this.apiUrl}/playlists/${playlistId}/tracks`, { headers });
   }
 
   /**

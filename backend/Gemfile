@@ -58,3 +58,7 @@ gem 'omniauth-google-oauth2', '~> 1.1'         # Google OAuth2 strategy for Omni
 gem 'omniauth-spotify', '~> 0.0.13'            # Spotify OAuth2 strategy for OmniAuth
 gem 'rspotify', '~> 2.12'                      # Spotify Web API wrapper
 # gem 'omniauth-soundcloud', '~> 1.0'          # SoundCloud OAuth (version conflict with rspotify)
+
+# --- Google APIs ---
+gem 'google-apis-youtube_v3', '~> 0.31'        # YouTube Data API v3
+gem 'googleauth', '~> 1.8'                     # Google authentication library
