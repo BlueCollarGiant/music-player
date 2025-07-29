@@ -12,7 +12,7 @@ class YoutubeController < ApplicationController
         playlists: playlists,
         total: playlists.length,
         user: {
-          channel_name: @youtube_connection.channel_name,
+          platform_user_id: @youtube_connection.platform_user_id,
           connected_at: @youtube_connection.connected_at
         }
       }
@@ -65,20 +65,19 @@ class YoutubeController < ApplicationController
   def connection_status
     render json: {
       connected: true,
-      channel_name: @youtube_connection.channel_name,
-      channel_id: @youtube_connection.channel_id,
+      platform_user_id: @youtube_connection.platform_user_id,
       connected_at: @youtube_connection.connected_at,
-      token_expires_at: @youtube_connection.token_expires_at
+      expires_at: @youtube_connection.expires_at
     }
   end
 
   private
 
   def ensure_youtube_connection
-    # Updated to use youtube_connections instead of platform_connections
-    @youtube_connection = current_user.youtube_connections.find_by(platform: 'youtube')
+    # Use the youtube_connection method from User model
+    @youtube_connection = current_user.youtube_connection
     
-    unless @youtube_connection&.active?
+    unless @youtube_connection
       render json: { 
         error: "YouTube not connected", 
         message: "Please connect your YouTube account to access playlists",
@@ -87,8 +86,8 @@ class YoutubeController < ApplicationController
       return
     end
 
-    # Check if token needs refresh
-    if @youtube_connection.token_expired?
+    # Check if token needs refresh (if the connection has these methods)
+    if @youtube_connection.respond_to?(:token_expired?) && @youtube_connection.token_expired?
       unless refresh_youtube_token
         render json: { 
           error: "YouTube token expired", 
@@ -123,15 +122,14 @@ class YoutubeController < ApplicationController
     )
 
     response.items.map do |playlist|
-      {
-        id: playlist.id,
-        title: playlist.snippet.title,
-        description: playlist.snippet.description&.truncate(200),
-        video_count: playlist.content_details.item_count,
-        thumbnail_url: playlist.snippet&.thumbnails&.medium&.url,
-        created_at: playlist.snippet.published_at,
-        privacy_status: playlist.snippet.privacy_status
-      }
+        {
+          id: playlist.id,
+          title: playlist.snippet.title,
+          description: playlist.snippet.description&.truncate(200),
+          video_count: playlist.content_details.item_count,
+          thumbnail_url: playlist.snippet&.thumbnails&.medium&.url,
+          created_at: playlist.snippet.published_at
+        }
     end
   end
 
@@ -217,7 +215,7 @@ class YoutubeController < ApplicationController
       # Update the connection with new token
       @youtube_connection.update!(
         access_token: auth.access_token,
-        token_expires_at: Time.current + auth.expires_in.seconds
+        expires_at: Time.current + auth.expires_in.seconds
       )
       
       Rails.logger.info "Successfully refreshed YouTube token for user #{current_user.id}"

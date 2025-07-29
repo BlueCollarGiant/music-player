@@ -48,4 +48,9 @@ class PlatformConnection < ApplicationRecord
     # Some platforms like SoundCloud provide tokens without expiration
     expires_at.nil?
   end
+
+  def token_expired?
+    # Check if token is expired (same as expired? method)
+    expired?
+  end
 end

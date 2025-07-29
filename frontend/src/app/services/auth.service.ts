@@ -109,7 +109,7 @@ export class AuthService {
     
     try {
       // Get current user from a simple endpoint that just validates the token
-      const userResponse = await fetch('/api/current_user', {
+      const userResponse = await fetch('http://localhost:3000/api/current_user', {
         headers: this.getAuthHeaders(token),
         credentials: 'include'
       });
@@ -154,7 +154,7 @@ export class AuthService {
 
     try {
       // First get the current user to find their ID
-      const userResponse = await fetch('/api/current_user', {
+      const userResponse = await fetch('http://localhost:3000/api/current_user', {
         headers: this.getAuthHeaders(authToken),
         credentials: 'include'
       });
@@ -164,7 +164,7 @@ export class AuthService {
         const userId = userData.user.id;
 
         // Now get the user's profile using their ID
-        const profileResponse = await fetch(`/user_profiles/${userId}`, {
+        const profileResponse = await fetch(`http://localhost:3000/user_profiles/${userId}`, {
           headers: this.getAuthHeaders(authToken),
           credentials: 'include'
         });
@@ -185,7 +185,7 @@ export class AuthService {
     if (!authToken) return;
 
     try {
-      const response = await fetch('/user_profiles/platform_connections', {
+      const response = await fetch('http://localhost:3000/user_profiles/platform_connections', {
         headers: this.getAuthHeaders(authToken),
         credentials: 'include'
       });
@@ -221,7 +221,7 @@ export class AuthService {
     this.isLoading.set(true);
 
     try {
-      const response = await fetch('/login', {
+      const response = await fetch('http://localhost:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -254,7 +254,7 @@ export class AuthService {
     this.isLoading.set(true);
     
     try {
-      const response = await fetch('/users', {
+      const response = await fetch('http://localhost:3000/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -295,14 +295,8 @@ export class AuthService {
     this.storeToken(token);
     await this.validateAndLoadUser(token);
 
-    //Trigger the signals again just in case anything didn't update
-    const user = this.currentUser();
-    const profile = this.userProfile();
-    const connections = this.platformConnections();
-
-    this.currentUser.set(user);         // re-set to trigger subscribers
-    this.userProfile.set(profile);
-    this.platformConnections.set(connections);
+    // Force refresh platform connections after OAuth callback
+    await this.loadPlatformConnections(token);
   }
 }
 
@@ -347,25 +341,69 @@ export class AuthService {
 
     try {
       const connection = this.platformConnections().find(conn => conn.platform === platform);
-      if (!connection) return;
+      if (!connection) {
+        console.warn(`No ${platform} connection found to disconnect`);
+        return;
+      }
 
-      const response = await fetch(`/user_profiles/platform_connections/${connection.id}`, {
-        method: 'DELETE',
-        headers: {
-          ...this.getAuthHeaders(token),
-          'X-CSRF-Token': this.getCSRFToken()
-        },
-        credentials: 'include'
-      });
+      let response;
+      
+      // Use specific endpoints for each platform
+      switch (platform.toLowerCase()) {
+        case 'youtube':
+          console.log('Attempting to disconnect YouTube...');
+          console.log('Using endpoint: DELETE /user_profiles/youtube_connection');
+          console.log('Auth token present:', !!token);
+          
+          response = await fetch('http://localhost:3000/user_profiles/youtube_connection', {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            credentials: 'include'
+          });
+          
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
+          break;
+        
+        case 'spotify':
+        case 'soundcloud':
+          // For future implementation - these endpoints don't exist yet
+          console.warn(`${platform} disconnect not implemented yet`);
+          return;
+          
+        default:
+          console.error(`Unknown platform: ${platform}`);
+          return;
+      }
 
-      if (response.ok) {
+      if (response && response.ok) {
         // Remove from local state
         this.platformConnections.update(connections => 
           connections.filter(conn => conn.platform !== platform)
         );
+        console.log(`Successfully disconnected from ${platform}`);
+      } else if (response) {
+        const responseText = await response.text();
+        console.error('Disconnect failed. Response:', responseText);
+        console.error('Status:', response.status);
+        
+        let errorMessage;
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorData.message || `Failed to disconnect from ${platform}`;
+        } catch {
+          errorMessage = `Failed to disconnect from ${platform}. Status: ${response.status}`;
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error(`Failed to disconnect ${platform}:`, error);
+      throw error;
     }
   }
 
@@ -375,7 +413,7 @@ export class AuthService {
 
     try {
       if (token) {
-        await fetch('/logout', {
+        await fetch('http://localhost:3000/logout', {
           method: 'DELETE',
           headers: this.getAuthHeaders(token),
           credentials: 'include'
@@ -395,7 +433,7 @@ export class AuthService {
     if (!token) throw new Error('Not authenticated');
 
     try {
-      const response = await fetch('/user_profiles/update', {
+      const response = await fetch('http://localhost:3000/user_profiles/update', {
         method: 'PATCH',
         headers: {
           ...this.getAuthHeaders(token),
@@ -428,7 +466,7 @@ export class AuthService {
     if (!token) throw new Error('Not authenticated');
 
     try {
-      const response = await fetch('/admin/users', {
+      const response = await fetch('http://localhost:3000/admin/users', {
         headers: this.getAuthHeaders(token),
         credentials: 'include'
       });

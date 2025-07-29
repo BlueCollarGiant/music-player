@@ -92,6 +92,13 @@
           </div>
         }
         
+        <!-- YouTube Test Button (only show if YouTube is connected) -->
+        @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
+          <div class="test-section">
+            <button class="test-btn" (click)="testYouTubePlaylists()">🧪 Test YouTube Playlists</button>
+          </div>
+        }
+
         <!-- Logout option (only show if logged in) -->
         @if (isUserLoggedIn()) {
           <div class="logout-section">

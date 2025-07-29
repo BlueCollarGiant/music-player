@@ -94,7 +94,7 @@ class UserProfilesController < ApplicationController
           connected_at: connection.connected_at,
           expires_at: connection.expires_at,
           is_active: connection.active?,
-          needs_refresh: connection.needs_refresh?
+          supports_refresh: connection.supports_refresh?
         }
       }
     else
