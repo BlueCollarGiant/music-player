@@ -11,7 +11,7 @@ class UsersController < ApplicationController
                 role: @current_user.role,
                 oauth_provider: @current_user.provider,
                 is_admin: @current_user.is_admin?,
-                is_locked: @current_user.is_locked?,
+                # is_locked: !!@current_user.locked_at,  # Disabled for now
                 #failed_attempts: @current_user.failed_attempts,
                 created_at: @current_user.created_at,
                 updated_at: @current_user.updated_at

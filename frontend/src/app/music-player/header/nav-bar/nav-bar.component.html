@@ -14,7 +14,13 @@
           @if (isUserLoggedIn()) {
             <div class="user-avatar">
               <img [src]="userAvatar() || '/assets/avatars/default-avatar.png'" alt="User Avatar" class="avatar-image">
-              <span class="username">{{ username() }}</span>
+              <span class="username">{{ displayUsername() }}</span>
+              @if (isOAuthConnected()) {
+                <div class="connected-indicator">
+                  <span class="connected-icon">✓</span>
+                  Connected
+                </div>
+              }
             </div>
           } @else {
             <div class="auth-section">

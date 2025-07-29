@@ -33,6 +33,7 @@ Rails.application.routes.draw do
       get :current                      # GET /user_profiles/current
       get :youtube_connection           # GET /user_profiles/youtube_connection
       delete :youtube_connection        # DELETE /user_profiles/youtube_connection (calls unlink_youtube action)
+      get :platform_connections        # GET /user_profiles/platform_connections
     end
   end
 

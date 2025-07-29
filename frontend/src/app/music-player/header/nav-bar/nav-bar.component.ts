@@ -28,6 +28,25 @@ export class NavBarComponent {
   userAvatar = this.authService.avatarUrl;
   connectedPlatforms = this.authService.connectedPlatformNames;
 
+  // Computed property for display username (fallback to email prefix if generic)
+  displayUsername = computed(() => {
+    const currentUsername = this.username();
+    const currentUser = this.authService.currentUser();
+    
+    // If username is generic (starts with "user_") and we have email, use email prefix
+    if (currentUsername && currentUsername.startsWith('user_') && currentUser?.email) {
+      return currentUser.email.split('@')[0];
+    }
+    
+    return currentUsername || 'User';
+  });
+
+  // Check if user is connected via OAuth (has oauth_provider)
+  isOAuthConnected = computed(() => {
+    const currentUser = this.authService.currentUser();
+    return !!(currentUser?.oauth_provider);
+  });
+
   constructor() {
     // Track current route
     this.router.events.pipe(
@@ -49,8 +68,11 @@ export class NavBarComponent {
       console.log('Nav bar debug:');
       console.log('  isAuthenticated:', this.isUserLoggedIn());
       console.log('  username:', this.username());
+      console.log('  displayUsername:', this.displayUsername());
+      console.log('  isOAuthConnected:', this.isOAuthConnected());
       console.log('  avatar:', this.userAvatar());
       console.log('  authService.currentUser:', this.authService.currentUser());
+      console.log('  authService.profile:', this.authService.profile());
     }, 3000);
   }
   }

@@ -22,7 +22,14 @@ export class OauthCallbackComponent implements OnInit {
       if (params['token']) {
         this.message = 'Completing login...';
         await this.authService.handleOAuthCallback(params['token']);
-        this.message = 'Success! Redirecting...';
+        
+        // Check if this was a YouTube connection
+        if (params['youtube_connected'] === 'true') {
+          this.message = 'YouTube connected successfully! Redirecting...';
+        } else {
+          this.message = 'Login successful! Redirecting...';
+        }
+        
         window.dispatchEvent(new Event('openHamburgerMenu'));
         
         // Redirect to previous page or home
@@ -33,7 +40,7 @@ export class OauthCallbackComponent implements OnInit {
           this.router.navigate([returnUrl]);
         }, 1000);
       }
-      // Handle platform connection
+      // Handle platform connection (legacy support)
       else if (params['platform'] && params['status'] === 'connected') {
         this.message = `${params['platform']} connected successfully!`;
         
