@@ -1,26 +1,47 @@
 <!-- Song List Panel (Left Side) -->
-<div class="song-list">
+<div class="song-list" 
+     [class.empty]="isEmpty()"
+     [class.small]="isSmall()"
+     [class.medium]="isMedium()"
+     [class.large]="isLarge()">
   <div class="header">
     <div class="info">
       <!--<div class="thumbnail"></div>-->
-      <span>Your Sound Starts Here</span>
-    </div>
-    <div class="actions">
-      <app-song-form></app-song-form> <!--this is the song form and song form modal if you dont remember future me-->
+      <div class="playlist-selector">
+        <select class="playlist-dropdown" (change)="onPlaylistChange($event)" [disabled]="isYouTubeMode && youtubeService.isLoading()">
+          @if (isYouTubeMode) {
+            @if (youtubeService.isLoading()) {
+              <option value="">Loading YouTube Playlists...</option>
+            } @else if (youtubeService.playlists().length === 0) {
+              <option value="">No YouTube Playlists Found</option>
+            } @else {
+              <option value="">Select YouTube Playlist</option>
+              @for (playlist of youtubeService.playlists(); track playlist.id) {
+                <option [value]="playlist.id">{{ playlist.title }} ({{ playlist.video_count }} tracks)</option>
+              }
+            }
+          } @else {
+            <option value="default">Your Sound Starts Here</option>
+            <option value="youtube">YouTube Playlist</option>
+            <option value="spotify">Spotify Playlist</option>
+            <option value="favorites">Favorites</option>
+          }
+        </select>
+      </div>
     </div>
   </div>
 
-  <!-- Song Items -->
-  <div class="items">
-    @for (song of playlistLogic.displaySongList(); track song.id) {
-      <div class="item" [class.active]="song.id === musicService.currentTrack()?.id">
+  <!-- Song Items - Responsive to playlist size -->
+  <div class="items" [attr.data-count]="realSongCount()">
+    @for (song of getDisplaySongs(); track song.id) {
+      <div class="item" 
+           [class.active]="song.id === musicService.currentTrack()?.id"
+           (click)="selectSong(song)"
+           [class.clickable]="!song.isPlaceholder">
         <div class="info">
           <div class="thumbnail"></div>
           <span>{{ song.name }}</span>
         </div>
-        @if (!song.isPlaceholder) {
-          <button class="btn-remove" (click)="playlistLogic.removeSong(song.id)">Remove</button>
-      }
       </div>
     }
   </div>

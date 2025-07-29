@@ -1,0 +1,46 @@
+<div class="landing-container">
+  <div class="hero-section">
+    <h1 class="hero-title">Welcome to Music Player</h1>
+    <p class="hero-subtitle">Your ultimate music streaming experience</p>
+    
+    <div class="hero-actions">
+      <button class="btn-primary" (click)="startListening()">
+        🎵 Start Listening
+      </button>
+      <button class="btn-secondary" (click)="scrollToFeatures()">
+        Learn More
+      </button>
+    </div>
+  </div>
+
+  <div class="features-section" #featuresSection>
+    <div class="container">
+      <h2>Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎶</div>
+          <h3>Multi-Platform Support</h3>
+          <p>Connect your YouTube, Spotify, and SoundCloud accounts</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Mobile First</h3>
+          <p>Responsive design that works perfectly on all devices</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🎵</div>
+          <h3>Custom Playlists</h3>
+          <p>Create and manage your own playlists</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h3>Secure Login</h3>
+          <p>OAuth integration with Google or manual account creation</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

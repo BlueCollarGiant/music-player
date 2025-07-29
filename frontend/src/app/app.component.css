@@ -1,0 +1,21 @@
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-container {
+  margin-top: auto;
+  padding: 0.5rem; /* Match youtube-container padding */
+}
+
+.footer-container app-player-controls {
+  width: 100%;
+  padding: 1rem; /* Match content padding */
+}

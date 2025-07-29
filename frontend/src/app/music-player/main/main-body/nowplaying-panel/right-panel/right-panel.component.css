@@ -1,17 +1,23 @@
 /* ===== NOW PLAYING (RIGHT PANEL) ===== */
 .now-playing {
-  width: 24rem;
-  background-color: #0a1029;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  background-image: linear-gradient(#6c6cff, #04f8f8);
   border-radius: 0.5rem;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden; /* important: stop internal overflow */
+  box-sizing: border-box;
+  min-width: 320px; /* Wider minimum for better mobile experience */
 }
 /* ===== Song album or Song Thumbnail (RIGHT PANEL) ===== */
 .album-art {
-  width: 16rem;
-  height: 16rem;
+  width: min(85%, 20rem); /* Increased max width for better visibility */
+  aspect-ratio: 1; /* Keep it square */
   background-size: cover;
   background-position: center;
   border-radius: 0.5rem;
@@ -19,14 +25,40 @@
 }
 /* ===== Song and artist container (RIGHT PANEL) ===== */
 .title {
-  font-size: 1.875rem;
+  font-size: clamp(1.25rem, 4vw, 1.875rem); /* Responsive font size */
   font-weight: 500;
   margin-bottom: 0.25rem;
+  text-align: center;
+  word-wrap: break-word;
 }
 
 .artist {
   color: #a0a0a0;
   margin-bottom: 2rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  font-size: clamp(0.875rem, 3vw, 1rem); /* Responsive font size */
+}
+
+/* ===== MOBILE RESPONSIVE - COMPACT RIGHT PANEL ===== */
+@media (max-width: 768px) {
+  .now-playing {
+    flex: 1;
+    height: 100%;
+    max-height: 100%;
+    padding: 1rem;
+    min-width: 100%; /* Take full width on mobile */
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  .album-art {
+    width: min(95%, 16rem); /* Larger on mobile for better visibility */
+    margin-bottom: 1rem;
+  }
+  
+  .artist {
+    margin-bottom: 1rem;
+  }
 }
 

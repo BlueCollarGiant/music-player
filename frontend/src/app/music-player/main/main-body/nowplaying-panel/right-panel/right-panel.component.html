@@ -1,9 +1,12 @@
 <!-- Now Playing Panel (Right Side) -->
 <div class="now-playing">
-  <img class="album-art"  src="https://raw.githubusercontent.com/BlueCollarGiant/music-player/refs/heads/main/src/app/assets/images/thumbnail.png" alt="Album Art" loading="eager"/>
+  <img class="album-art" 
+       src="thumbnail.png" 
+       [alt]="musicService.currentTrack()?.name + ' Album Art' || 'Album Art'" 
+       loading="eager"/>
   <div class="song-info-container">
-    <h2 class="title">Current Song</h2>
-    <p class="artist">Current Artist</p>
+    <h2 class="title">{{ musicService.currentTrack()?.name || 'No Song Playing' }}</h2>
+    <p class="artist">{{ musicService.currentTrack()?.artist || 'Unknown Artist' }}</p>
   </div>
   <!-- Visualizer -->
   <app-visualizer [isPlaying]="musicService.isPlaying()"/>

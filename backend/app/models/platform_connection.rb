@@ -2,13 +2,12 @@ class PlatformConnection < ApplicationRecord
   belongs_to :user
 
   # Platform constants for validation and backwards compatibility
-  SUPPORTED_PLATFORMS = %w[spotify youtube soundcloud].freeze
+  SUPPORTED_PLATFORMS = %w[youtube].freeze
 
   # Platform enum for better readability and query syntax
   enum platform: {
-    spotify: 'spotify',
-    youtube: 'youtube', 
-    soundcloud: 'soundcloud'
+    youtube: 'youtube'
+    
   }
 
   # Validations
@@ -42,7 +41,7 @@ class PlatformConnection < ApplicationRecord
 
   def supports_refresh?
     # Check if platform supports refresh tokens and we have one stored
-    refresh_token.present? && (spotify? || youtube?)
+    refresh_token.present? && youtube?
   end
 
   def long_lived_token?

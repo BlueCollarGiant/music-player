@@ -4,11 +4,20 @@ Rails.application.routes.draw do
   delete "/logout", to: "sessions#destroy"
 
   # OAuth routes - unified callback handling for multiple providers
-  get '/auth/:provider/callback', to: 'oauth#callback'
-  get '/auth/failure', to: 'oauth#failure'
+  get '/auth/:provider/callback', to: 'sessions#omniauth'
+  get '/auth/failure', to: 'sessions#failure'
 
   # User routes
   resources :users, only: [:create, :show]
+  
+  # API routes
+  scope '/api' do
+    get '/current_user', to: 'users#current'
+    
+    # YouTube API routes
+    get '/youtube/playlists', to: 'youtube#playlists'
+    get '/youtube/playlists/:playlist_id/tracks', to: 'youtube#playlist_tracks'
+  end
 
   # Password reset
   resources :password_resets, only: [:create]
@@ -21,8 +30,9 @@ Rails.application.routes.draw do
       get :avatar_history
     end
     collection do
-      get :platform_connections
-      delete 'platform_connections/:platform', action: :unlink_platform
+      get :current                      # GET /user_profiles/current
+      get :youtube_connection           # GET /user_profiles/youtube_connection
+      delete :youtube_connection        # DELETE /user_profiles/youtube_connection (calls unlink_youtube action)
     end
   end
 
@@ -34,4 +44,8 @@ Rails.application.routes.draw do
     post 'users/:id/promote', to: 'admin#promote_user'
     post 'users/:id/demote', to: 'admin#demote_user'
   end
+
+  get '*path', to: 'application#frontend_index', constraints: ->(req) do
+     !req.xhr? && req.format.html?
+   end
 end

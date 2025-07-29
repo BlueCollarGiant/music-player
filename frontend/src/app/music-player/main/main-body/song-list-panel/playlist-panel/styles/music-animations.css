@@ -1,0 +1,41 @@
+/* ===== CURRENT TRACK THUMBNAIL (with 🎵 float effect) ===== */
+
+/* --- Subsection: Floating Music Notes --- */
+.item.active .thumbnail::before,
+.item.active .thumbnail::after {
+  content: '🎵';
+  position: absolute;
+  bottom: -1rem;
+  opacity: 0;
+  font-size: var(--font-size-base);
+  animation: floatNote 3s infinite ease-in-out;
+  pointer-events: none;
+}
+
+.item.active .thumbnail::before {
+  left: 5px;
+  animation-delay: 0s;
+}
+
+.item.active .thumbnail::after {
+  right: 5px;
+  animation-delay: 1.5s;
+}
+
+/* --- Subsection: Float Animation --- */
+@keyframes floatNote {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-3rem);
+    opacity: 0;
+  }
+}
