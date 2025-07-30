@@ -1,13 +1,25 @@
+
 <!-- Now Playing Panel (Right Side) -->
 <div class="now-playing">
-  <img class="album-art" 
-       src="thumbnail.png" 
-       [alt]="musicService.currentTrack()?.name + ' Album Art' || 'Album Art'" 
-       loading="eager"/>
+  <!-- Show iframe if video_url exists and is YouTube, otherwise show image -->
+  @if (musicService.currentTrack()?.video_url && musicService.hasYouTubeVideo(musicService.currentTrack()?.video_url)) {
+    <div class="video-container">
+      #youtubePlayer
+      class="youtube-player"
+      style="width: 320px; height: 180px;">
+    </div>
+  } @else {
+    <img class="album-art"
+         src="thumbnail.png"
+         [alt]="musicService.currentTrack()?.name + ' Album Art' || 'Album Art'"
+         loading="eager"/>
+  }
+
   <div class="song-info-container">
     <h2 class="title">{{ musicService.currentTrack()?.name || 'No Song Playing' }}</h2>
     <p class="artist">{{ musicService.currentTrack()?.artist || 'Unknown Artist' }}</p>
   </div>
+  
   <!-- Visualizer -->
   <app-visualizer [isPlaying]="musicService.isPlaying()"/>
 </div>
