@@ -2,6 +2,7 @@ import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { Song } from '../music-player/Models/song.model';
 
 export interface YouTubePlaylist {
   id: string;
@@ -25,20 +26,16 @@ export interface YouTubePlaylistTrack {
   providedIn: 'root'
 })
 export class YouTubeService {
-  private apiUrl = 'http://localhost:3000/api/youtube';
-  private platformId = inject(PLATFORM_ID);
+  private readonly apiUrl = 'http://localhost:3000/api/youtube';
+  private readonly platformId = inject(PLATFORM_ID);
   
-  // Signals for reactive state management
-  public playlists = signal<YouTubePlaylist[]>([]);
-  public selectedPlaylist = signal<YouTubePlaylist | null>(null);
-  public playlistTracks = signal<YouTubePlaylistTrack[]>([]);
-  public isLoading = signal<boolean>(false);
+  public readonly playlists = signal<YouTubePlaylist[]>([]);
+  public readonly selectedPlaylist = signal<YouTubePlaylist | null>(null);
+  public readonly playlistTracks = signal<YouTubePlaylistTrack[]>([]);
+  public readonly isLoading = signal<boolean>(false);
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Get authentication headers
-   */
   private getAuthHeaders(): HttpHeaders {
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
@@ -54,67 +51,62 @@ export class YouTubeService {
     return headers;
   }
 
-  /**
-   * Fetch user's YouTube playlists from backend
-   */
   getUserPlaylists(): Observable<{ playlists: YouTubePlaylist[], total: number }> {
     this.isLoading.set(true);
-    const headers = this.getAuthHeaders();
-    return this.http.get<{ playlists: YouTubePlaylist[], total: number }>(`${this.apiUrl}/playlists`, { headers });
+    return this.http.get<{ playlists: YouTubePlaylist[], total: number }>(
+      `${this.apiUrl}/playlists`, 
+      { headers: this.getAuthHeaders() }
+    );
   }
 
-  /**
-   * Fetch tracks from a specific YouTube playlist
-   */
   getPlaylistTracks(playlistId: string): Observable<{ tracks: YouTubePlaylistTrack[], playlist_id: string, total: number }> {
     this.isLoading.set(true);
-    const headers = this.getAuthHeaders();
-    return this.http.get<{ tracks: YouTubePlaylistTrack[], playlist_id: string, total: number }>(`${this.apiUrl}/playlists/${playlistId}/tracks`, { headers });
+    return this.http.get<{ tracks: YouTubePlaylistTrack[], playlist_id: string, total: number }>(
+      `${this.apiUrl}/playlists/${playlistId}/tracks`, 
+      { headers: this.getAuthHeaders() }
+    );
   }
 
-  /**
-   * Load and set playlists
-   */
   loadPlaylists(): void {
     this.getUserPlaylists().subscribe({
       next: (response) => {
         this.playlists.set(response.playlists);
         this.isLoading.set(false);
-        console.log('✅ YouTube playlists loaded successfully:', response.playlists);
       },
-      error: (error) => {
-        console.error('❌ Error loading YouTube playlists:', error);
+      error: () => {
         this.isLoading.set(false);
-        this.playlists.set([]); // Clear playlists on error
+        this.playlists.set([]);
       }
     });
   }
 
-  /**
-   * Load tracks for a specific playlist
-   */
   loadPlaylistTracks(playlistId: string): void {
     this.getPlaylistTracks(playlistId).subscribe({
       next: (response) => {
-        console.log('📥 Raw YouTube tracks response:', response);
-        console.log('🎵 First track details:', response.tracks[0]);
         this.playlistTracks.set(response.tracks);
         this.isLoading.set(false);
-        console.log('✅ YouTube playlist tracks loaded successfully:', response.tracks);
       },
-      error: (error) => {
-        console.error('❌ Error loading playlist tracks:', error);
+      error: () => {
         this.isLoading.set(false);
-        this.playlistTracks.set([]); // Clear tracks on error
+        this.playlistTracks.set([]);
       }
     });
   }
 
-  /**
-   * Select a playlist and load its tracks
-   */
   selectPlaylist(playlist: YouTubePlaylist): void {
     this.selectedPlaylist.set(playlist);
     this.loadPlaylistTracks(playlist.id);
+  }
+
+  convertTracksToSongs(): Song[] {
+    return this.playlistTracks().map((track, index) => ({
+      id: index + 1,
+      name: track.title,
+      artist: track.artist,
+      duration: track.duration,
+      video_url: track.video_url,
+      thumbnail_url: track.thumbnail_url,
+      isPlaceholder: false
+    }));
   }
 }

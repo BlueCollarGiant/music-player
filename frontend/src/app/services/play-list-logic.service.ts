@@ -33,8 +33,9 @@ export class PlayListLogic {
     if (raw) {
       try {
         return JSON.parse(raw) as Song[];
-      } catch (e) {
-        console.error('❌ Failed to parse localStorage playlist:', e);
+      } catch {
+        // Failed to parse localStorage, return null to use default
+        return null;
       }
     }
     return null;
@@ -46,6 +47,16 @@ export class PlayListLogic {
   readonly displaySongList = computed(() => {
     return this.songList();
   });
+
+  // Playlist size calculations
+  readonly realSongCount = computed(() => {
+    return this.displaySongList().filter(song => !song.isPlaceholder).length;
+  });
+
+  readonly isEmpty = computed(() => this.realSongCount() === 0);
+  readonly isSmall = computed(() => this.realSongCount() > 0 && this.realSongCount() <= 3);
+  readonly isMedium = computed(() => this.realSongCount() > 3 && this.realSongCount() <= 8);
+  readonly isLarge = computed(() => this.realSongCount() > 8);
 
   //-----Methods go here stop leaving them everywhere -----//
 

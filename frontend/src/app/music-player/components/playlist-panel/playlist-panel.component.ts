@@ -1,7 +1,7 @@
-import { Component, inject, computed, Input, OnInit, effect } from '@angular/core';
+import { Component, inject, computed, Input, OnInit } from '@angular/core';
 import { MusicPlayerService } from '../../../../../services/music-player.service';
 import { PlayListLogic } from '../../../../../services/play-list-logic.service';
-import { YouTubeService, YouTubePlaylist } from '../../../../../services/youtube.service';
+import { YouTubeService } from '../../../../../services/youtube.service';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { Song } from '../../../../Models/song.model';
 
@@ -31,13 +31,36 @@ export class PlaylistPanelComponent implements OnInit {
     if (this.isYouTubeMode) {
       return this.youtubeService.playlistTracks().length;
     }
-    return this.playlistLogic.displaySongList().filter(song => !song.isPlaceholder).length;
+    return this.playlistLogic.realSongCount();
   });
   
-  readonly isEmpty = computed(() => this.realSongCount() === 0);
-  readonly isSmall = computed(() => this.realSongCount() > 0 && this.realSongCount() <= 3);
-  readonly isMedium = computed(() => this.realSongCount() > 3 && this.realSongCount() <= 8);
-  readonly isLarge = computed(() => this.realSongCount() > 8);
+  readonly isEmpty = computed(() => {
+    if (this.isYouTubeMode) {
+      return this.realSongCount() === 0;
+    }
+    return this.playlistLogic.isEmpty();
+  });
+  
+  readonly isSmall = computed(() => {
+    if (this.isYouTubeMode) {
+      return this.realSongCount() > 0 && this.realSongCount() <= 3;
+    }
+    return this.playlistLogic.isSmall();
+  });
+  
+  readonly isMedium = computed(() => {
+    if (this.isYouTubeMode) {
+      return this.realSongCount() > 3 && this.realSongCount() <= 8;
+    }
+    return this.playlistLogic.isMedium();
+  });
+  
+  readonly isLarge = computed(() => {
+    if (this.isYouTubeMode) {
+      return this.realSongCount() > 8;
+    }
+    return this.playlistLogic.isLarge();
+  });
 
   ngOnInit(): void {
     if (this.isYouTubeMode) {
@@ -46,15 +69,7 @@ export class PlaylistPanelComponent implements OnInit {
   }
 
   selectSong(song: Song) {
-    // Only allow selection of real songs, not placeholders
-    if (!song.isPlaceholder) {
-      this.musicService.currentTrack.set(song);
-      // Reset progress when changing songs
-      this.musicService.currentProgress.set(0);
-      this.musicService.currentTime.set('0:00');
-      // Stop current playback
-      this.musicService.isPlaying.set(false);
-    }
+    this.musicService.selectTrack(song);
   }
 
   onPlaylistChange(event: Event) {
@@ -62,30 +77,16 @@ export class PlaylistPanelComponent implements OnInit {
     const selectedValue = target.value;
     
     if (this.isYouTubeMode) {
-      // Handle YouTube playlist selection
       const selectedPlaylist = this.youtubeService.playlists().find(p => p.id === selectedValue);
       if (selectedPlaylist) {
         this.youtubeService.selectPlaylist(selectedPlaylist);
       }
-    } else {
-      // Handle regular playlist selection
-      console.log('Selected playlist:', selectedValue);
-      // TODO: Implement regular playlist switching logic
     }
   }
 
-  // Convert YouTube tracks to Song format for display
   getDisplaySongs(): Song[] {
     if (this.isYouTubeMode) {
-      return this.youtubeService.playlistTracks().map((track, index) => ({
-        id: index + 1,
-        name: track.title,
-        artist: track.artist,
-        duration: track.duration,
-        video_url: track.video_url,
-        thumbnail_url: track.thumbnail_url,
-        isPlaceholder: false
-      }));
+      return this.youtubeService.convertTracksToSongs();
     }
     return this.playlistLogic.displaySongList();
   }

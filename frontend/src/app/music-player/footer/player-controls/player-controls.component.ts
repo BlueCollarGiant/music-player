@@ -1,9 +1,7 @@
 
-import { Component, inject} from '@angular/core';//remove unused imports
+import { Component, inject } from '@angular/core';
 import { MusicPlayerService } from '../../../services/music-player.service';
 import { SharedModule } from '../../../shared/shared.module';
-
-
 
 @Component({
   selector: 'app-player-controls',
@@ -12,39 +10,23 @@ import { SharedModule } from '../../../shared/shared.module';
   styleUrl: './player-controls.component.css'
 })
 export class PlayerControlsComponent {
-  //-----Injections section-----//
+  //-----Injections-----//
   public musicService = inject(MusicPlayerService);
 
-  //-----Methods section-----//
+  //-----Methods-----//
   togglePlayPause(): void {
-    const playing = this.musicService.isPlaying();
     this.musicService.togglePlayPause();
   }
-  goPrevious() {
+
+  goPrevious(): void {
     this.musicService.previousSong();
   }
 
-  goNext() {
+  goNext(): void {
     this.musicService.nextSong();
-  }
-  startPlayback(): void {
-    this.musicService.play();
-  }
-
-  pausePlayback(): void {
-    this.musicService.pause();
   }
 
   onProgressBarClick(event: MouseEvent): void {
-    const progressBar = event.currentTarget as HTMLElement;
-    const rect = progressBar.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const percentage = (clickX / rect.width) * 100;
-    
-    // Clamp percentage between 0 and 100
-    const clampedPercentage = Math.max(0, Math.min(100, percentage));
-    
-    // Update the progress
-    this.musicService.seekTo(clampedPercentage);
+    this.musicService.seekToFromProgressBar(event);
   }
 }
