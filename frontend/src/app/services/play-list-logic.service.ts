@@ -1,5 +1,4 @@
 import { computed, inject, Injectable, Injector, signal } from '@angular/core';
-import { songQue } from '../data/music-data';
 import { Song } from '../music-player/Models/song.model';
 import { MusicPlayerService } from './music-player.service';
 
@@ -14,7 +13,7 @@ export class PlayListLogic {
   }
   // inject Song from musicService commenting because i keep losing song lol
   private songList = signal<Song[]>(
-    this.loadFromLocalStorage() || [...songQue]
+    this.loadFromLocalStorage() || []
   );
 
   //-----Local storage setup area---//

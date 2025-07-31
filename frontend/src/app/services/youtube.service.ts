@@ -20,6 +20,7 @@ export interface YouTubePlaylistTrack {
   duration: string;
   thumbnail_url?: string;
   video_url: string;
+  position: number;
 }
 
 @Injectable({
@@ -99,8 +100,8 @@ export class YouTubeService {
   }
 
   convertTracksToSongs(): Song[] {
-    return this.playlistTracks().map((track, index) => ({
-      id: index + 1,
+    return this.playlistTracks().map((track) => ({
+      id: track.id,
       name: track.title,
       artist: track.artist,
       duration: track.duration,
