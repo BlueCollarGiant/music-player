@@ -51,6 +51,7 @@ export class PlaylistPanelComponent implements OnInit {
       this.musicService.currentTrack.set(song);
       // Reset progress when changing songs
       this.musicService.currentProgress.set(0);
+      this.musicService.currentTime.set('0:00');
       // Stop current playback
       this.musicService.isPlaying.set(false);
     }
@@ -81,6 +82,8 @@ export class PlaylistPanelComponent implements OnInit {
         name: track.title,
         artist: track.artist,
         duration: track.duration,
+        video_url: track.video_url,
+        thumbnail_url: track.thumbnail_url,
         isPlaceholder: false
       }));
     }

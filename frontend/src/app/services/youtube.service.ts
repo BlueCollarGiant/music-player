@@ -96,6 +96,8 @@ export class YouTubeService {
   loadPlaylistTracks(playlistId: string): void {
     this.getPlaylistTracks(playlistId).subscribe({
       next: (response) => {
+        console.log('📥 Raw YouTube tracks response:', response);
+        console.log('🎵 First track details:', response.tracks[0]);
         this.playlistTracks.set(response.tracks);
         this.isLoading.set(false);
         console.log('✅ YouTube playlist tracks loaded successfully:', response.tracks);

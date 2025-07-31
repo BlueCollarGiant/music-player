@@ -1,25 +1,49 @@
-
 <!-- Now Playing Panel (Right Side) -->
 <div class="now-playing">
-  <!-- Show iframe if video_url exists and is YouTube, otherwise show image -->
-  @if (musicService.currentTrack()?.video_url && musicService.hasYouTubeVideo(musicService.currentTrack()?.video_url)) {
-    <div class="video-container">
-      #youtubePlayer
-      class="youtube-player"
-      style="width: 320px; height: 180px;">
+  <!-- Media Container - Takes up most of the space -->
+  <div class="media-container">
+    @if (showVideo()) {
+      <!-- Show YouTube video when playing -->
+      <div class="video-container">
+        <iframe #youtubeIframe
+                class="youtube-player"
+                [src]="videoEmbedUrl()"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+      </div>
+    } @else if (showThumbnail()) {
+      <!-- Show thumbnail when song is selected but not playing -->
+      <div class="thumbnail-container" (click)="onThumbnailClick()">
+        <img class="album-art clickable-thumbnail"
+             [src]="thumbnailUrl()"
+             [alt]="currentTrack()?.name + ' Album Art' || 'Album Art'"
+             loading="eager"/>
+        <div class="play-overlay">
+          <div class="play-button">▶</div>
+        </div>
+      </div>
+    } @else {
+      <!-- Show visualizer when no current track -->
+      <div class="visualizer-container">
+        <app-visualizer [isPlaying]="isPlaying()"/>
+      </div>
+    }
+  </div>
+
+  <!-- Song Info Container - Fixed at bottom -->
+  @if (currentTrack()) {
+    <div class="song-info-container">
+      <h2 class="title">{{ currentTrack()?.name || 'No Song Playing' }}</h2>
+      <p class="artist">{{ currentTrack()?.artist || 'Unknown Artist' }}</p>
     </div>
-  } @else {
-    <img class="album-art"
-         src="thumbnail.png"
-         [alt]="musicService.currentTrack()?.name + ' Album Art' || 'Album Art'"
-         loading="eager"/>
   }
 
-  <div class="song-info-container">
-    <h2 class="title">{{ musicService.currentTrack()?.name || 'No Song Playing' }}</h2>
-    <p class="artist">{{ musicService.currentTrack()?.artist || 'Unknown Artist' }}</p>
-  </div>
-  
-  <!-- Visualizer -->
-  <app-visualizer [isPlaying]="musicService.isPlaying()"/>
+  <!-- Visualizer - Always show when track exists -->
+  @if (currentTrack()) {
+    <div class="bottom-visualizer">
+      <app-visualizer [isPlaying]="isPlaying()"/>
+    </div>
+  }
 </div>

@@ -18,6 +18,7 @@ export class MusicPlayerService {
   // Playback needed by player-controls
   readonly isPlaying = signal<boolean>(false);
   currentProgress = signal<number>(0);
+  currentTime = signal<string>('0:00');
   private intervalRef: any = null;
 
 
@@ -26,9 +27,8 @@ export class MusicPlayerService {
 
 
 
-  // Current Track
-  //currentTrack = signal<Song | null>(this.playlist.displaySongList()[1] ?? null); // if this.songs[1] is undefined fall back to null
-  currentTrack = signal<Song | null>(null);//test
+  // Current Track - Initialize with first song if available
+  currentTrack = signal<Song | null>(this.playlist.displaySongList()[0] ?? null);
 
   // Audio Visualizer Bars
   audioBars = signal<number[]>(Array(30).fill(0).map(() => Math.max(15, Math.floor(Math.random() * 100))));
@@ -37,35 +37,28 @@ export class MusicPlayerService {
   // Methods
 
 
-  setYouTubePlayer(player: any): void {
-    this.youtubePlayer = player;
-  }
+  // Remove the complex YouTube player integration
+  // The new approach uses simple embed iframes
   setActiveTab(tab: string): void {
     this.activeTab.set(tab);
   }
 
   togglePlayPause(): void {
-  const nowPlaying = !this.isPlaying();
-  
-  // Control YouTube player if available
-  if (this.youtubePlayer && this.currentTrack()?.video_url) {
-    if (nowPlaying) {
-      this.youtubePlayer.playVideo();
-    } else {
-      this.youtubePlayer.pauseVideo();
-    }
-  } else {
-    // Fallback to original audio logic
+    const nowPlaying = !this.isPlaying();
     this.isPlaying.set(nowPlaying);
     
-    if (nowPlaying) {
+    if (nowPlaying && this.currentTrack()?.video_url) {
+      // For YouTube videos, the iframe will handle playback
+      // We just need to track the playing state
+      this.startProgressBar();
+    } else if (nowPlaying) {
+      // For audio-only tracks
       this.startProgressBar();
     } else {
+      // Pause - clear progress tracking
       clearInterval(this.intervalRef);
     }
   }
-
-}
 private startProgressBar(): void {
   const song = this.currentTrack();
   if (!song || !song.duration) return;
@@ -98,10 +91,20 @@ private startProgressBar(): void {
 }
   seekTo(percentage: number): void {
   if (this.youtubePlayer && this.currentTrack()?.video_url) {
-    const duration = this.youtubePlayer.getDuration();
-    const seekTime = (percentage / 100) * duration;
-    this.youtubePlayer.seekTo(seekTime, true);
-    this.currentProgress.set(percentage);
+    try {
+      if (typeof this.youtubePlayer.getDuration === 'function' && typeof this.youtubePlayer.seekTo === 'function') {
+        const duration = this.youtubePlayer.getDuration();
+        const seekTime = (percentage / 100) * duration;
+        this.youtubePlayer.seekTo(seekTime, true);
+        this.currentProgress.set(percentage);
+      } else {
+        console.error('❌ YouTube player seek methods not available');
+        this.currentProgress.set(percentage);
+      }
+    } catch (error) {
+      console.error('❌ Error seeking YouTube video:', error);
+      this.currentProgress.set(percentage);
+    }
   } else {
     // Fallback for audio-only tracks
     this.currentProgress.set(percentage);
@@ -130,6 +133,7 @@ private startProgressBar(): void {
     this.currentTrack.set(prevSong);
     this.timeService.parseTime(prevSong.duration);
     this.currentProgress.set(0);
+    this.currentTime.set('0:00');
     
     // Stop YouTube player if it exists
     if (this.youtubePlayer) {
@@ -165,6 +169,7 @@ private startProgressBar(): void {
     this.currentTrack.set(nextSong);
     this.timeService.parseTime(nextSong.duration);
     this.currentProgress.set(0);
+    this.currentTime.set('0:00');
     
     // Stop YouTube player if it exists
     if (this.youtubePlayer) {
@@ -203,6 +208,24 @@ private startProgressBar(): void {
     const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
   }
+
+  // Helper method to format seconds to time string
+  private formatTime(seconds: number): string {
+    // Handle invalid numbers
+    if (!seconds || isNaN(seconds) || seconds < 0) {
+      return '0:00';
+    }
+    
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  // Method to update current time (called from right panel)
+  updateCurrentTime(currentSeconds: number): void {
+    // Validate input before formatting
+    if (typeof currentSeconds === 'number' && !isNaN(currentSeconds)) {
+      this.currentTime.set(this.formatTime(currentSeconds));
+    }
+  }
 }
-
-

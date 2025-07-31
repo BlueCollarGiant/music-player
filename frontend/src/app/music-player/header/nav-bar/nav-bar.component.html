@@ -95,7 +95,7 @@
         <!-- YouTube Navigation Button (only show if YouTube is connected) -->
         @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
           <div class="youtube-section">
-            <button class="youtube-nav-btn" (click)="goToYouTube()">📺 Go to YouTube</button>
+            <button class="youtube-nav-btn" (click)="handleYouTubeClick()">📺 Go to YouTube</button>
           </div>
         }
 

@@ -35,4 +35,16 @@ export class PlayerControlsComponent {
     this.musicService.pause();
   }
 
+  onProgressBarClick(event: MouseEvent): void {
+    const progressBar = event.currentTarget as HTMLElement;
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percentage = (clickX / rect.width) * 100;
+    
+    // Clamp percentage between 0 and 100
+    const clampedPercentage = Math.max(0, Math.min(100, percentage));
+    
+    // Update the progress
+    this.musicService.seekTo(clampedPercentage);
+  }
 }

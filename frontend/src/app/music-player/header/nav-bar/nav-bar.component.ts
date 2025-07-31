@@ -179,14 +179,31 @@ export class NavBarComponent {
     }
   }
 
-  // Navigate to YouTube page
+  // Navigate to YouTube page and auto-load playlists
   goToYouTube() {
     if (!this.isPlatformConnected('youtube')) {
       alert('YouTube not connected! Please connect YouTube first.');
       return;
     }
 
+    // Auto-load YouTube playlists when navigating to YouTube
+    console.log('🎵 Auto-loading YouTube playlists...');
+    this.youtubeService.loadPlaylists();
+
     this.router.navigate(['/youtube']);
     this.closeMobileMenu();
+  }
+
+  // Handle YouTube button click - auto-load playlists if connected
+  handleYouTubeClick() {
+    if (this.isPlatformConnected('youtube')) {
+      // User is connected, auto-load playlists
+      console.log('🎵 YouTube connected, auto-loading playlists...');
+      this.youtubeService.loadPlaylists();
+      this.goToYouTube();
+    } else {
+      // User not connected, connect first
+      this.connectPlatform('youtube');
+    }
   }
 }

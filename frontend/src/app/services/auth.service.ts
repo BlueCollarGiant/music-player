@@ -297,8 +297,33 @@ export class AuthService {
 
     // Force refresh platform connections after OAuth callback
     await this.loadPlatformConnections(token);
+
+    // Check if user has YouTube access through their Google OAuth
+    await this.checkYouTubeAccess(token);
   }
 }
+
+  // Check if user's Google OAuth includes YouTube access
+  private async checkYouTubeAccess(token: string): Promise<void> {
+    try {
+      // Check if the user's Google OAuth token has YouTube scope
+      const response = await fetch('http://localhost:3000/api/youtube/check_access', {
+        headers: this.getAuthHeaders(token),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.has_youtube_access) {
+          console.log('✅ User has YouTube access through Google OAuth');
+          // Refresh platform connections to include YouTube
+          await this.loadPlatformConnections(token);
+        }
+      }
+    } catch (error) {
+      console.log('ℹ️ YouTube access check failed (this is normal if not implemented):', error);
+    }
+  }
 
   // Platform connection methods
   public connectYouTube(): void {
