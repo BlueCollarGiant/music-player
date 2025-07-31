@@ -18,12 +18,7 @@ export class PlayListLogic {
 
   //-----Local storage setup area---//
 
-  //  Save only real songs
-  private saveToLocalStorage(songs: Song[]): void {
-    if (typeof window === 'undefined') return;
-    const realSongs = songs.filter((song) => !song.isPlaceholder);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(realSongs));
-  }
+  
 
   // local storage Load on startup
   private loadFromLocalStorage(): Song[] | null {
