@@ -1,9 +1,9 @@
 import { Component, inject, computed, Input, OnInit } from '@angular/core';
-import { MusicPlayerService } from '../../../../../services/music-player.service';
-import { PlayListLogic } from '../../../../../services/play-list-logic.service';
-import { YouTubeService } from '../../../../../services/youtube.service';
-import { SharedModule } from '../../../../../shared/shared.module';
-import { Song } from '../../../../Models/song.model';
+import { MusicPlayerService } from '../../../services/music-player.service';
+import { PlayListLogic } from '../../../services/play-list-logic.service';
+import { YouTubeService } from '../../../services/youtube.service';
+import { SharedModule } from '../../../shared/shared.module';
+import { Song } from '../../Models/song.model';
 
 @Component({
   selector: 'app-playlist-panel',
@@ -27,35 +27,35 @@ export class PlaylistPanelComponent implements OnInit {
   public youtubeService = inject(YouTubeService);
 
   // Computed signals for responsive playlist behavior
-  readonly realSongCount = computed(() => {
+  readonly realSongCount = computed<number>(() => {
     if (this.isYouTubeMode) {
       return this.youtubeService.playlistTracks().length;
     }
     return this.playlistLogic.realSongCount();
   });
   
-  readonly isEmpty = computed(() => {
+  readonly isEmpty = computed<boolean>(() => {
     if (this.isYouTubeMode) {
       return this.realSongCount() === 0;
     }
     return this.playlistLogic.isEmpty();
   });
   
-  readonly isSmall = computed(() => {
+  readonly isSmall = computed<boolean>(() => {
     if (this.isYouTubeMode) {
       return this.realSongCount() > 0 && this.realSongCount() <= 3;
     }
     return this.playlistLogic.isSmall();
   });
   
-  readonly isMedium = computed(() => {
+  readonly isMedium = computed<boolean>(() => {
     if (this.isYouTubeMode) {
       return this.realSongCount() > 3 && this.realSongCount() <= 8;
     }
     return this.playlistLogic.isMedium();
   });
   
-  readonly isLarge = computed(() => {
+  readonly isLarge = computed<boolean>(() => {
     if (this.isYouTubeMode) {
       return this.realSongCount() > 8;
     }
@@ -77,7 +77,7 @@ export class PlaylistPanelComponent implements OnInit {
     const selectedValue = target.value;
     
     if (this.isYouTubeMode) {
-      const selectedPlaylist = this.youtubeService.playlists().find(p => p.id === selectedValue);
+      const selectedPlaylist = this.youtubeService.playlists().find((p: any) => p.id === selectedValue);
       if (selectedPlaylist) {
         this.youtubeService.selectPlaylist(selectedPlaylist);
       }

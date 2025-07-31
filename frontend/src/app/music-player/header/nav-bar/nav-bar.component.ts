@@ -141,12 +141,6 @@ export class NavBarComponent {
         case 'youtube':
           this.authService.connectYouTube();
           break;
-        case 'spotify':
-          this.authService.connectSpotify();
-          break;
-        case 'soundcloud':
-          this.authService.connectSoundCloud();
-          break;
         default:
           console.warn(`Platform ${platform} not supported`);
       }

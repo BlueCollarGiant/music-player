@@ -1,5 +1,6 @@
 import { Component, inject, computed, ElementRef, ViewChild } from '@angular/core';
-import { MusicPlayerService } from '../../../../../services/music-player.service';
+import { MusicPlayerService } from '../../../services/music-player.service';
+import { Song } from '../../Models/song.model';
 import { VisualizerComponent } from './visualizer-container/visualizer/visualizer.component';
 import { CommonModule } from '@angular/common';
 
@@ -16,7 +17,7 @@ export class RightPanelComponent {
   musicService = inject(MusicPlayerService);
 
   //-----Computed Properties-----//
-  readonly currentTrack = computed(() => this.musicService.currentTrack());
+  readonly currentTrack = computed<Song | null>(() => this.musicService.currentTrack());
   readonly isPlaying = computed(() => this.musicService.isPlaying());
   readonly hasVideoUrl = computed(() => !!this.currentTrack()?.video_url);
   readonly showVideo = computed(() => this.hasVideoUrl() && this.isPlaying());
