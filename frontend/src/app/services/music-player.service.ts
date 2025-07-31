@@ -115,38 +115,113 @@ export class MusicPlayerService {
     }
   }
 
-  nextSong(): void {
-    const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
-    const current = this.currentTrack();
+  /*nextSong(): void {
+  const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
+  
+  if (tracks.length === 0) return;
+  
+  const current = this.currentTrack();
+  let nextIndex = 0;
 
-    if (!current && tracks.length > 0) {
-      this.currentTrack.set(tracks[0]);
-    }
-
-    if (!current) return;
-
+  if (current) {
     const currentIndex = tracks.findIndex(song => song.id === current.id);
-    let nextIndex = currentIndex + 1;
-
-    if (nextIndex >= tracks.length) {
-      nextIndex = 0;
-    }
-    
-    const nextSong = tracks[nextIndex];
-    if (nextSong) {
-      this.currentTrack.set(nextSong);
-      this.currentProgress.set(0);
-      this.currentTime.set('0:00');
-      
-      if (this.youtubePlayer) {
-        this.youtubePlayer.stopVideo();
-      }
-      
-      this.clearProgressInterval();
-      this.isPlaying.set(false);
+    if (currentIndex !== -1) {
+      nextIndex = (currentIndex + 1) % tracks.length;
     }
   }
+  
+  const nextSong = tracks[nextIndex];
+  if (!nextSong?.video_url) return;
 
+  // Update current track and reset progress
+  this.currentTrack.set(nextSong);
+  this.currentProgress.set(0);
+  this.currentTime.set('0:00');
+  
+  // Handle YouTube player
+  if (this.youtubePlayer) {
+    this.youtubePlayer.stopVideo();
+    
+    const videoId = this.extractVideoId(nextSong.video_url);
+    if (videoId) {
+      this.youtubePlayer.loadVideoById(videoId);
+      this.youtubePlayer.playVideo();
+    }
+  }
+  
+  this.clearProgressInterval();
+  this.isPlaying.set(true);
+}
+
+private extractVideoId(url: string): string | null {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match?.[1] ?? null;
+}*/
+
+nextSong(): void {
+  console.log('nextSong() called');
+  
+  // Debug the playlist state
+  const allSongs = this.playlist.displaySongList();
+  console.log('All songs in playlist:', allSongs);
+  console.log('Playlist length:', allSongs.length);
+  
+  const tracks = allSongs.filter(song => !song.isPlaceholder);
+  console.log('Available tracks (non-placeholder):', tracks);
+  console.log('Available tracks count:', tracks.length);
+  
+  if (tracks.length === 0) {
+    console.log('No tracks available - playlist might be empty or all placeholders');
+    return;
+  }
+  
+  const current = this.currentTrack();
+  console.log('Current track:', current);
+  
+  let nextIndex = 0;
+  if (current) {
+    const currentIndex = tracks.findIndex(song => song.id === current.id);
+    console.log('Current index:', currentIndex);
+    if (currentIndex !== -1) {
+      nextIndex = (currentIndex + 1) % tracks.length;
+    }
+  }
+  
+  console.log('Next index:', nextIndex);
+  const nextSong = tracks[nextIndex];
+  console.log('Next song:', nextSong);
+  
+  if (!nextSong?.video_url) {
+    console.log('No video URL found');
+    return;
+  }
+
+  this.currentTrack.set(nextSong);
+  console.log('Updated current track');
+  
+  if (this.youtubePlayer) {
+    console.log('YouTube player exists, extracting video ID');
+    const videoId = this.extractVideoId(nextSong.video_url);
+    console.log('Video ID:', videoId);
+    
+    if (videoId) {
+      this.youtubePlayer.stopVideo();
+      this.youtubePlayer.loadVideoById(videoId);
+      this.youtubePlayer.playVideo();
+      console.log('Started playing new video');
+    }
+  } else {
+    console.log('No YouTube player found!');
+  }
+  
+  this.isPlaying.set(true);
+}
+  private extractVideoId(url: string): string | null {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match?.[1] ?? null;
+}
   //-----YouTube Helper Methods-----//
   getYouTubeId(url: string): string | null {
     if (!url) return null;
