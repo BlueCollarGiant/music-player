@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './right-panel.component.css'
 })
 export class RightPanelComponent {
-  @ViewChild('youtubeIframe') youtubeIframe!: ElementRef<HTMLIFrameElement>;
+  
   
   //-----Injections-----//
   musicService = inject(MusicPlayerService);
