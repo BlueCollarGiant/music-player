@@ -1,0 +1,182 @@
+/* ===== NOW PLAYING (RIGHT PANEL) ===== */
+.now-playing {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  background-image: linear-gradient(#6c6cff, #04f8f8);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-width: 320px;
+  gap: 1rem; /* Add spacing between sections */
+}
+
+/* ===== MEDIA CONTAINER - Takes up most space ===== */
+.media-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0; /* Allow shrinking */
+}
+/* ===== Song album or Song Thumbnail (RIGHT PANEL) ===== */
+.album-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+/* ===== YouTube Video Container (RIGHT PANEL) ===== */
+.video-container {
+  width: 90%;
+  height: 70%;
+  max-width: 500px;
+  max-height: 350px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+  aspect-ratio: 16/9; /* Maintain video aspect ratio */
+}
+
+.youtube-player {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  z-index: 10;
+  position: relative;
+}
+
+/* Clickable thumbnail styles */
+.thumbnail-container {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 70%;
+  height: 60%;
+  max-width: 400px;
+  max-height: 300px;
+  aspect-ratio: 1; /* Keep thumbnails square */
+}
+
+.thumbnail-container:hover {
+  transform: scale(1.02);
+}
+
+.clickable-thumbnail {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  transition: filter 0.2s ease;
+}
+
+.thumbnail-container:hover .clickable-thumbnail {
+  filter: brightness(0.8);
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.thumbnail-container:hover .play-overlay {
+  opacity: 1;
+}
+
+.play-button {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+/* ===== Song and artist container (RIGHT PANEL) ===== */
+.song-info-container {
+  flex-shrink: 0;
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.title {
+  font-size: clamp(0.9rem, 3vw, 1.2rem); /* Smaller title */
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* Single line with ellipsis */
+  max-width: 100%;
+  display: block; /* Ensure block display for text-overflow */
+}
+
+.artist {
+  color: #a0a0a0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  font-size: clamp(0.75rem, 2.5vw, 0.9rem); /* Smaller artist text */
+  margin: 0.25rem 0 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* Single line with ellipsis */
+  max-width: 100%;
+  display: block; /* Ensure block display for text-overflow */
+}
+
+/* ===== VISUALIZER CONTAINERS ===== */
+.visualizer-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-visualizer {
+  flex-shrink: 0;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+}
+
+/* ===== MOBILE RESPONSIVE - COMPACT RIGHT PANEL ===== */
+@media (max-width: 768px) {
+  .now-playing {
+    flex: 1;
+    height: 100%;
+    max-height: 100%;
+    padding: 1rem;
+    min-width: 100%; /* Take full width on mobile */
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  .album-art {
+    width: min(95%, 16rem); /* Larger on mobile for better visibility */
+    margin-bottom: 1rem;
+  }
+  
+  .artist {
+    margin-bottom: 1rem;
+  }
+}

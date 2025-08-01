@@ -59,22 +59,22 @@
                   YouTube (Click to connect)
                 }
               </button>
-              <button class="platform-btn spotify-btn" [class.connected]="isPlatformConnected('spotify')" (click)="handlePlatformClick('spotify')">
+              <!--<button class="platform-btn spotify-btn" [class.connected]="isPlatformConnected('spotify')" (click)="handlePlatformClick('spotify')">
                 <span class="platform-icon">🎵</span>
                 @if (isPlatformConnected('spotify')) {
                   Spotify ✓ (Click to disconnect)
                 } @else {
                   Spotify (Click to connect)
                 }
-              </button>
-              <button class="platform-btn soundcloud-btn" [class.connected]="isPlatformConnected('soundcloud')" (click)="handlePlatformClick('soundcloud')">
+              </button>-->
+              <!--<button class="platform-btn soundcloud-btn" [class.connected]="isPlatformConnected('soundcloud')" (click)="handlePlatformClick('soundcloud')">
                 <span class="platform-icon">☁️</span>
                 @if (isPlatformConnected('soundcloud')) {
                   SoundCloud ✓ (Click to disconnect)
                 } @else {
                   SoundCloud (Click to connect)
                 }
-              </button>
+              </button>-->
             </div>
           </div>
         }
@@ -92,10 +92,10 @@
           </div>
         }
         
-        <!-- YouTube Test Button (only show if YouTube is connected) -->
+        <!-- YouTube Navigation Button (only show if YouTube is connected) -->
         @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
-          <div class="test-section">
-            <button class="test-btn" (click)="testYouTubePlaylists()">🧪 Test YouTube Playlists</button>
+          <div class="youtube-section">
+            <button class="youtube-nav-btn" (click)="handleYouTubeClick()">📺 Go to YouTube</button>
           </div>
         }
 

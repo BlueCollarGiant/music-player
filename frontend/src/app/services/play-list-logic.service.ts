@@ -1,5 +1,4 @@
 import { computed, inject, Injectable, Injector, signal } from '@angular/core';
-import { songQue } from '../data/music-data';
 import { Song } from '../music-player/Models/song.model';
 import { MusicPlayerService } from './music-player.service';
 
@@ -14,17 +13,12 @@ export class PlayListLogic {
   }
   // inject Song from musicService commenting because i keep losing song lol
   private songList = signal<Song[]>(
-    this.loadFromLocalStorage() || [...songQue]
+    this.loadFromLocalStorage() || []
   );
 
   //-----Local storage setup area---//
 
-  //  Save only real songs
-  private saveToLocalStorage(songs: Song[]): void {
-    if (typeof window === 'undefined') return;
-    const realSongs = songs.filter((song) => !song.isPlaceholder);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(realSongs));
-  }
+  
 
   // local storage Load on startup
   private loadFromLocalStorage(): Song[] | null {
@@ -33,8 +27,9 @@ export class PlayListLogic {
     if (raw) {
       try {
         return JSON.parse(raw) as Song[];
-      } catch (e) {
-        console.error('❌ Failed to parse localStorage playlist:', e);
+      } catch {
+        // Failed to parse localStorage, return null to use default
+        return null;
       }
     }
     return null;
@@ -46,6 +41,16 @@ export class PlayListLogic {
   readonly displaySongList = computed(() => {
     return this.songList();
   });
+
+  // Playlist size calculations
+  readonly realSongCount = computed(() => {
+    return this.displaySongList().filter(song => !song.isPlaceholder).length;
+  });
+
+  readonly isEmpty = computed(() => this.realSongCount() === 0);
+  readonly isSmall = computed(() => this.realSongCount() > 0 && this.realSongCount() <= 3);
+  readonly isMedium = computed(() => this.realSongCount() > 3 && this.realSongCount() <= 8);
+  readonly isLarge = computed(() => this.realSongCount() > 8);
 
   //-----Methods go here stop leaving them everywhere -----//
 

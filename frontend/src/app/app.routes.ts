@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { OauthCallbackComponent } from './oauth-callback/oauth-callback.component';
 import { LandingComponent } from './music-player/main/landing/landing.component';
-import { MainBodyComponent } from './music-player/main/main-body/main-body.component';
 import { YoutubeComponent } from './music-player/main/youtube/youtube.component';
 
 export const routes: Routes = [
@@ -12,10 +11,6 @@ export const routes: Routes = [
   {
     path: 'landing',
     component: LandingComponent
-  },
-  {
-    path: 'player',
-    component: MainBodyComponent
   },
   {
     path: 'youtube',

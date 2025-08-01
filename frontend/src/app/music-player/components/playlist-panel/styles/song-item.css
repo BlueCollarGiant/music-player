@@ -56,6 +56,23 @@
   background-color: var(--color-primary-dark);
 }
 
+/* --- Subsection: Song Info Text --- */
+.item .info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0; /* Allow text to shrink */
+}
+
+.item .info span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0; /* Allow text to shrink */
+}
+
 /* --- Subsection: Responsive Item Sizing --- */
 .song-list.small .item {
   padding: var(--spacing-lg);

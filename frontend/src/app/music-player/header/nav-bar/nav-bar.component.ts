@@ -9,7 +9,7 @@ import { YouTubeService } from '../../../services/youtube.service';
 
 @Component({
   selector: 'app-nav-bar',
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './nav-bar.component.html',
   styleUrl: './nav-bar.component.css'
 })
@@ -141,12 +141,6 @@ export class NavBarComponent {
         case 'youtube':
           this.authService.connectYouTube();
           break;
-        case 'spotify':
-          this.authService.connectSpotify();
-          break;
-        case 'soundcloud':
-          this.authService.connectSoundCloud();
-          break;
         default:
           console.warn(`Platform ${platform} not supported`);
       }
@@ -179,31 +173,31 @@ export class NavBarComponent {
     }
   }
 
-  // Test YouTube playlist functionality
-  testYouTubePlaylists() {
-    console.log('Testing YouTube playlist fetch...');
-    console.log('YouTube connected:', this.isPlatformConnected('youtube'));
-    
+  // Navigate to YouTube page and auto-load playlists
+  goToYouTube() {
     if (!this.isPlatformConnected('youtube')) {
       alert('YouTube not connected! Please connect YouTube first.');
       return;
     }
 
-    this.youtubeService.getUserPlaylists().subscribe({
-      next: (response) => {
-        console.log('✅ YouTube playlists fetched successfully!');
-        console.log('Total playlists:', response.total);
-        console.log('Playlists:', response.playlists);
-        alert(`Success! Found ${response.total} YouTube playlists. Check console for details.`);
-      },
-      error: (error) => {
-        console.error('❌ YouTube playlist fetch failed:', error);
-        console.error('Error status:', error.status);
-        console.error('Error message:', error.error);
-        alert(`Failed to fetch YouTube playlists: ${error.error?.message || error.message}`);
-      }
-    });
-    
+    // Auto-load YouTube playlists when navigating to YouTube
+    console.log('🎵 Auto-loading YouTube playlists...');
+    this.youtubeService.loadPlaylists();
+
+    this.router.navigate(['/youtube']);
     this.closeMobileMenu();
+  }
+
+  // Handle YouTube button click - auto-load playlists if connected
+  handleYouTubeClick() {
+    if (this.isPlatformConnected('youtube')) {
+      // User is connected, auto-load playlists
+      console.log('🎵 YouTube connected, auto-loading playlists...');
+      this.youtubeService.loadPlaylists();
+      this.goToYouTube();
+    } else {
+      // User not connected, connect first
+      this.connectPlatform('youtube');
+    }
   }
 }

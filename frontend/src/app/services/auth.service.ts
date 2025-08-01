@@ -1,8 +1,6 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
 
 export interface User {
@@ -59,32 +57,31 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
+  //-----Dependency Injection-----//
   private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
-  public isMobileMenuOpen = signal(false);
 
-  // Authentication state signals
+  //-----Properties & Signals-----//
+  public isMobileMenuOpen = signal(false);
   public currentUser = signal<User | null>(null);
   private userProfile = signal<UserProfile | null>(null);
   private platformConnections = signal<PlatformConnection[]>([]);
   private isLoading = signal(false);
 
-  // Public computed properties
+  //-----Computed Properties-----//
   public user = computed(() => this.currentUser());
   public profile = computed(() => this.userProfile());
   public connections = computed(() => this.platformConnections());
   public isAuthenticated = computed(() => !!this.currentUser());
   public isAdmin = computed(() => this.currentUser()?.is_admin || false);
   public loading = computed(() => this.isLoading());
-
-  // Helper computed properties
   public username = computed(() => this.userProfile()?.username || this.currentUser()?.email?.split('@')[0] || 'User');
   public avatarUrl = computed(() => this.userProfile()?.avatar_url);
   public connectedPlatformNames = computed(() => this.platformConnections().map(conn => conn.platform));
 
+  //-----Constructor-----//
   constructor() {
-    // Only initialize auth state in browser environment
     if (isPlatformBrowser(this.platformId)) {
       this.initializeAuthState();
     }
@@ -97,7 +94,6 @@ export class AuthService {
       try {
         await this.validateAndLoadUser(token);
       } catch (error) {
-        console.error('Failed to validate stored token:', error);
         this.clearAuthState();
       }
     }
@@ -175,7 +171,7 @@ export class AuthService {
         }
       }
     } catch (error) {
-      console.error('Failed to load user profile:', error);
+      // Silent fail for profile loading
     }
   }
 
@@ -199,7 +195,7 @@ export class AuthService {
     }
   }
 
-    // OAuth Login Methods
+  //-----Public OAuth Methods-----//
   public loginWithGoogle(): void {
     // Save current URL for redirect after authentication
     if (isPlatformBrowser(this.platformId)) {
@@ -243,7 +239,6 @@ export class AuthService {
         throw new Error(errorData.error || 'Login failed');
       }
     } catch (error) {
-      console.error('Email login failed:', error);
       throw error;
     } finally {
       this.isLoading.set(false);
@@ -297,10 +292,35 @@ export class AuthService {
 
     // Force refresh platform connections after OAuth callback
     await this.loadPlatformConnections(token);
+
+    // Check if user has YouTube access through their Google OAuth
+    await this.checkYouTubeAccess(token);
   }
 }
 
-  // Platform connection methods
+  // Check if user's Google OAuth includes YouTube access
+  private async checkYouTubeAccess(token: string): Promise<void> {
+    try {
+      // Check if the user's Google OAuth token has YouTube scope
+      const response = await fetch('http://localhost:3000/api/youtube/check_access', {
+        headers: this.getAuthHeaders(token),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.has_youtube_access) {
+          console.log('✅ User has YouTube access through Google OAuth');
+          // Refresh platform connections to include YouTube
+          await this.loadPlatformConnections(token);
+        }
+      }
+    } catch (error) {
+      console.log('ℹ️ YouTube access check failed (this is normal if not implemented):', error);
+    }
+  }
+
+  //-----Public Platform Methods-----//
   public connectYouTube(): void {
     if (!this.isAuthenticated()) {
       console.error('User must be logged in to connect platforms');
@@ -308,26 +328,9 @@ export class AuthService {
     }
     window.location.href = '/auth/youtube';
   }
-  // Optional toggle method:
-    toggleMobileMenu() {
-      this.isMobileMenuOpen.update(open => !open);
-    }
-  public connectSpotify(): void {
-    if (!this.isAuthenticated()) {
-      console.error('User must be logged in to connect platforms');
-      return;
-    }
-    //  Add Spotify OAuth endpoint when implemented in backend
-    window.location.href = '/auth/spotify';
-  }
 
-  public connectSoundCloud(): void {
-    if (!this.isAuthenticated()) {
-      console.error('User must be logged in to connect platforms');
-      return;
-    }
-    // Add SoundCloud OAuth endpoint when implemented in backend
-    window.location.href = '/auth/soundcloud';
+  public toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update(open => !open);
   }
 
   public isPlatformConnected(platform: string): boolean {
@@ -351,10 +354,6 @@ export class AuthService {
       // Use specific endpoints for each platform
       switch (platform.toLowerCase()) {
         case 'youtube':
-          console.log('Attempting to disconnect YouTube...');
-          console.log('Using endpoint: DELETE /user_profiles/youtube_connection');
-          console.log('Auth token present:', !!token);
-          
           response = await fetch('http://localhost:3000/user_profiles/youtube_connection', {
             method: 'DELETE',
             headers: {
@@ -364,16 +363,8 @@ export class AuthService {
             },
             credentials: 'include'
           });
-          
-          console.log('Response status:', response.status);
-          console.log('Response ok:', response.ok);
           break;
         
-        case 'spotify':
-        case 'soundcloud':
-          // For future implementation - these endpoints don't exist yet
-          console.warn(`${platform} disconnect not implemented yet`);
-          return;
           
         default:
           console.error(`Unknown platform: ${platform}`);
@@ -385,11 +376,8 @@ export class AuthService {
         this.platformConnections.update(connections => 
           connections.filter(conn => conn.platform !== platform)
         );
-        console.log(`Successfully disconnected from ${platform}`);
       } else if (response) {
         const responseText = await response.text();
-        console.error('Disconnect failed. Response:', responseText);
-        console.error('Status:', response.status);
         
         let errorMessage;
         try {
@@ -427,7 +415,7 @@ export class AuthService {
     }
   }
 
-  // User profile management
+  //-----Public Profile Methods-----//
   public async updateProfile(profileData: Partial<UserProfile>): Promise<void> {
     const token = this.getStoredToken();
     if (!token) throw new Error('Not authenticated');
@@ -456,7 +444,7 @@ export class AuthService {
     }
   }
 
-  // Admin methods
+  //-----Public Admin Methods-----//
   public async getUsers(): Promise<User[]> {
     if (!this.isAdmin()) {
       throw new Error('Admin access required');
@@ -483,7 +471,7 @@ export class AuthService {
     }
   }
 
-  // Utility methods
+  //-----Private Helper Methods-----//
   private getStoredToken(): string | null {
     if (!isPlatformBrowser(this.platformId)) {
       return null;

@@ -244,30 +244,37 @@
   font-size: 1.25rem;
 }
 
-.test-section {
+.youtube-section {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid #333;
 }
 
-.test-btn {
+.youtube-nav-btn {
   width: 100%;
   padding: 12px;
-  background: #17a2b8;
+  background: linear-gradient(135deg, #ff0000, #cc0000);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
 
-.test-btn:hover {
-  background: #138496;
+.youtube-nav-btn:hover {
+  background: linear-gradient(135deg, #cc0000, #ff0000);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+}
+
+.youtube-nav-btn:active {
+  transform: translateY(0);
 }
 
 .logout-section {

@@ -1,9 +1,8 @@
 
-import { Component, inject} from '@angular/core';//remove unused imports
+import { Component, inject } from '@angular/core';
 import { MusicPlayerService } from '../../../services/music-player.service';
 import { SharedModule } from '../../../shared/shared.module';
-
-
+import { PlaybackCoordinatorService } from '../../../services/playback-coordinator.service';
 
 @Component({
   selector: 'app-player-controls',
@@ -12,27 +11,24 @@ import { SharedModule } from '../../../shared/shared.module';
   styleUrl: './player-controls.component.css'
 })
 export class PlayerControlsComponent {
-  //-----Injections section-----//
+  //-----Injections-----//
   public musicService = inject(MusicPlayerService);
+  public playbackCoordinator = inject(PlaybackCoordinatorService);
 
-  //-----Methods section-----//
+  //-----Methods-----//
   togglePlayPause(): void {
-    const playing = this.musicService.isPlaying();
     this.musicService.togglePlayPause();
   }
-  goPrevious() {
-    this.musicService.previousSong();
+
+  goPrevious(): void {
+    this.playbackCoordinator.previousYouTubeSong();
   }
 
-  goNext() {
-    this.musicService.nextSong();
-  }
-  startPlayback(): void {
-    this.musicService.play();
+  goNext(): void {
+    this.playbackCoordinator.nextYouTubeSong();
   }
 
-  pausePlayback(): void {
-    this.musicService.pause();
+  onProgressBarClick(event: MouseEvent): void {
+    this.musicService.seekToFromProgressBar(event);
   }
-
 }

@@ -36,10 +36,10 @@
   </div>
 
   <div class="progress">
-    <div class="bar">
+    <div class="bar" (click)="onProgressBarClick($event)">
       <div class="fill" [style.width.%]="musicService.currentProgress()"></div>
     </div>
   </div>
 
-  <div class="time">{{ musicService.currentTrack()?.duration || '0:00' }}</div>
+  <div class="time">{{ musicService.currentTime() }} / {{ musicService.currentTrack()?.duration || '0:00' }}</div>
 </div>

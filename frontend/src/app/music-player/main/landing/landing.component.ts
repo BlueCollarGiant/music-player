@@ -23,14 +23,8 @@ export class LandingComponent {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     
-    if (token) {
-      console.log('OAuth token detected:', token);
-      console.log('Before callback - isAuthenticated:', this.authService.isAuthenticated());
-      
+    if (token) { 
       this.authService.handleOAuthCallback(token).then(() => {
-        console.log('After callback - isAuthenticated:', this.authService.isAuthenticated());
-        console.log('Username:', this.authService.username());
-        console.log('Avatar:', this.authService.avatarUrl());
 
         // Optionally auto-open hamburger to show logged-in state
         setTimeout(() => {

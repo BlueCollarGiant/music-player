@@ -35,7 +35,7 @@
 
 .song-list.large {
   min-height: 500px;
-  max-height: 70vh;
+  height: 100%;
 }
 
 /* --- Subsection: Header Section --- */
@@ -96,7 +96,6 @@
 
 .song-list.large .items {
   gap: var(--spacing-sm);
-  max-height: 400px;
   padding-right: var(--spacing-xl);
   padding-left: var(--spacing-sm);
 }
