@@ -11,7 +11,11 @@ import { CommonModule } from '@angular/common';
   styleUrl: './right-panel.component.css'
 })
 export class RightPanelComponent {
-  
+  @ViewChild('youtubeIframe', { static: false }) youtubeIframe!: ElementRef<HTMLIFrameElement>;
+  player: any;
+  currentTime: number = 0;
+  intervalId: any;
+  duration: number = 0;
   
   //-----Injections-----//
   musicService = inject(MusicPlayerService);
@@ -40,4 +44,47 @@ export class RightPanelComponent {
       this.musicService.togglePlayPause();
     }
   }
+  ngAfterViewInit() {
+    // Wait for the YouTube API to be ready
+    (window as any).onYouTubeIframeAPIReady = () => {
+      this.initPlayer();
+    };
+    // If API is already loaded
+    if ((window as any).YT && (window as any).YT.Player) {
+      this.initPlayer();
+    }
+  }
+    initPlayer() {
+    this.player = new (window as any).YT.Player(this.youtubeIframe.nativeElement, {
+      events: {
+        'onReady': this.onPlayerReady.bind(this),
+        'onStateChange': this.onPlayerStateChange.bind(this)
+      }
+    });
+    }
+    onPlayerReady(event: any) {
+      this.duration = event.target.getDuration();
+    }
+    onPlayerStateChange(event: any) {
+    if (event.data === (window as any).YT.PlayerState.PLAYING) {
+      this.startTrackingTime();
+    } else {
+      this.stopTrackingTime();
+      }
+    }
+    startTrackingTime() {
+    this.stopTrackingTime();
+    this.intervalId = setInterval(() => {
+      this.currentTime = this.player.getCurrentTime();
+      // You can emit this value or update your UI here
+    }, 500);
+  }
+
+  stopTrackingTime() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+  }
 }
+
