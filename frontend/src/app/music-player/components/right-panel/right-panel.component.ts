@@ -1,5 +1,6 @@
 import { Component, inject, computed, ElementRef, ViewChild } from '@angular/core';
 import { MusicPlayerService } from '../../../services/music-player.service';
+import { PlaybackCoordinatorService } from '../../../services/playback-coordinator.service';
 import { Song } from '../../Models/song.model';
 import { VisualizerComponent } from './visualizer-container/visualizer/visualizer.component';
 import { CommonModule } from '@angular/common';
@@ -13,12 +14,10 @@ import { CommonModule } from '@angular/common';
 export class RightPanelComponent {
   @ViewChild('youtubeIframe', { static: false }) youtubeIframe!: ElementRef<HTMLIFrameElement>;
   player: any;
-  currentTime: number = 0;
-  intervalId: any;
-  duration: number = 0;
   
   //-----Injections-----//
   musicService = inject(MusicPlayerService);
+  playbackCoordinator = inject(PlaybackCoordinatorService);
 
   //-----Computed Properties-----//
   readonly currentTrack = computed<Song | null>(() => this.musicService.currentTrack());
@@ -41,7 +40,7 @@ export class RightPanelComponent {
   //-----Methods-----//
   onThumbnailClick(): void {
     if (this.hasVideoUrl()) {
-      this.musicService.togglePlayPause();
+      this.playbackCoordinator.togglePlayPause();
     }
   }
   ngAfterViewInit() {
@@ -54,37 +53,23 @@ export class RightPanelComponent {
       this.initPlayer();
     }
   }
-    initPlayer() {
+  initPlayer() {
     this.player = new (window as any).YT.Player(this.youtubeIframe.nativeElement, {
       events: {
         'onReady': this.onPlayerReady.bind(this),
         'onStateChange': this.onPlayerStateChange.bind(this)
       }
     });
-    }
-    onPlayerReady(event: any) {
-      this.duration = event.target.getDuration();
-    }
-    onPlayerStateChange(event: any) {
-    if (event.data === (window as any).YT.PlayerState.PLAYING) {
-      this.startTrackingTime();
-    } else {
-      this.stopTrackingTime();
-      }
-    }
-    startTrackingTime() {
-    this.stopTrackingTime();
-    this.intervalId = setInterval(() => {
-      this.currentTime = this.player.getCurrentTime();
-      // You can emit this value or update your UI here
-    }, 500);
   }
 
-  stopTrackingTime() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
+  onPlayerReady(event: any) {
+    // Connect the player to the PlaybackCoordinator
+    this.playbackCoordinator.setYouTubePlayer(this.player);
+    this.playbackCoordinator.onPlayerReady(event);
+  }
+
+  onPlayerStateChange(event: any) {
+    // Let the PlaybackCoordinator handle state changes and progress tracking
+    this.playbackCoordinator.onPlayerStateChange(event);
   }
 }
-

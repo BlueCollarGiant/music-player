@@ -28,7 +28,13 @@ export class PlayerControlsComponent {
     this.playbackCoordinator.nextYouTubeSong();
   }
 
-  onProgressBarClick(event: MouseEvent): void {
-    this.musicService.seekToFromProgressBar(event);
-  }
+  /*onProgressBarClick(event: MouseEvent): void {
+    const progressBar = event.currentTarget as HTMLElement;
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percentage = (clickX / rect.width) * 100;
+    
+    const clampedPercentage = Math.max(0, Math.min(100, percentage));
+    this.playbackCoordinator.seekTo(clampedPercentage);
+  }*/
 }
