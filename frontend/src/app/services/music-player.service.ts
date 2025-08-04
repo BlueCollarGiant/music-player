@@ -4,14 +4,14 @@ import { Song } from '../music-player/Models/song.model';
 import { PlayListLogic } from './play-list-logic.service';
 
 
-export interface MusicPlatformAdapter {
+/*export interface MusicPlatformAdapter {
   play(): void;
   pause(): void;
   seekTo(percent: number): void;
   currentTime(): number;
   duration(): number;
   isPlaying(): boolean;
-}
+}*/
 
 
 @Injectable({ providedIn: 'root' })

@@ -1,4 +1,4 @@
-import { Component, inject, computed, ElementRef, ViewChild } from '@angular/core';
+import { Component, inject, computed, ElementRef, ViewChild, AfterViewInit, effect } from '@angular/core';
 import { MusicPlayerService } from '../../../services/music-player.service';
 import { PlaybackCoordinatorService } from '../../../services/playback-coordinator.service';
 import { Song } from '../../Models/song.model';
@@ -11,9 +11,8 @@ import { CommonModule } from '@angular/common';
   templateUrl: './right-panel.component.html',
   styleUrl: './right-panel.component.css'
 })
-export class RightPanelComponent {
+export class RightPanelComponent implements AfterViewInit {
   @ViewChild('youtubeIframe', { static: false }) youtubeIframe!: ElementRef<HTMLIFrameElement>;
-  player: any;
   
   //-----Injections-----//
   musicService = inject(MusicPlayerService);
@@ -37,39 +36,75 @@ export class RightPanelComponent {
     return this.musicService.getVideoEmbedUrl(track.video_url);
   });
 
+  constructor() {
+    // Watch for video changes and connect to YouTube player
+    effect(() => {
+      const track = this.currentTrack();
+      const isPlaying = this.isPlaying();
+      
+      if (track?.video_url && isPlaying) {
+        // Give the iframe time to load, then connect to it
+        setTimeout(() => this.connectToYouTubePlayer(), 1000);
+      }
+    });
+  }
+
+  ngAfterViewInit() {
+    // Initial connection attempt
+    setTimeout(() => this.connectToYouTubePlayer(), 1000);
+  }
+
+  private connectToYouTubePlayer(): void {
+    if (!this.youtubeIframe?.nativeElement) {
+      console.log('🔍 No iframe element found yet');
+      return;
+    }
+
+    const iframe = this.youtubeIframe.nativeElement;
+    const track = this.currentTrack();
+    
+    if (!track?.video_url) {
+      console.log('🔍 No video URL found');
+      return;
+    }
+
+    console.log('🎬 Connecting to YouTube iframe player');
+    
+    // Extract video ID from current track
+    const videoId = this.musicService.getYouTubeId(track.video_url);
+    if (!videoId) {
+      console.log('❌ Could not extract video ID');
+      return;
+    }
+
+    // Create a YouTube Player instance that connects to the existing iframe
+    if ((window as any).YT && (window as any).YT.Player) {
+      try {
+        const player = new (window as any).YT.Player(iframe, {
+          events: {
+            'onReady': (event: any) => {
+              console.log('🎯 YouTube player connected!');
+              this.playbackCoordinator.setYouTubePlayer(player);
+              this.playbackCoordinator.onPlayerReady(event);
+            },
+            'onStateChange': (event: any) => {
+              console.log('🎯 Player state changed');
+              this.playbackCoordinator.onPlayerStateChange(event);
+            }
+          }
+        });
+      } catch (error) {
+        console.log('⚠️ Could not connect to existing iframe:', error);
+      }
+    } else {
+      console.log('⏳ YouTube API not ready yet');
+    }
+  }
+
   //-----Methods-----//
   onThumbnailClick(): void {
     if (this.hasVideoUrl()) {
       this.playbackCoordinator.togglePlayPause();
     }
-  }
-  ngAfterViewInit() {
-    // Wait for the YouTube API to be ready
-    (window as any).onYouTubeIframeAPIReady = () => {
-      this.initPlayer();
-    };
-    // If API is already loaded
-    if ((window as any).YT && (window as any).YT.Player) {
-      this.initPlayer();
-    }
-  }
-  initPlayer() {
-    this.player = new (window as any).YT.Player(this.youtubeIframe.nativeElement, {
-      events: {
-        'onReady': this.onPlayerReady.bind(this),
-        'onStateChange': this.onPlayerStateChange.bind(this)
-      }
-    });
-  }
-
-  onPlayerReady(event: any) {
-    // Connect the player to the PlaybackCoordinator
-    this.playbackCoordinator.setYouTubePlayer(this.player);
-    this.playbackCoordinator.onPlayerReady(event);
-  }
-
-  onPlayerStateChange(event: any) {
-    // Let the PlaybackCoordinator handle state changes and progress tracking
-    this.playbackCoordinator.onPlayerStateChange(event);
   }
 }
