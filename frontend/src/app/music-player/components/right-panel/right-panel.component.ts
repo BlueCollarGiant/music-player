@@ -12,11 +12,12 @@ import { CommonModule } from '@angular/common';
   styleUrl: './right-panel.component.css'
 })
 export class RightPanelComponent implements AfterViewInit {
+  //-----View References-----//
   @ViewChild('youtubeIframe', { static: false }) youtubeIframe!: ElementRef<HTMLIFrameElement>;
   
-  //-----Injections-----//
-  musicService = inject(MusicPlayerService);
-  playbackCoordinator = inject(PlaybackCoordinatorService);
+  //-----Dependency Injection-----//
+  private readonly musicService = inject(MusicPlayerService);
+  private readonly playbackCoordinator = inject(PlaybackCoordinatorService);
 
   //-----Computed Properties-----//
   readonly currentTrack = computed<Song | null>(() => this.musicService.currentTrack());
@@ -36,72 +37,54 @@ export class RightPanelComponent implements AfterViewInit {
     return this.musicService.getVideoEmbedUrl(track.video_url);
   });
 
+  //-----Constructor-----//
   constructor() {
-    // Watch for video changes and connect to YouTube player
     effect(() => {
       const track = this.currentTrack();
       const isPlaying = this.isPlaying();
       
       if (track?.video_url && isPlaying) {
-        // Give the iframe time to load, then connect to it
         setTimeout(() => this.connectToYouTubePlayer(), 1000);
       }
     });
   }
 
-  ngAfterViewInit() {
-    // Initial connection attempt
+  //-----Lifecycle Methods-----//
+  ngAfterViewInit(): void {
     setTimeout(() => this.connectToYouTubePlayer(), 1000);
   }
 
+  //-----YouTube Player Connection-----//
   private connectToYouTubePlayer(): void {
-    if (!this.youtubeIframe?.nativeElement) {
-      console.log('🔍 No iframe element found yet');
+    if (!this.youtubeIframe?.nativeElement || !this.currentTrack()?.video_url) {
       return;
     }
 
     const iframe = this.youtubeIframe.nativeElement;
-    const track = this.currentTrack();
+    const videoId = this.musicService.getYouTubeId(this.currentTrack()!.video_url!);
     
-    if (!track?.video_url) {
-      console.log('🔍 No video URL found');
+    if (!videoId || !(window as any).YT?.Player) {
       return;
     }
 
-    console.log('🎬 Connecting to YouTube iframe player');
-    
-    // Extract video ID from current track
-    const videoId = this.musicService.getYouTubeId(track.video_url);
-    if (!videoId) {
-      console.log('❌ Could not extract video ID');
-      return;
-    }
-
-    // Create a YouTube Player instance that connects to the existing iframe
-    if ((window as any).YT && (window as any).YT.Player) {
-      try {
-        const player = new (window as any).YT.Player(iframe, {
-          events: {
-            'onReady': (event: any) => {
-              console.log('🎯 YouTube player connected!');
-              this.playbackCoordinator.setYouTubePlayer(player);
-              this.playbackCoordinator.onPlayerReady(event);
-            },
-            'onStateChange': (event: any) => {
-              console.log('🎯 Player state changed');
-              this.playbackCoordinator.onPlayerStateChange(event);
-            }
+    try {
+      const player = new (window as any).YT.Player(iframe, {
+        events: {
+          'onReady': (event: any) => {
+            this.playbackCoordinator.setYouTubePlayer(player);
+            this.playbackCoordinator.onPlayerReady(event);
+          },
+          'onStateChange': (event: any) => {
+            this.playbackCoordinator.onPlayerStateChange(event);
           }
-        });
-      } catch (error) {
-        console.log('⚠️ Could not connect to existing iframe:', error);
-      }
-    } else {
-      console.log('⏳ YouTube API not ready yet');
+        }
+      });
+    } catch (error) {
+      // Silently fail if connection unsuccessful
     }
   }
 
-  //-----Methods-----//
+  //-----Event Handlers-----//
   onThumbnailClick(): void {
     if (this.hasVideoUrl()) {
       this.playbackCoordinator.togglePlayPause();
