@@ -6,12 +6,6 @@ const LOCAL_STORAGE_KEY = 'music-player-playlist'; // local storage
 @Injectable({ providedIn: 'root' })
 export class PlayListLogic {
   //------injections area-----//
-
-  private injector = inject(Injector);
-  private get musicService(): MusicPlayerService {
-    return this.injector.get(MusicPlayerService);
-  }
-  // inject Song from musicService commenting because i keep losing song lol
   private songList = signal<Song[]>(
     this.loadFromLocalStorage() || []
   );
@@ -52,8 +46,5 @@ export class PlayListLogic {
   readonly isMedium = computed(() => this.realSongCount() > 3 && this.realSongCount() <= 8);
   readonly isLarge = computed(() => this.realSongCount() > 8);
 
-  //-----Methods go here stop leaving them everywhere -----//
-
-  // Note: Song management is now handled through playlist selection only
-  // Users cannot manually add/remove individual songs
+  
 }

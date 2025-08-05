@@ -229,10 +229,5 @@ setYouTubePlayer(player: any): void {
     return match?.[1] ?? null;
   }
 
-  //-----Cleanup-----//
-  destroy(): void {
-    this.stopTimer();
-    this.youtubePlayerSignal.set(null);
-    this.isPlayerReadySignal.set(false);
-  }
+
 }
