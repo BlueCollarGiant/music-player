@@ -17,7 +17,7 @@ export class PlayerControlsComponent {
 
   //-----Methods-----//
   togglePlayPause(): void {
-    this.musicService.togglePlayPause();
+    this.playbackCoordinator.togglePlayPause();
   }
 
   goPrevious(): void {
@@ -28,7 +28,5 @@ export class PlayerControlsComponent {
     this.playbackCoordinator.nextYouTubeSong();
   }
 
-  onProgressBarClick(event: MouseEvent): void {
-    this.musicService.seekToFromProgressBar(event);
-  }
+  
 }

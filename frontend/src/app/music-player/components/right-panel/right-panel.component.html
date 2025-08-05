@@ -3,26 +3,31 @@
   <!-- Media Container - Takes up most of the space -->
   <div class="media-container">
     @if (showVideo()) {
-      <!-- Show YouTube video when playing -->
+      <!-- YouTube Video Container -->
       <div class="video-container">
-        <iframe #youtubeIframe
-                class="youtube-player"
-                [src]="videoEmbedUrl()"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-        </iframe>
+        <!-- YouTube Player Container - YouTube API will create iframe inside this div -->
+        <div #youtubePlayer
+             class="youtube-player">
+        </div>
+        
+        <!-- Thumbnail Overlay (when video exists but not playing) -->
+        @if (showThumbnailOverlay()) {
+          <div class="thumbnail-overlay" (click)="onThumbnailClick()">
+            <img [src]="thumbnailUrl()" alt="Video Thumbnail" class="overlay-thumbnail"/>
+            <div class="play-overlay">
+              <div class="play-button">▶</div>
+            </div>
+          </div>
+        }
       </div>
-    } @else if (showThumbnail()) {
-      <!-- Show thumbnail when song is selected but not playing -->
+      
+    } @else if (showStaticThumbnail()) {
+      <!-- Static Thumbnail (no video URL) -->
       <div class="thumbnail-container" (click)="onThumbnailClick()">
-        <img class="album-art clickable-thumbnail"
+        <img class="album-art"
              [src]="thumbnailUrl()"
              [alt]="currentTrack()?.name + ' Album Art' || 'Album Art'"
              loading="eager"/>
-        <div class="play-overlay">
-          <div class="play-button">▶</div>
-        </div>
       </div>
     } @else {
       <!-- Show visualizer when no current track -->
