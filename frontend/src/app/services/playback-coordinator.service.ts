@@ -88,6 +88,13 @@ export class PlaybackCoordinatorService {
   //-----YouTube Player Setup-----//
   setYouTubePlayer(player: any): void {
     console.log('🎬 YouTube player set:', !!player);
+    
+    if (!player) {
+      // Reset ready state when clearing player
+      this.isPlayerReadySignal.set(false);
+      console.log('🔄 Player cleared - resetting ready state');
+    }
+    
     this.youtubePlayerSignal.set(player);
     // Set up the player reference in MusicPlayerService for backward compatibility
     this.musicPlayer.setYouTubePlayer(player);
