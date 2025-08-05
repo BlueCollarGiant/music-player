@@ -1,12 +1,9 @@
 import { Injectable, inject, signal, linkedSignal } from '@angular/core';
 import { MusicPlayerService } from './music-player.service';
-import { YouTubeService, YouTubePlaylistTrack } from './youtube.service';
-import { Song } from '../music-player/Models/song.model';
 
 @Injectable({ providedIn: 'root' })
 export class PlaybackCoordinatorService {
   private readonly musicPlayer = inject(MusicPlayerService);
-  private readonly youtubeService = inject(YouTubeService);
 
   //-----Core State Signals-----//
   private readonly youtubePlayerSignal = signal<any>(null);
@@ -16,18 +13,22 @@ export class PlaybackCoordinatorService {
 
   //-----Public Reactive Signals for UI-----//
   readonly currentProgress = linkedSignal(() => {
-  this.timerTick();
-  const player = this.youtubePlayerSignal();
-  const track = this.musicPlayer.currentTrack();
-  
-  if (track?.video_url && player && this.isPlayerReadySignal()) {
-    const currentTime = player.getCurrentTime();
-    const duration = player.getDuration();
-    return duration > 0 ? (currentTime / duration) * 100 : 0;
-  }
-  
-  return this.musicPlayer.currentProgress();
-});
+    this.timerTick();
+    const player = this.youtubePlayerSignal();
+    const track = this.musicPlayer.currentTrack();
+    
+    if (track?.video_url && player && this.isPlayerReadySignal()) {
+      try {
+        const currentTime = player.getCurrentTime();
+        const duration = player.getDuration();
+        return duration > 0 ? (currentTime / duration) * 100 : 0;
+      } catch {
+        return 0;
+      }
+    }
+    
+    return this.musicPlayer.currentProgress();
+  });
 
   readonly currentTime = linkedSignal(() => {
     this.timerTick(); // Dependency to trigger updates
@@ -60,28 +61,15 @@ export class PlaybackCoordinatorService {
     return track?.duration || '0:00';
   });
 
-  // Helper to convert YouTubePlaylistTrack to Song
-  private toSong(track: YouTubePlaylistTrack): Song {
-    return {
-      id: track.id,
-      name: track.title,
-      artist: track.artist,
-      duration: track.duration,
-      video_url: track.video_url,
-      thumbnail_url: track.thumbnail_url,
-      isPlaceholder: false,
-    };
-  }
-
   //-----YouTube Player Setup-----//
-setYouTubePlayer(player: any): void {
-  if (!player) {
-    this.isPlayerReadySignal.set(false);
+  setYouTubePlayer(player: any): void {
+    if (!player) {
+      this.isPlayerReadySignal.set(false);
+    }
+    
+    this.youtubePlayerSignal.set(player);
+    this.musicPlayer.setYouTubePlayer(player);
   }
-  
-  this.youtubePlayerSignal.set(player);
-  this.musicPlayer.setYouTubePlayer(player);
-}
 
   onPlayerReady(event: any): void {
     this.isPlayerReadySignal.set(true);
@@ -105,19 +93,21 @@ setYouTubePlayer(player: any): void {
       case YT.PlayerState.ENDED:
         this.musicPlayer.setPlayingState(false);
         this.stopTimer();
-        this.nextYouTubeSong();
+        // Auto-advance to next track
+        this.musicPlayer.goToNextTrack();
         break;
     }
   }
 
   //-----Timer Management-----//
- private startTimer(): void {
-  this.stopTimer();
-  
-  this.timerInterval = window.setInterval(() => {
-    this.timerTick.update(tick => tick + 1);
-  }, 500);
-}
+  private startTimer(): void {
+    this.stopTimer();
+    
+    this.timerInterval = window.setInterval(() => {
+      this.timerTick.update(tick => tick + 1);
+    }, 500);
+  }
+
   private stopTimer(): void {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
@@ -170,50 +160,15 @@ setYouTubePlayer(player: any): void {
     }
   }
 
-
-  private formatTime(seconds: number): string {
-    if (!seconds || isNaN(seconds) || seconds < 0) {
-      return '0:00';
-    }
-    
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }
-
-  // Navigation for YouTube playlists
-  nextYouTubeSong(): void {
-    const tracks = this.youtubeService.playlistTracks();
-    const current = this.musicPlayer.currentTrack();
-    if (!current) return;
-    const currentIndex = tracks.findIndex(t => t.id === current.id);
-    if (currentIndex !== -1 && currentIndex < tracks.length - 1) {
-      const nextTrack = tracks[currentIndex + 1];
-      this.musicPlayer.selectTrack(this.toSong(nextTrack));
-      this.loadYouTubeVideo(nextTrack.video_url);
-    }
-  }
-
-  previousYouTubeSong(): void {
-    const tracks = this.youtubeService.playlistTracks();
-    const current = this.musicPlayer.currentTrack();
-    if (!current) return;
-    const currentIndex = tracks.findIndex(t => t.id === current.id);
-    if (currentIndex > 0) {
-      const prevTrack = tracks[currentIndex - 1];
-      this.musicPlayer.selectTrack(this.toSong(prevTrack));
-      this.loadYouTubeVideo(prevTrack.video_url);
-    }
-  }
-
-  //-----Video Loading-----//
-  private loadYouTubeVideo(videoUrl: string): void {
+  //-----Video Loading for Track Changes-----//
+  loadVideoForCurrentTrack(): void {
     const player = this.youtubePlayerSignal();
     const isReady = this.isPlayerReadySignal();
+    const track = this.musicPlayer.currentTrack();
     
-    if (!player || !isReady) return;
+    if (!player || !isReady || !track?.video_url) return;
 
-    const videoId = this.extractVideoId(videoUrl);
+    const videoId = this.musicPlayer.getYouTubeId(track.video_url);
     if (videoId) {
       try {
         player.loadVideoById(videoId);
@@ -223,11 +178,14 @@ setYouTubePlayer(player: any): void {
     }
   }
 
-  private extractVideoId(url: string): string | null {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(regex);
-    return match?.[1] ?? null;
+  //-----Private Helper Methods-----//
+  private formatTime(seconds: number): string {
+    if (!seconds || isNaN(seconds) || seconds < 0) {
+      return '0:00';
+    }
+    
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
-
-
 }

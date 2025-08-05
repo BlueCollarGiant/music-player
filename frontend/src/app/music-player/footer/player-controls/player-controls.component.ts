@@ -21,12 +21,10 @@ export class PlayerControlsComponent {
   }
 
   goPrevious(): void {
-    this.playbackCoordinator.previousYouTubeSong();
+    this.musicService.goToPreviousTrack();
   }
 
   goNext(): void {
-    this.playbackCoordinator.nextYouTubeSong();
+    this.musicService.goToNextTrack();
   }
-
-  
 }

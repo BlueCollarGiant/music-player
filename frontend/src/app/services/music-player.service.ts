@@ -1,28 +1,16 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Song } from '../music-player/Models/song.model';
-import { PlayListLogic } from './play-list-logic.service';
-
-
-/*export interface MusicPlatformAdapter {
-  play(): void;
-  pause(): void;
-  seekTo(percent: number): void;
-  currentTime(): number;
-  duration(): number;
-  isPlaying(): boolean;
-}*/
-
+import { YouTubeService, YouTubePlaylistTrack } from './youtube.service';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
   //-----Dependency Injection-----//
   private readonly sanitizer = inject(DomSanitizer);
-  private readonly playlist = inject(PlayListLogic);
+  private readonly youtubeService = inject(YouTubeService);
 
   //-----Private Properties-----//
   private youtubePlayer: any = null;
-  private intervalRef: number | null = null;
 
   //-----Navigation State-----//
   readonly activeTab = signal<string>('Songs');
@@ -32,7 +20,7 @@ export class MusicPlayerService {
   readonly isPlaying = signal<boolean>(false);
   readonly currentProgress = signal<number>(0);
   readonly currentTime = signal<string>('0:00');
-  readonly currentTrack = signal<Song | null>(this.playlist.displaySongList()[0] ?? null);
+  readonly currentTrack = signal<Song | null>(null);
 
   //-----Audio Visualizer-----//
   readonly audioBars = signal<number[]>(
@@ -42,6 +30,47 @@ export class MusicPlayerService {
   //-----Navigation Methods-----//
   setActiveTab(tab: string): void {
     this.activeTab.set(tab);
+  }
+
+  //-----Unified Track Navigation-----//
+  goToNextTrack(): void {
+    const tracks = this.youtubeService.playlistTracks();
+    const current = this.currentTrack();
+    if (!current || tracks.length === 0) return;
+
+    const currentIndex = tracks.findIndex(t => t.id === current.id);
+    const nextIndex = currentIndex !== -1 ? (currentIndex + 1) % tracks.length : 0;
+    
+    if (nextIndex < tracks.length) {
+      const nextTrack = tracks[nextIndex];
+      this.selectTrack(this.convertYouTubeTrackToSong(nextTrack));
+    }
+  }
+
+  goToPreviousTrack(): void {
+    const tracks = this.youtubeService.playlistTracks();
+    const current = this.currentTrack();
+    if (!current || tracks.length === 0) return;
+
+    const currentIndex = tracks.findIndex(t => t.id === current.id);
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : tracks.length - 1;
+    
+    if (prevIndex >= 0) {
+      const prevTrack = tracks[prevIndex];
+      this.selectTrack(this.convertYouTubeTrackToSong(prevTrack));
+    }
+  }
+
+  private convertYouTubeTrackToSong(track: YouTubePlaylistTrack): Song {
+    return {
+      id: track.id,
+      name: track.title,
+      artist: track.artist,
+      duration: track.duration,
+      video_url: track.video_url,
+      thumbnail_url: track.thumbnail_url,
+      isPlaceholder: false,
+    };
   }
 
   //-----Playback Control Methods-----//
@@ -72,101 +101,12 @@ export class MusicPlayerService {
     }
   }
 
-  //-----Track Navigation Methods-----//
-  previousSong(): void {
-    const tracks = this.playlist.displaySongList().filter(song => !song.isPlaceholder);
-    const current = this.currentTrack();
-
-    if (!current) return;
-
-    const currentIndex = tracks.findIndex(song => song.id === current.id);
-    let prevIndex = currentIndex - 1;
-
-    if (prevIndex < 0) {
-      prevIndex = tracks.length - 1;
-    }
-
-    const prevSong = tracks[prevIndex];
-    if (prevSong) {
-      this.currentTrack.set(prevSong);
-      this.currentProgress.set(0);
-      this.currentTime.set('0:00');
-      
-      if (this.youtubePlayer) {
-        this.youtubePlayer.stopVideo();
-      }
-      
-      this.isPlaying.set(false);
-    }
-  }
-
-
-nextSong(): void {
-  
-  
-  // Debug the playlist state
-  const allSongs = this.playlist.displaySongList();
-  
-  
-  const tracks = allSongs.filter(song => !song.isPlaceholder);
-  
-  
-  if (tracks.length === 0) {
-    console.log('No tracks available - playlist might be empty or all placeholders');
-    return;
-  }
-  
-  const current = this.currentTrack();
-  
-  
-  let nextIndex = 0;
-  if (current) {
-    const currentIndex = tracks.findIndex(song => song.id === current.id);
-    
-    if (currentIndex !== -1) {
-      nextIndex = (currentIndex + 1) % tracks.length;
-    }
-  }
-  
-  
-  const nextSong = tracks[nextIndex];
- 
-  
-  if (!nextSong?.video_url) {
-    console.log('No video URL found');
-    return;
-  }
-
-  this.currentTrack.set(nextSong);
-  console.log('Updated current track');
-  
-  if (this.youtubePlayer) {
-    console.log('YouTube player exists, extracting video ID');
-    const videoId = this.extractVideoId(nextSong.video_url);
-    console.log('Video ID:', videoId);
-    
-    if (videoId) {
-      this.youtubePlayer.stopVideo();
-      this.youtubePlayer.loadVideoById(videoId);
-      this.youtubePlayer.playVideo();
-      console.log('Started playing new video');
-    }
-  } else {
-    console.log('No YouTube player found!');
-  }
-  
-  this.isPlaying.set(true);
-}
-  private extractVideoId(url: string): string | null {
-  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = url.match(regex);
-  return match?.[1] ?? null;
-}
-  //-----YouTube Helper Methods-----//
+  //-----YouTube Helper Methods (Unified)-----//
   getYouTubeId(url: string): string | null {
     if (!url) return null;
-    const idMatch = url.match(/v=([^&]+)/) || url.match(/youtu\.be\/([^?&]+)/);
-    return idMatch ? idMatch[1] : null;
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match?.[1] ?? null;
   }
 
   hasYouTubeVideo(url: string | undefined): boolean {
@@ -238,15 +178,6 @@ nextSong(): void {
   }
 
   //-----Private Helper Methods-----//
-  
-
-  
-
-  private durationToSeconds(duration: string): number {
-    const [h, m, s] = duration.split(':').map(n => parseInt(n, 10) || 0);
-    return h * 3600 + m * 60 + s;
-  }
-
   private formatTime(seconds: number): string {
     if (!seconds || isNaN(seconds) || seconds < 0) {
       return '0:00';
