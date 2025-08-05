@@ -53,19 +53,11 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       const track = this.currentTrack();
       const trackId = track?.id || null;
       
-      console.log('🔍 Effect triggered:', { 
-        newTrackId: trackId, 
-        previousTrackId: this.previousTrackId,
-        willDestroy: trackId !== this.previousTrackId 
-      });
-      
       // Only recreate player when track actually changes
       if (trackId !== this.previousTrackId) {
-        console.log('💥 Destroying player for track change');
         this.destroyCurrentPlayer();
         
         if (track?.video_url) {
-          console.log('🎬 Creating new player for track:', track.name);
           setTimeout(() => this.createYouTubePlayer(), 500);
         }
         
@@ -78,74 +70,41 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     // Initial player creation if track already selected
     const currentTrack = this.currentTrack();
     if (currentTrack?.video_url) {
-      console.log('🎬 Initial player creation for:', currentTrack.name);
       this.previousTrackId = currentTrack.id;
       setTimeout(() => this.createYouTubePlayer(), 500);
     }
   }
 
   private createYouTubePlayer(): void {
-    console.log('🔍 Attempting to create YouTube player...');
-    
-    if (!this.youtubePlayer?.nativeElement) {
-      console.log('❌ No div element found - div may not be in DOM yet');
-      return;
-    }
-
-    const track = this.currentTrack();
-    if (!track?.video_url) {
-      console.log('❌ No video URL found for current track');
-      return;
-    }
-
-    const playerDiv = this.youtubePlayer.nativeElement;
-    const videoId = this.musicService.getYouTubeId(track.video_url);
-    
-    if (!videoId) {
-      console.log('❌ Could not extract video ID from:', track.video_url);
-      return;
-    }
-    
-    if (!(window as any).YT?.Player) {
-      console.log('❌ YouTube API not ready yet');
-      return;
-    }
-
-    try {
-      console.log('🎬 Creating YouTube player (NOT auto-playing)');
-      
-      // Create player WITHOUT autoplay
-      this.currentPlayer = new (window as any).YT.Player(playerDiv, {
-        videoId: videoId,
-        playerVars: {
-          autoplay: 0, // Key fix: don't autoplay
-          controls: 0, // Hide YouTube controls
-          rel: 0,
-          modestbranding: 1
-        },
-        events: {
-          'onReady': (event: any) => {
-            console.log('🎯 YouTube player ready (but not playing)');
-            this.playbackCoordinator.setYouTubePlayer(this.currentPlayer);
-            this.playbackCoordinator.onPlayerReady(event);
-            // DON'T start playing here
-          },
-          'onStateChange': (event: any) => {
-            console.log('� Player state changed:', event.data);
-            this.playbackCoordinator.onPlayerStateChange(event);
-          }
-        }
-      });
-    } catch (error) {
-      console.log('⚠️ Could not create YouTube player:', error);
-    }
+  const track = this.currentTrack();
+  const videoId = track?.video_url ? this.musicService.getYouTubeId(track.video_url) : null;
+  
+  if (!this.youtubePlayer?.nativeElement || !videoId || !(window as any).YT?.Player) {
+    return;
   }
 
+  this.currentPlayer = new (window as any).YT.Player(this.youtubePlayer.nativeElement, {
+    videoId,
+    playerVars: {
+      autoplay: 0,
+      controls: 0,
+      rel: 0,
+      modestbranding: 1
+    },
+    events: {
+      onReady: (event: any) => {
+        this.playbackCoordinator.setYouTubePlayer(this.currentPlayer);
+        this.playbackCoordinator.onPlayerReady(event);
+      },
+      onStateChange: (event: any) => {
+        this.playbackCoordinator.onPlayerStateChange(event);
+      }
+    }
+  });
+}
   private destroyCurrentPlayer(): void {
     if (this.currentPlayer) {
       try {
-        console.log('🗑️ Destroying current YouTube player');
-        
         // Clear the player reference in the service first
         this.playbackCoordinator.setYouTubePlayer(null);
         
@@ -159,7 +118,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
           this.currentPlayer.destroy();
         }
       } catch (error) {
-        console.log('⚠️ Error destroying player:', error);
+        // Silent fail
       } finally {
         this.currentPlayer = null;
       }
@@ -170,13 +129,11 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   onThumbnailClick(): void {
     // This should trigger play, not just toggle
     if (this.hasVideoUrl() && !this.isPlaying()) {
-      console.log('🎯 Thumbnail clicked - starting playback');
       this.playbackCoordinator.togglePlayPause(); // This will start playing
     }
   }
 
   ngOnDestroy() {
-    console.log('🗑️ Component destroying - cleaning up player');
     this.destroyCurrentPlayer();
   }
 }

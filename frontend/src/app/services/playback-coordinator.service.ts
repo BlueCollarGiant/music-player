@@ -16,30 +16,18 @@ export class PlaybackCoordinatorService {
 
   //-----Public Reactive Signals for UI-----//
   readonly currentProgress = linkedSignal(() => {
-    this.timerTick(); // Dependency to trigger updates
-    const player = this.youtubePlayerSignal();
-    const track = this.musicPlayer.currentTrack();
-    
-    console.log('📊 Progress calculation:', {
-      hasTrack: !!track?.video_url,
-      hasPlayer: !!player,
-      isReady: this.isPlayerReadySignal()
-    });
-    
-    if (track?.video_url && player && this.isPlayerReadySignal()) {
-      try {
-        const currentTime = player.getCurrentTime();
-        const duration = player.getDuration();
-        const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-        console.log('📈 YouTube Progress:', progress.toFixed(1) + '%', `(${currentTime.toFixed(1)}s / ${duration.toFixed(1)}s)`);
-        return progress;
-      } catch (error) {
-        console.error('❌ YouTube API Error:', error);
-        return 0;
-      }
-    }
-    return this.musicPlayer.currentProgress();
-  });
+  this.timerTick();
+  const player = this.youtubePlayerSignal();
+  const track = this.musicPlayer.currentTrack();
+  
+  if (track?.video_url && player && this.isPlayerReadySignal()) {
+    const currentTime = player.getCurrentTime();
+    const duration = player.getDuration();
+    return duration > 0 ? (currentTime / duration) * 100 : 0;
+  }
+  
+  return this.musicPlayer.currentProgress();
+});
 
   readonly currentTime = linkedSignal(() => {
     this.timerTick(); // Dependency to trigger updates
@@ -86,22 +74,16 @@ export class PlaybackCoordinatorService {
   }
 
   //-----YouTube Player Setup-----//
-  setYouTubePlayer(player: any): void {
-    console.log('🎬 YouTube player set:', !!player);
-    
-    if (!player) {
-      // Reset ready state when clearing player
-      this.isPlayerReadySignal.set(false);
-      console.log('🔄 Player cleared - resetting ready state');
-    }
-    
-    this.youtubePlayerSignal.set(player);
-    // Set up the player reference in MusicPlayerService for backward compatibility
-    this.musicPlayer.setYouTubePlayer(player);
+setYouTubePlayer(player: any): void {
+  if (!player) {
+    this.isPlayerReadySignal.set(false);
   }
+  
+  this.youtubePlayerSignal.set(player);
+  this.musicPlayer.setYouTubePlayer(player);
+}
 
   onPlayerReady(event: any): void {
-    console.log('✅ YouTube player ready');
     this.isPlayerReadySignal.set(true);
     const duration = event.target.getDuration();
     this.musicPlayer.updateDuration(duration);
@@ -109,22 +91,18 @@ export class PlaybackCoordinatorService {
 
   onPlayerStateChange(event: any): void {
     const YT = (window as any).YT;
-    console.log('🎮 Player state change:', event.data);
     if (!YT) return;
 
     switch (event.data) {
       case YT.PlayerState.PLAYING:
-        console.log('▶️ Video playing - starting timer');
         this.musicPlayer.setPlayingState(true);
         this.startTimer();
         break;
       case YT.PlayerState.PAUSED:
-        console.log('⏸️ Video paused - stopping timer');
         this.musicPlayer.setPlayingState(false);
         this.stopTimer();
         break;
       case YT.PlayerState.ENDED:
-        console.log('⏹️ Video ended - stopping timer');
         this.musicPlayer.setPlayingState(false);
         this.stopTimer();
         this.nextYouTubeSong();
@@ -133,19 +111,14 @@ export class PlaybackCoordinatorService {
   }
 
   //-----Timer Management-----//
-  private startTimer(): void {
-    console.log('🎵 Timer started');
-    this.stopTimer();
-    
-    this.timerInterval = window.setInterval(() => {
-      // Increment timer to trigger linkedSignal updates
-      this.timerTick.update(tick => tick + 1);
-      console.log('⏰ Timer tick:', this.timerTick());
-    }, 500); // Update every 500ms for smooth progress
-  }
-
+ private startTimer(): void {
+  this.stopTimer();
+  
+  this.timerInterval = window.setInterval(() => {
+    this.timerTick.update(tick => tick + 1);
+  }, 500);
+}
   private stopTimer(): void {
-    console.log('⏹️ Timer stopped');
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
