@@ -84,16 +84,6 @@ export class MusicPlayerService {
     this.currentProgress.set(Math.max(0, Math.min(100, percentage)));
   }
 
-  seekToFromProgressBar(event: MouseEvent): void {
-    const progressBar = event.currentTarget as HTMLElement;
-    const rect = progressBar.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const percentage = (clickX / rect.width) * 100;
-    
-    const clampedPercentage = Math.max(0, Math.min(100, percentage));
-    this.seekTo(clampedPercentage);
-  }
-
   selectTrack(song: Song): void {
     if (!song.isPlaceholder) {
       this.currentTrack.set(song);

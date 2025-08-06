@@ -27,4 +27,13 @@ export class PlayerControlsComponent {
   goNext(): void {
     this.musicService.goToNextTrack();
   }
+
+  onProgressBarClick(event: MouseEvent): void {
+    const progressBar = event.currentTarget as HTMLElement;
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
+    
+    this.playbackCoordinator.seekTo(percentage);
+  }
 }
