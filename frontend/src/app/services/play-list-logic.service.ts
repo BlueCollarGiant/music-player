@@ -1,20 +1,16 @@
-import { computed, inject, Injectable, Injector, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Song } from '../music-player/Models/song.model';
-import { MusicPlayerService } from './music-player.service';
 
-const LOCAL_STORAGE_KEY = 'music-player-playlist'; // local storage
+const LOCAL_STORAGE_KEY = 'music-player-playlist';
+
 @Injectable({ providedIn: 'root' })
 export class PlayListLogic {
-  //------injections area-----//
+  //-----Private State-----//
   private songList = signal<Song[]>(
     this.loadFromLocalStorage() || []
   );
 
-  //-----Local storage setup area---//
-
-  
-
-  // local storage Load on startup
+  //-----Private Methods-----//
   private loadFromLocalStorage(): Song[] | null {
     if (typeof window === 'undefined') return null;
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -29,7 +25,7 @@ export class PlayListLogic {
     return null;
   }
 
-  //-----Display Logic -----//
+  //-----Display Logic-----//
 
   // Display songs without placeholders - users can only view their playlists
   readonly displaySongList = computed(() => {
@@ -45,6 +41,4 @@ export class PlayListLogic {
   readonly isSmall = computed(() => this.realSongCount() > 0 && this.realSongCount() <= 3);
   readonly isMedium = computed(() => this.realSongCount() > 3 && this.realSongCount() <= 8);
   readonly isLarge = computed(() => this.realSongCount() > 8);
-
-  
 }

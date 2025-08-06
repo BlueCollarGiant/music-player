@@ -103,7 +103,6 @@ export class NavBarComponent {
 
   openManualLogin() {
     // Open manual login/signup modal for users without Gmail
-    console.log('Opening manual login/signup modal...');
     // For now, just show an alert - you can implement a modal later
     alert('Manual login/signup form coming soon! For now, please use Google login.');
     this.closeMobileMenu();
@@ -155,7 +154,7 @@ export class NavBarComponent {
     if (confirmed) {
       try {
         await this.authService.disconnectPlatform(platform);
-        console.log(`Successfully disconnected from ${platform}`);
+        alert(`Successfully disconnected from ${platform}!`);
       } catch (error) {
         console.error(`Failed to disconnect from ${platform}:`, error);
         alert(`Failed to disconnect from ${platform}. Please try again.`);
@@ -181,7 +180,6 @@ export class NavBarComponent {
     }
 
     // Auto-load YouTube playlists when navigating to YouTube
-    console.log('🎵 Auto-loading YouTube playlists...');
     this.youtubeService.loadPlaylists();
 
     this.router.navigate(['/youtube']);
@@ -192,7 +190,6 @@ export class NavBarComponent {
   handleYouTubeClick() {
     if (this.isPlatformConnected('youtube')) {
       // User is connected, auto-load playlists
-      console.log('🎵 YouTube connected, auto-loading playlists...');
       this.youtubeService.loadPlaylists();
       this.goToYouTube();
     } else {
