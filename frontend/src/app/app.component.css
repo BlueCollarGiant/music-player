@@ -13,9 +13,13 @@
 .footer-container {
   margin-top: auto;
   padding: 0.5rem; /* Match youtube-container padding */
+  background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(20,20,20,0.6) 100%);
+  border-radius: 1rem;
 }
 
 .footer-container app-player-controls {
   width: 100%;
-  padding: 1rem; /* Match content padding */
+  /* padding: 1rem; /* Match content padding */
+  background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(20,20,20,0.6) 100%);
+  border-radius: 1rem;
 }

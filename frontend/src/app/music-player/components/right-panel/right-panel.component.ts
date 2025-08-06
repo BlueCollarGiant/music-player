@@ -85,6 +85,8 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
   this.currentPlayer = new (window as any).YT.Player(this.youtubePlayer.nativeElement, {
     videoId,
+    width: '100%',
+    height: '100%',
     playerVars: {
       autoplay: 0,
       controls: 0,
@@ -95,6 +97,9 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       onReady: (event: any) => {
         this.playbackCoordinator.setYouTubePlayer(this.currentPlayer);
         this.playbackCoordinator.onPlayerReady(event);
+
+        //force player resize
+        this.forcePlayerResize();
       },
       onStateChange: (event: any) => {
         this.playbackCoordinator.onPlayerStateChange(event);
@@ -102,7 +107,32 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     }
   });
 }
-  private destroyCurrentPlayer(): void {
+  
+private forcePlayerResize(): void {
+  if (this.currentPlayer && this.youtubePlayer) {
+    //get the container dimensions
+    const container = this.youtubePlayer.nativeElement;
+    //const rect = container.getBoundingClientRect();
+
+    // Force the YouTube player to resize
+    //if (this.currentPlayer.setSize) {
+      //this.currentPlayer.setSize(rect.width, rect.height);
+    //}
+    
+    // Also force the iframe directly
+    const iframe = container.querySelector('iframe');
+    if (iframe) {
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.position = '';
+      iframe.style.top = '';
+      iframe.style.left = '';
+    }
+  }
+}
+
+
+private destroyCurrentPlayer(): void {
     if (this.currentPlayer) {
       try {
         // Clear the player reference in the service first

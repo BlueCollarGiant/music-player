@@ -36,7 +36,7 @@
   </div>
 
   <div class="progress">
-    <div class="bar" >
+    <div class="bar" (click)="onProgressBarClick($event)" style="cursor: pointer;">
       <div class="fill" [style.width.%]="playbackCoordinator.currentProgress()"></div>
     </div>
   </div>
