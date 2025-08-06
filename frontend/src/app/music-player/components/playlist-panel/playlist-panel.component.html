@@ -39,7 +39,12 @@
            (click)="selectSong(song)"
            [class.clickable]="!song.isPlaceholder">
         <div class="info">
-          <div class="thumbnail"></div>
+          <div class="thumbnail">
+            <!--youtube thumbnail-->
+            @if (song.video_url && song.id !== musicService.currentTrack()?.id) {
+              <img src="app/assets/images/yt_icon_red_digital.png" alt="YouTube Icon" class="youtube-icon"/>
+            }
+          </div>
           <span>{{ song.name }}</span>
         </div>
       </div>

@@ -50,12 +50,38 @@
   background-color: var(--color-primary);
   border-radius: var(--border-radius);
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .item.active .thumbnail {
   background-color: var(--color-primary-dark);
 }
+/* YouTube icon styling */
+.youtube-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  object-fit: contain;
+  pointer-events: none;
+  opacity: 0.9;
+}
 
+/* Responsive YouTube icon sizing */
+.song-list.small .youtube-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.song-list.medium .youtube-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.song-list.large .youtube-icon {
+  width: 1rem;
+  height: 1rem;
+}
 /* --- Subsection: Song Info Text --- */
 .item .info {
   display: flex;
