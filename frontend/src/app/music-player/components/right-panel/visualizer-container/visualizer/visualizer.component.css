@@ -18,7 +18,17 @@
   width: 4px;
   height: 65%;
   margin: 0 1px;
-  background: linear-gradient(to bottom, #3b82f6, #7e22ce);
+   background: linear-gradient(270deg,
+    #08485c,  /* Flipped Coral */
+    #001c5c,  /* Flipped Yellow */
+    #1c0835,  /* Flipped Mint */
+    #481c08,  /* Flipped Sky */
+    #373a08,  /* Flipped Lavender */
+    #1c3508,  /* Flipped Pale Purple */
+    #084826,  /* Flipped Pink Blush */
+    #08485c   /* Loop back */
+  );
+  background-size: 1800% 1800%;
   border-radius: 9999px;
   transform-origin: center center; /* 🔥 Grow/shrink from the center */
   animation: none;
@@ -26,9 +36,10 @@
 }
 
 
-
 .bar.playing {
-  animation-name: wave;
+  animation:
+    wave 1.2s ease-in-out infinite alternate,
+    lofi-rainbow-bg 18s linear infinite;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   animation-direction: alternate;
@@ -50,4 +61,10 @@
     transform: scaleY(0.2);
     opacity: 0.5;
   }
+  
+}
+@keyframes lofi-rainbow-bg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
