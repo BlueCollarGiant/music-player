@@ -7,11 +7,12 @@
   justify-content: space-between;
   border: 2px solid var(--color-border);
   align-items: center;
-  border-radius: 5px; /* TODO: Standardize with CSS variables */
+  border-radius: 5px; 
   padding: var(--spacing-md);
   min-height: 4rem;
   box-sizing: border-box;
   transition: var(--transition);
+  
   margin: 0;
 }
 
@@ -45,9 +46,10 @@
 /* --- Subsection: Thumbnail --- */
 .thumbnail {
   position: relative;
-  width: 2.5rem;
-  height: 2.5rem;
-  background-color: var(--color-primary);
+  width: 2.5rem;   
+  height: 2.5rem;  
+  background: #181826;
+  
   border-radius: var(--border-radius);
   overflow: hidden;
   display: flex;
@@ -55,33 +57,36 @@
   justify-content: center;
 }
 
+.youtube-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
 .item.active .thumbnail {
-  background-color: var(--color-primary-dark);
+  background: linear-gradient(270deg,
+    #f7b7a3,  /* Soft Coral */
+    #ffe3a3,  /* Pastel Yellow */
+    #e3f7ca,  /* Mint */
+    #b7e3f7,  /* Sky Blue */
+    #c8c5f7,  /* Lavender */
+    #e3caf7,  /* Pale Purple */
+    #f7b7d9,  /* Pink Blush */
+    #f7b7a3   /* Loop back */
+  );
+  background-size: 1800% 1800%;
+  animation: rainbow-bg 18s ease infinite;
+}
+
+@keyframes rainbow-bg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 /* YouTube icon styling */
-.youtube-icon {
-  width: 1.2rem;
-  height: 1.2rem;
-  object-fit: contain;
-  pointer-events: none;
-  opacity: 0.9;
-}
 
-/* Responsive YouTube icon sizing */
-.song-list.small .youtube-icon {
-  width: 1.4rem;
-  height: 1.4rem;
-}
 
-.song-list.medium .youtube-icon {
-  width: 1.2rem;
-  height: 1.2rem;
-}
-
-.song-list.large .youtube-icon {
-  width: 1rem;
-  height: 1rem;
-}
 /* --- Subsection: Song Info Text --- */
 .item .info {
   display: flex;
