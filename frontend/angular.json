@@ -65,6 +65,9 @@
             "development": {
               "buildTarget": "class-project:build:development",
               "proxyConfig": "proxy.conf.json"
+            },
+            "render": {
+              "buildTarget": "class-project:build:render"
             }
           },
           "defaultConfiguration": "development"
