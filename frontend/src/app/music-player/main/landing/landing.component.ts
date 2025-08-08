@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild, inject, PLATFORM_ID } from '@angular/
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
-import { environment } from '../../../../environments/environment.render';
+import { environment } from '../../../../environments/environment';
 
 
 
