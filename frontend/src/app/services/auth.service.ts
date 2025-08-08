@@ -202,7 +202,7 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('pre_auth_url', '/landing');
     }
-    window.location.href = '/auth/google_oauth2';
+  window.location.href = `${environment.apiUrl}/auth/google_oauth2`;
   }
 
   public loginWithYouTube(): void {
@@ -210,7 +210,7 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('pre_auth_url', '/landing');
     }
-    window.location.href = '/auth/youtube';
+  window.location.href = `${environment.apiUrl}/auth/youtube`;
   }
 
   // Manual Authentication Methods (for users without Gmail)
@@ -327,7 +327,7 @@ export class AuthService {
       console.error('User must be logged in to connect platforms');
       return;
     }
-    window.location.href = '/auth/youtube';
+  window.location.href = `${environment.apiUrl}/auth/youtube`;
   }
 
   public toggleMobileMenu(): void {
