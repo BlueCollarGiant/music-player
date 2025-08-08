@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild, inject, PLATFORM_ID } from '@angular/
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 
 
@@ -55,6 +56,6 @@ export class LandingComponent {
   }
 
   loginWithYouTube() {
-    window.location.href = 'http://localhost:3000/auth/youtube'; // or whatever route you have
+    window.location.href = `${environment.apiUrl}/auth/youtube`; // or whatever route you have
   }
 }

@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { Song } from '../music-player/Models/song.model';
+import { environment } from '../../environments/environment';
 
 export interface YouTubePlaylist {
   id: string;
@@ -27,7 +28,7 @@ export interface YouTubePlaylistTrack {
   providedIn: 'root'
 })
 export class YouTubeService {
-  private readonly apiUrl = 'http://localhost:3000/api/youtube';
+  private readonly apiUrl = `${environment.apiUrl}/api/youtube`;
   private readonly platformId = inject(PLATFORM_ID);
 
   public readonly playlists = signal<YouTubePlaylist[]>([]);

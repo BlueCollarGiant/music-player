@@ -77,7 +77,7 @@ class SessionsController < ApplicationController
   def failure
     error_msg = params[:message] || 'unknown_error'
     Rails.logger.error "OAuth failure: #{error_msg}"
-    redirect_to "http://localhost:4200/landing?error=oauth_failure&details=#{error_msg}"
+  redirect_to "#{frontend_base_url}/landing?error=oauth_failure&details=#{error_msg}", allow_other_host: true
   end
 
   private
