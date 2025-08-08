@@ -108,7 +108,6 @@ export class AuthService {
       // Get current user from a simple endpoint that just validates the token
       const userResponse = await fetch(`${environment.apiUrl}/api/current_user`, {
         headers: this.getAuthHeaders(token),
-        credentials: 'include'
       });
 
       if (!userResponse.ok) {
@@ -153,7 +152,7 @@ export class AuthService {
       // First get the current user to find their ID
       const userResponse = await fetch(`${environment.apiUrl}/api/current_user`, {
         headers: this.getAuthHeaders(authToken),
-        credentials: 'include'
+        
       });
 
       if (userResponse.ok) {
@@ -163,7 +162,7 @@ export class AuthService {
         // Now get the user's profile using their ID
         const profileResponse = await fetch(`${environment.apiUrl}/user_profiles/${userId}`, {
           headers: this.getAuthHeaders(authToken),
-          credentials: 'include'
+          
         });
 
         if (profileResponse.ok) {
@@ -184,7 +183,7 @@ export class AuthService {
     try {
       const response = await fetch(`${environment.apiUrl}/user_profiles/platform_connections`, {
         headers: this.getAuthHeaders(authToken),
-        credentials: 'include'
+        
       });
 
       if (response.ok) {
@@ -228,7 +227,7 @@ export class AuthService {
           email: email,
           password: password
         }),
-        credentials: 'include'
+        
       });
 
       if (response.ok) {
@@ -266,7 +265,7 @@ export class AuthService {
             username: username || email.split('@')[0]
           }
         }),
-        credentials: 'include'
+        
       });
 
       if (response.ok) {
@@ -305,7 +304,7 @@ export class AuthService {
       // Check if the user's Google OAuth token has YouTube scope
       const response = await fetch(`${environment.apiUrl}/api/youtube/check_access`, {
         headers: this.getAuthHeaders(token),
-        credentials: 'include'
+        
       });
 
       if (response.ok) {
@@ -362,7 +361,7 @@ export class AuthService {
               'Content-Type': 'application/json',
               'Accept': 'application/json'
             },
-            credentials: 'include'
+            
           });
           break;
         
@@ -405,7 +404,7 @@ export class AuthService {
         await fetch(`${environment.apiUrl}/logout`, {
           method: 'DELETE',
           headers: this.getAuthHeaders(token),
-          credentials: 'include'
+          
         });
       }
     } catch (error) {
@@ -430,7 +429,7 @@ export class AuthService {
           'X-CSRF-Token': this.getCSRFToken()
         },
         body: JSON.stringify({ user_profile: profileData }),
-        credentials: 'include'
+        
       });
 
       if (response.ok) {
@@ -457,7 +456,7 @@ export class AuthService {
     try {
       const response = await fetch(`${environment.apiUrl}/admin/users`, {
         headers: this.getAuthHeaders(token),
-        credentials: 'include'
+        
       });
 
       if (response.ok) {

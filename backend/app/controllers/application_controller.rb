@@ -40,6 +40,15 @@ class ApplicationController < ActionController::Base
 
   attr_reader :current_user
 
+  # Frontend base URL for redirects (public helper)
+  def frontend_base_url
+    if Rails.env.development?
+      'http://localhost:4200'
+    else
+      ENV.fetch('FRONTEND_URL')
+    end
+  end
+
   private
 
   def authenticate_user!

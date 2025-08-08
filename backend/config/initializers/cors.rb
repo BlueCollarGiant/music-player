@@ -1,14 +1,12 @@
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    if Rails.env.development?
-      origins 'http://localhost:4200'
-    else
-      origins ENV['FRONTEND_URL'] || 'https://yourmusicapp.com'  # Your Angular app domain
-    end
+    # Allow local dev and, if present, your deployed frontend
+    origins 'http://localhost:4200', ENV['FRONTEND_URL']
 
     resource '*',
-      headers: :any,
+      headers: :any,                                # allow Authorization, Content-Type, etc.
       methods: [:get, :post, :put, :patch, :delete, :options, :head],
-      credentials: true
+      expose:  ['Authorization']                    # expose Authorization header for JWT tokens
+      
   end
 end
