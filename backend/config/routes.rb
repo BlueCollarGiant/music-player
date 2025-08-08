@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # Health check (public)
+  get "/health", to: proc { [200, { "Content-Type" => "text/plain" }, ["ok"]] }
+
   # Auth routes
   post "/login", to: "sessions#create"
   delete "/logout", to: "sessions#destroy"

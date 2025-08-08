@@ -1,5 +1,4 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment';
@@ -59,7 +58,6 @@ export interface AuthResponse {
 })
 export class AuthService {
   //-----Dependency Injection-----//
-  private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
 
@@ -221,7 +219,6 @@ export class AuthService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': this.getCSRFToken()
         },
         body: JSON.stringify({
           email: email,
@@ -253,7 +250,6 @@ export class AuthService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': this.getCSRFToken()
         },
         body: JSON.stringify({
           user: {
@@ -426,7 +422,6 @@ export class AuthService {
         headers: {
           ...this.getAuthHeaders(token),
           'Content-Type': 'application/json',
-          'X-CSRF-Token': this.getCSRFToken()
         },
         body: JSON.stringify({ user_profile: profileData }),
         
@@ -509,10 +504,5 @@ export class AuthService {
     if (token) {
       await this.validateAndLoadUser(token);
     }
-  }
-
-  private getCSRFToken(): string {
-    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : '';
   }
 }
