@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: number;
@@ -105,7 +106,7 @@ export class AuthService {
     
     try {
       // Get current user from a simple endpoint that just validates the token
-      const userResponse = await fetch('http://localhost:3000/api/current_user', {
+      const userResponse = await fetch(`${environment.apiUrl}/api/current_user`, {
         headers: this.getAuthHeaders(token),
         credentials: 'include'
       });
@@ -150,7 +151,7 @@ export class AuthService {
 
     try {
       // First get the current user to find their ID
-      const userResponse = await fetch('http://localhost:3000/api/current_user', {
+      const userResponse = await fetch(`${environment.apiUrl}/api/current_user`, {
         headers: this.getAuthHeaders(authToken),
         credentials: 'include'
       });
@@ -160,7 +161,7 @@ export class AuthService {
         const userId = userData.user.id;
 
         // Now get the user's profile using their ID
-        const profileResponse = await fetch(`http://localhost:3000/user_profiles/${userId}`, {
+        const profileResponse = await fetch(`${environment.apiUrl}/user_profiles/${userId}`, {
           headers: this.getAuthHeaders(authToken),
           credentials: 'include'
         });
@@ -181,7 +182,7 @@ export class AuthService {
     if (!authToken) return;
 
     try {
-      const response = await fetch('http://localhost:3000/user_profiles/platform_connections', {
+      const response = await fetch(`${environment.apiUrl}/user_profiles/platform_connections`, {
         headers: this.getAuthHeaders(authToken),
         credentials: 'include'
       });
@@ -217,7 +218,7 @@ export class AuthService {
     this.isLoading.set(true);
 
     try {
-      const response = await fetch('http://localhost:3000/login', {
+      const response = await fetch(`${environment.apiUrl}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +250,7 @@ export class AuthService {
     this.isLoading.set(true);
     
     try {
-      const response = await fetch('http://localhost:3000/users', {
+      const response = await fetch(`${environment.apiUrl}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -302,7 +303,7 @@ export class AuthService {
   private async checkYouTubeAccess(token: string): Promise<void> {
     try {
       // Check if the user's Google OAuth token has YouTube scope
-      const response = await fetch('http://localhost:3000/api/youtube/check_access', {
+      const response = await fetch(`${environment.apiUrl}/api/youtube/check_access`, {
         headers: this.getAuthHeaders(token),
         credentials: 'include'
       });
@@ -354,7 +355,7 @@ export class AuthService {
       // Use specific endpoints for each platform
       switch (platform.toLowerCase()) {
         case 'youtube':
-          response = await fetch('http://localhost:3000/user_profiles/youtube_connection', {
+          response = await fetch(`${environment.apiUrl}/user_profiles/youtube_connection`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -401,7 +402,7 @@ export class AuthService {
 
     try {
       if (token) {
-        await fetch('http://localhost:3000/logout', {
+        await fetch(`${environment.apiUrl}/logout`, {
           method: 'DELETE',
           headers: this.getAuthHeaders(token),
           credentials: 'include'
@@ -421,7 +422,7 @@ export class AuthService {
     if (!token) throw new Error('Not authenticated');
 
     try {
-      const response = await fetch('http://localhost:3000/user_profiles/update', {
+      const response = await fetch(`${environment.apiUrl}/user_profiles/update`, {
         method: 'PATCH',
         headers: {
           ...this.getAuthHeaders(token),
@@ -454,7 +455,7 @@ export class AuthService {
     if (!token) throw new Error('Not authenticated');
 
     try {
-      const response = await fetch('http://localhost:3000/admin/users', {
+      const response = await fetch(`${environment.apiUrl}/admin/users`, {
         headers: this.getAuthHeaders(token),
         credentials: 'include'
       });
