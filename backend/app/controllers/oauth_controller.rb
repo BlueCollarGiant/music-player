@@ -1,4 +1,4 @@
-#class OAuthController < ApplicationController
+#class OauthController < ApplicationController
   #skip_before_action :authenticate_user!, only: [:callback, :failure]
 
   # GET /auth/:provider/callback - handles Google login and YouTube connection
