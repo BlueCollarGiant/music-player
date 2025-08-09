@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   post "/login", to: "sessions#create"
   delete "/logout", to: "sessions#destroy"
 
+  #check if youtube connection 
+  get "/api/youtube/check_access", to: "youtube#check_access"
   # OAuth routes - unified callback handling for multiple providers
   get '/auth/:provider/callback', to: 'sessions#omniauth'
   get '/auth/failure', to: 'sessions#failure'

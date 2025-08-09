@@ -1,6 +1,20 @@
 class YoutubeController < ApplicationController
   before_action :authenticate_user!
-  before_action :ensure_youtube_connection
+  before_action :ensure_youtube_connection, except: [:check_access]
+
+
+
+  # GET /api/youtube/check_access
+  def check_access
+    has_access =
+      if defined?(PlatformConnection)
+        PlatformConnection.exists?(user_id: current_user.id, platform: "youtube")
+      else
+        false
+      end
+
+    render json: { has_youtube_access: has_access }
+  end
 
   # GET /api/youtube/playlists
   def playlists
