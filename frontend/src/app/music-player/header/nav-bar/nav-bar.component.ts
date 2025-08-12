@@ -6,6 +6,7 @@ import { filter } from 'rxjs/operators';
 import { MusicPlayerService } from '../../../services/music-player.service';
 import { AuthService } from '../../../services/auth.service';
 import { YouTubeService } from '../../../services/youtube.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-nav-bar',
@@ -14,6 +15,7 @@ import { YouTubeService } from '../../../services/youtube.service';
   styleUrl: './nav-bar.component.css'
 })
 export class NavBarComponent {
+  environment = environment;
   public musicService = inject(MusicPlayerService);
   public authService = inject(AuthService);
   private youtubeService = inject(YouTubeService);
