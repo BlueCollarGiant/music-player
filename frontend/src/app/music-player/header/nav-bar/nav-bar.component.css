@@ -52,6 +52,7 @@
   padding: 1.5rem;
   box-shadow: -4px 0 8px rgba(0, 0, 0, 0.3);
   overflow-y: auto;
+  overflow-x: hidden; /* prevent horizontal scroll on mobile drawer */
 }
 
 .mobile-menu-header {
@@ -344,4 +345,43 @@
 .mobile-menu-tabs button.active:hover {
   background-color: #2563eb;
   color: white;
+}
+
+.inline-form {
+  display: block;         
+  width: 100%;            
+  margin: 0;              
+  padding: 0;
+}
+
+
+.inline-form > button {
+  display: flex;          
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+
+.platform-btn {
+  width: 100%;
+}
+
+
+.auth-buttons .inline-form,
+.platform-buttons .inline-form {
+  width: 100%;
+}
+
+
+.auth-buttons .inline-form + .inline-form,
+.platform-buttons .inline-form + .inline-form {
+  margin-top: 0.5rem;
+}
+
+
+.platform-btn.connected,
+.oauth-btn.connected {
+  cursor: default;
+  opacity: 1;
 }

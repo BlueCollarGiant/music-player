@@ -202,14 +202,6 @@ export class AuthService {
   window.location.href = `${environment.apiUrl}/auth/google_oauth2`;
   }
 
-  public loginWithYouTube(): void {
-    // Save current URL for redirect after YouTube connection
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('pre_auth_url', '/landing');
-    }
-  window.location.href = `${environment.apiUrl}/auth/youtube`;
-  }
-
   // Manual Authentication Methods (for users without Gmail)
   public async loginWithEmail(email: string, password: string): Promise<void> {
     this.isLoading.set(true);
@@ -306,7 +298,7 @@ export class AuthService {
       if (response.ok) {
         const data = await response.json();
         if (data.has_youtube_access) {
-          console.log('✅ User has YouTube access through Google OAuth');
+          
           // Refresh platform connections to include YouTube
           await this.loadPlatformConnections(token);
         }
@@ -317,14 +309,6 @@ export class AuthService {
   }
 
   //-----Public Platform Methods-----//
-  public connectYouTube(): void {
-    if (!this.isAuthenticated()) {
-      console.error('User must be logged in to connect platforms');
-      return;
-    }
-  window.location.href = `${environment.apiUrl}/auth/youtube`;
-  }
-
   public toggleMobileMenu(): void {
     this.isMobileMenuOpen.update(open => !open);
   }

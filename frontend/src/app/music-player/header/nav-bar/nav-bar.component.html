@@ -5,16 +5,22 @@
     <div class="hamburger-line"></div>
     <div class="hamburger-line"></div>
   </button>
-  
+
   @if (isMobileMenuOpen()) {
     <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
       <div class="mobile-menu" (click)="$event.stopPropagation()">
-        <div class="mobile-menu-header">
+  <div class="mobile-menu-header">
+
           <!-- User Authentication Section -->
           @if (isUserLoggedIn()) {
             <div class="user-avatar">
-              <img [src]="userAvatar() || '/assets/avatars/default-avatar.png'" alt="User Avatar" class="avatar-image">
+              <img
+                [src]="avatarSrc()"
+                alt="User Avatar"
+                class="avatar-image"
+              />
               <span class="username">{{ displayUsername() }}</span>
+
               @if (isOAuthConnected()) {
                 <div class="connected-indicator">
                   <span class="connected-icon">✓</span>
@@ -31,80 +37,141 @@
                   <span class="btn-icon">📧</span>
                   Login / Sign Up
                 </button>
-                <!-- OAuth Login (for Gmail users) -->
-                <button class="auth-btn oauth-btn" [class.connected]="isUserLoggedIn()" (click)="loginWithGoogle()">
-                  @if (isUserLoggedIn()) {
-                    <span class="btn-icon success">✅</span>
-                    Connected with Google
-                  } @else {
+
+                <!-- Google OAuth (native POST) -->
+                <form
+                  [attr.action]="environment.apiUrl + '/auth/google_oauth2'"
+                  method="post"
+                  target="_self"
+                  class="inline-form"
+                >
+                  <button type="submit" class="auth-btn oauth-btn" aria-label="Login with Google">
                     <span class="btn-icon">🔑</span>
                     Login with Google
-                  }
-                </button>
+                  </button>
+                </form>
               </div>
             </div>
           }
-        </div>
-        
-        <!-- Platform Connection Section (only show if logged in) -->
-        @if (isUserLoggedIn()) {
-          <div class="platform-section">
-            <h4>Connect Platforms</h4>
-            <div class="platform-buttons">
-              <button class="platform-btn youtube-btn" [class.connected]="isPlatformConnected('youtube')" (click)="handlePlatformClick('youtube')">
-                <span class="platform-icon">📺</span>
-                @if (isPlatformConnected('youtube')) {
-                  YouTube ✓ (Click to disconnect)
-                } @else {
-                  YouTube (Click to connect)
-                }
-              </button>
-              <!--<button class="platform-btn spotify-btn" [class.connected]="isPlatformConnected('spotify')" (click)="handlePlatformClick('spotify')">
-                <span class="platform-icon">🎵</span>
-                @if (isPlatformConnected('spotify')) {
-                  Spotify ✓ (Click to disconnect)
-                } @else {
-                  Spotify (Click to connect)
-                }
-              </button>-->
-              <!--<button class="platform-btn soundcloud-btn" [class.connected]="isPlatformConnected('soundcloud')" (click)="handlePlatformClick('soundcloud')">
-                <span class="platform-icon">☁️</span>
-                @if (isPlatformConnected('soundcloud')) {
-                  SoundCloud ✓ (Click to disconnect)
-                } @else {
-                  SoundCloud (Click to connect)
-                }
-              </button>-->
-            </div>
-          </div>
-        }
-        
-        <!-- Navigation Tabs (only show if logged in and on player page) -->
-        @if (isUserLoggedIn() && isPlayerActive()) {
-          <div class="mobile-menu-tabs">
-            @for (tab of tabs; track tab) {
-              <button
-                [class.active]="musicService.activeTab() === tab"
-                (click)="setActiveTabMobile(tab)">
-                {{ tab }}
-              </button>
-            }
-          </div>
-        }
-        
-        <!-- YouTube Navigation Button (only show if YouTube is connected) -->
-        @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
-          <div class="youtube-section">
-            <button class="youtube-nav-btn" (click)="handleYouTubeClick()">📺 Go to YouTube</button>
-          </div>
-        }
 
-        <!-- Logout option (only show if logged in) -->
-        @if (isUserLoggedIn()) {
-          <div class="logout-section">
-            <button class="logout-btn" (click)="logout()">Logout</button>
-          </div>
-        }
+        </div>
+
+        <!-- Platform Connection Section (only show if logged in) -->
+          @if (isUserLoggedIn()) {
+            <div class="platform-section">
+              <h4>Connect Platforms</h4>
+              <div class="platform-buttons">
+
+                <!-- YouTube: connect with POST when NOT connected; disconnect via TS when connected -->
+                @if (!isPlatformConnected('youtube')) {
+                  <form
+                    [attr.action]="environment.apiUrl + '/auth/youtube'"
+                    method="post"
+                    target="_self"
+                    class="inline-form"
+                  >
+                    <button type="submit" class="platform-btn youtube-btn" aria-label="Connect YouTube">
+                      <span class="platform-icon">📺</span>
+                      YouTube (Click to connect)
+                    </button>
+                  </form>
+                } @else {
+                  <button
+                    class="platform-btn youtube-btn connected"
+                    type="button"
+                    (click)="disconnectPlatform('youtube')"
+                    aria-label="Disconnect YouTube"
+                  >
+                    <span class="platform-icon">📺</span>
+                    YouTube ✓ (Click to disconnect)
+                  </button>
+                }
+
+                <!-- Spotify/SoundCloud placeholders (uncomment when ready) -->
+                <!--
+                @if (!isPlatformConnected('spotify')) {
+                  <form
+                    [attr.action]="environment.apiUrl + '/auth/spotify'"
+                    method="post"
+                    target="_self"
+                    class="inline-form"
+                  >
+                    <button type="submit" class="platform-btn spotify-btn" aria-label="Connect Spotify">
+                      <span class="platform-icon">🎵</span>
+                      Spotify (Click to connect)
+                    </button>
+                  </form>
+                } @else {
+                  <button
+                    class="platform-btn spotify-btn connected"
+                    type="button"
+                    (click)="disconnectPlatform('spotify')"
+                    aria-label="Disconnect Spotify"
+                  >
+                    <span class="platform-icon">🎵</span>
+                    Spotify ✓ (Click to disconnect)
+                  </button>
+                }
+
+                @if (!isPlatformConnected('soundcloud')) {
+                  <form
+                    [attr.action]="environment.apiUrl + '/auth/soundcloud'"
+                    method="post"
+                    target="_self"
+                    class="inline-form"
+                  >
+                    <button type="submit" class="platform-btn soundcloud-btn" aria-label="Connect SoundCloud">
+                      <span class="platform-icon">☁️</span>
+                      SoundCloud (Click to connect)
+                    </button>
+                  </form>
+                } @else {
+                  <button
+                    class="platform-btn soundcloud-btn connected"
+                    type="button"
+                    (click)="disconnectPlatform('soundcloud')"
+                    aria-label="Disconnect SoundCloud"
+                  >
+                    <span class="platform-icon">☁️</span>
+                    SoundCloud ✓ (Click to disconnect)
+                  </button>
+                }
+                -->
+
+              </div>
+            </div>
+          }
+
+          <!-- Navigation Tabs (only show if logged in and on player page) -->
+          @if (isUserLoggedIn() && isPlayerActive()) {
+            <div class="mobile-menu-tabs">
+              @for (tab of tabs; track tab) {
+                <button
+                  [class.active]="musicService.activeTab() === tab"
+                  (click)="setActiveTabMobile(tab)"
+                >
+                  {{ tab }}
+                </button>
+              }
+            </div>
+          }
+
+          <!-- YouTube Navigation Button (only if YouTube is connected) -->
+          @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
+            <div class="youtube-section">
+              <button class="youtube-nav-btn" (click)="handleYouTubeClick()">
+                📺 Go to YouTube
+              </button>
+            </div>
+          }
+
+          <!-- Logout option (only show if logged in) -->
+          @if (isUserLoggedIn()) {
+            <div class="logout-section">
+              <button class="logout-btn" (click)="logout()">Logout</button>
+            </div>
+          }
+
       </div>
     </div>
   }

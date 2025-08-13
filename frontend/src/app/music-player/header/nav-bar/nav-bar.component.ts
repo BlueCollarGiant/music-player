@@ -6,6 +6,7 @@ import { filter } from 'rxjs/operators';
 import { MusicPlayerService } from '../../../services/music-player.service';
 import { AuthService } from '../../../services/auth.service';
 import { YouTubeService } from '../../../services/youtube.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-nav-bar',
@@ -14,6 +15,7 @@ import { YouTubeService } from '../../../services/youtube.service';
   styleUrl: './nav-bar.component.css'
 })
 export class NavBarComponent {
+  environment = environment;
   public musicService = inject(MusicPlayerService);
   public authService = inject(AuthService);
   private youtubeService = inject(YouTubeService);
@@ -27,22 +29,26 @@ export class NavBarComponent {
   // Auth state from service
   isUserLoggedIn = this.authService.isAuthenticated;
   username = this.authService.username;
-  userAvatar = this.authService.avatarUrl;
   connectedPlatforms = this.authService.connectedPlatformNames;
 
   // Computed property for display username (fallback to email prefix if generic)
   displayUsername = computed(() => {
     const currentUsername = this.username();
     const currentUser = this.authService.currentUser();
-    
+
     // If username is generic (starts with "user_") and we have email, use email prefix
     if (currentUsername && currentUsername.startsWith('user_') && currentUser?.email) {
       return currentUser.email.split('@')[0];
     }
-    
+
     return currentUsername || 'User';
   });
-
+  avatarSrc = computed(() => {
+    const url = this.authService.avatarUrl(); // comes from AuthService.avatarUrl
+    return (url && url.trim() !== '')
+      ? url
+      : `${this.environment.apiUrl}/assets/avatars/default-avatar.png`;
+  });
   // Check if user is connected via OAuth (has oauth_provider)
   isOAuthConnected = computed(() => {
     const currentUser = this.authService.currentUser();
@@ -134,19 +140,6 @@ export class NavBarComponent {
     return this.authService.isPlatformConnected(platform);
   }
 
-  connectPlatform(platform: string) {
-    if (!this.isPlatformConnected(platform)) {
-      switch (platform) {
-        case 'youtube':
-          this.authService.connectYouTube();
-          break;
-        default:
-          console.warn(`Platform ${platform} not supported`);
-      }
-    }
-    this.closeMobileMenu();
-  }
-
   async disconnectPlatform(platform: string) {
     // Show confirmation dialog
     const confirmed = confirm(`Are you sure you want to disconnect ${platform}? This will remove access to your ${platform} playlists.`);
@@ -161,15 +154,6 @@ export class NavBarComponent {
       }
     }
     this.closeMobileMenu();
-  }
-
-  // Handle platform button click - connect or disconnect based on current state
-  handlePlatformClick(platform: string) {
-    if (this.isPlatformConnected(platform)) {
-      this.disconnectPlatform(platform);
-    } else {
-      this.connectPlatform(platform);
-    }
   }
 
   // Navigate to YouTube page and auto-load playlists
@@ -191,10 +175,10 @@ export class NavBarComponent {
     if (this.isPlatformConnected('youtube')) {
       // User is connected, auto-load playlists
       this.youtubeService.loadPlaylists();
-      this.goToYouTube();
+      this.router.navigate([ '/youtube'])
     } else {
-      // User not connected, connect first
-      this.connectPlatform('youtube');
+      alert('YouTube not connected! Please connect YouTube first.');
     }
+    this.closeMobileMenu();
   }
 }

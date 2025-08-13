@@ -17,7 +17,6 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       image_size: 50,
       access_type: 'online',
       skip_jwt: true,
-      provider_ignores_state: true,  # This helps with CSRF issues
       client_options: {
         ssl: { verify: false } # Only for development
       }
@@ -34,15 +33,14 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       approval_prompt: 'auto',
       include_granted_scopes: true,
       skip_jwt: true,
-      provider_ignores_state: true,  # This helps with CSRF issues
       client_options: {
         ssl: { verify: false } # Only for development
       }
     }
 end
 
-# Additional global configuration to disable CSRF protection
-OmniAuth.config.allowed_request_methods = [:post, :get]
-OmniAuth.config.silence_get_warning = true
-OmniAuth.config.request_validation_phase = nil
-OmniAuth.config.before_request_phase = nil
+if Rails.env.production?
+  OmniAuth.config.allowed_request_methods = [:post]
+else
+    OmniAuth.config.allowed_request_methods = [:post, :get]
+end
