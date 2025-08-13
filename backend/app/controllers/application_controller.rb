@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
     request.path.start_with?("/api/") ||
     request.format.json?
   }
-
+  
   # Handle exceptions globally
   rescue_from StandardError, with: :handle_standard_error
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
