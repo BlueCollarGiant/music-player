@@ -298,7 +298,7 @@ export class AuthService {
       if (response.ok) {
         const data = await response.json();
         if (data.has_youtube_access) {
-          console.log('✅ User has YouTube access through Google OAuth');
+          
           // Refresh platform connections to include YouTube
           await this.loadPlatformConnections(token);
         }

@@ -15,7 +15,7 @@
           @if (isUserLoggedIn()) {
             <div class="user-avatar">
               <img
-                [src]="userAvatar() || '/assets/avatars/default-avatar.png'"
+                [src]="avatarSrc()"
                 alt="User Avatar"
                 class="avatar-image"
               />
