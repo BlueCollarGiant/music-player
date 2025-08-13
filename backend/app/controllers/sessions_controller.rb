@@ -45,11 +45,10 @@ class SessionsController < ApplicationController
     if user
       token = JsonWebToken.encode(user_id: user.id)
 
-      if provider == "youtube"
-        # Handle YouTube platform connection
-        youtube_connection = user.platform_connections.find_or_initialize_by(platform: 'youtube')
-
-        youtube_connection.update!(
+      case provider
+      when "youtube"
+        connection = user.platform_connections.find_or_initialize_by(platform: 'youtube')
+        connection.update!(
           platform_user_id: auth.uid,
           access_token: auth.credentials.token,
           refresh_token: auth.credentials.refresh_token,
@@ -57,11 +56,19 @@ class SessionsController < ApplicationController
           connected_at: Time.current,
           scopes: auth.credentials.scope
         )
-
-        has_youtube = youtube_connection.persisted?
-        redirect_to "#{frontend_base_url}/landing?token=#{token}&youtube_connected=#{has_youtube}"
+        redirect_to "#{frontend_base_url}/landing?token=#{token}&youtube_connected=true"
+      when "spotify"
+        connection = user.platform_connections.find_or_initialize_by(platform: 'spotify')
+        connection.update!(
+          platform_user_id: auth.uid,
+          access_token: auth.credentials.token,
+          refresh_token: auth.credentials.refresh_token,
+          expires_at: auth.credentials.expires_at ? Time.at(auth.credentials.expires_at) : (Time.current + 1.hour),
+          connected_at: Time.current,
+          scopes: auth.credentials.scope
+        )
+        redirect_to "#{frontend_base_url}/landing?token=#{token}&spotify_connected=true"
       else
-        # For Google login, just redirect with token
         redirect_to "#{frontend_base_url}/landing?token=#{token}"
       end
     else

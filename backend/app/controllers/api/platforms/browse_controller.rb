@@ -1,7 +1,8 @@
 module Api
   module Platforms
     class BrowseController < ApplicationController
-      include YoutubePlatform
+  include YoutubePlatform
+  include SpotifyPlatform
       before_action :authenticate_user!
 
       # GET /api/platforms/:platform/playlists
@@ -10,12 +11,25 @@ module Api
         return unsupported_platform!(platform) unless supported_platform?(platform)
         page, per_page = pagination_params(default_per: 25, max_per: 50)
 
-        if platform == 'youtube'
+        case platform
+        when 'youtube'
           connection = youtube_connection
           return render(json: { error: 'YouTube not connected' }, status: :forbidden) unless connection
           refresh_youtube_token(connection) if connection.token_expired?
           service = create_youtube_service(connection)
           raw_playlists = fetch_user_playlists(service)
+          total = raw_playlists.length
+          sliced = raw_playlists.slice((page - 1) * per_page, per_page) || []
+          return render json: {
+            playlists: sliced.map { |pl| normalize_playlist(pl) },
+            page: page,
+            per_page: per_page,
+            total: total
+          }
+        when 'spotify'
+          connection = spotify_connection
+          return render(json: { error: 'Spotify not connected' }, status: :forbidden) unless connection
+          raw_playlists = fetch_spotify_playlists(connection)
           total = raw_playlists.length
           sliced = raw_playlists.slice((page - 1) * per_page, per_page) || []
           return render json: {
@@ -34,12 +48,25 @@ module Api
         playlist_id = params[:id]
         page, per_page = pagination_params(default_per: 50, max_per: 100)
 
-        if platform == 'youtube'
+        case platform
+        when 'youtube'
           connection = youtube_connection
           return render(json: { error: 'YouTube not connected' }, status: :forbidden) unless connection
           refresh_youtube_token(connection) if connection.token_expired?
           service = create_youtube_service(connection)
           raw_tracks = fetch_playlist_tracks(service, playlist_id)
+          total = raw_tracks.length
+          sliced = raw_tracks.slice((page - 1) * per_page, per_page) || []
+          return render json: {
+            tracks: sliced.map { |t| normalize_track(t, platform) },
+            page: page,
+            per_page: per_page,
+            total: total
+          }
+        when 'spotify'
+          connection = spotify_connection
+          return render(json: { error: 'Spotify not connected' }, status: :forbidden) unless connection
+          raw_tracks = fetch_spotify_playlist_tracks(connection, playlist_id)
           total = raw_tracks.length
           sliced = raw_tracks.slice((page - 1) * per_page, per_page) || []
           return render json: {
@@ -75,7 +102,7 @@ module Api
         {
           id: raw[:id],
           title: raw[:title],
-      description: raw[:description],
+          description: raw[:description],
           thumbnail_url: raw[:thumbnail_url],
           video_count: raw[:video_count]
         }

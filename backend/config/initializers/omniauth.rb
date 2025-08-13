@@ -37,6 +37,14 @@ Rails.application.config.middleware.use OmniAuth::Builder do
         ssl: { verify: false } # Only for development
       }
     }
+
+  provider :spotify,
+    ENV['SPOTIFY_CLIENT_ID'],
+    ENV['SPOTIFY_CLIENT_SECRET'],
+    {
+      scope: 'user-read-email playlist-read-private playlist-read-collaborative',
+      show_dialog: false
+    }
 end
 
 if Rails.env.production?
