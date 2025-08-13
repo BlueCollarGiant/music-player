@@ -136,19 +136,6 @@ export class NavBarComponent {
     return this.authService.isPlatformConnected(platform);
   }
 
-  connectPlatform(platform: string) {
-    if (!this.isPlatformConnected(platform)) {
-      switch (platform) {
-        case 'youtube':
-          this.authService.connectYouTube();
-          break;
-        default:
-          console.warn(`Platform ${platform} not supported`);
-      }
-    }
-    this.closeMobileMenu();
-  }
-
   async disconnectPlatform(platform: string) {
     // Show confirmation dialog
     const confirmed = confirm(`Are you sure you want to disconnect ${platform}? This will remove access to your ${platform} playlists.`);
@@ -163,15 +150,6 @@ export class NavBarComponent {
       }
     }
     this.closeMobileMenu();
-  }
-
-  // Handle platform button click - connect or disconnect based on current state
-  handlePlatformClick(platform: string) {
-    if (this.isPlatformConnected(platform)) {
-      this.disconnectPlatform(platform);
-    } else {
-      this.connectPlatform(platform);
-    }
   }
 
   // Navigate to YouTube page and auto-load playlists
@@ -193,10 +171,10 @@ export class NavBarComponent {
     if (this.isPlatformConnected('youtube')) {
       // User is connected, auto-load playlists
       this.youtubeService.loadPlaylists();
-      this.goToYouTube();
+      this.router.navigate(['/player', 'youtube'])
     } else {
-      // User not connected, connect first
-      this.connectPlatform('youtube');
+      alert('YouTube not connected! Please connect YouTube first.');
     }
+    this.closeMobileMenu();
   }
 }
