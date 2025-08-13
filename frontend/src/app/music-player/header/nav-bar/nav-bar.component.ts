@@ -171,7 +171,7 @@ export class NavBarComponent {
     if (this.isPlatformConnected('youtube')) {
       // User is connected, auto-load playlists
       this.youtubeService.loadPlaylists();
-      this.router.navigate(['/player', 'youtube'])
+      this.router.navigate([ '/youtube'])
     } else {
       alert('YouTube not connected! Please connect YouTube first.');
     }
