@@ -22,8 +22,16 @@ Rails.application.routes.draw do
     # YouTube API routes
     get '/youtube/playlists', to: 'youtube#playlists'
     get '/youtube/playlists/:playlist_id/tracks', to: 'youtube#playlist_tracks'
-  end
+    # Platform-agnostic (initially YouTube-only) endpoints
+    namespace :platforms, module: 'api/platforms' do
+      # Access / connection checks
+      get    ':platform/check_access',          to: 'connections#check_access'
 
+      # Normalized browsing endpoints
+      get    ':platform/playlists',             to: 'browse#playlists'
+      get    ':platform/playlists/:id/tracks',  to: 'browse#tracks'
+    end
+  end
   # Password reset
   resources :password_resets, only: [:create]
 
