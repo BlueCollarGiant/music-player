@@ -1,20 +1,37 @@
 
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  padding: 0;
+  overflow: hidden; /* Prevent any global scrolling */
+}
+
+body { 
+  font-family: Roboto, "Helvetica Neue", sans-serif; 
+  background-color: #0f1631;
+}
+
 html {
   /* This targets the root of the document (html) */
   background-color: #0f1631;
 }
-/* ===== ROOT CONTAINER ===== */
-.music-player {
-  min-height: 100vh;
-  background-color: #0f1631;
-  color: white;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
+
+/* Default (app/youtube base) */
+:root, .platform--youtube {
+  --accent-color: #ff0000;
+  --accent-color-alt: #cc0000;
+  --accent-gradient: linear-gradient(135deg, #ff0000, #cc0000);
 }
 
+.platform--spotify {
+  --accent-color: #1db954;
+  --accent-color-alt: #158f40;
+  --accent-gradient: linear-gradient(135deg, #1db954, #158f40);
+}
 
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.platform--soundcloud {
+  --accent-color: #ff7700;
+  --accent-color-alt: #ff5500;
+  --accent-gradient: linear-gradient(135deg, #ff7700, #ff5500);
+}
 

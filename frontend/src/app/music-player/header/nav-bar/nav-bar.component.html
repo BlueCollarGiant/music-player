@@ -156,11 +156,19 @@
             </div>
           }
 
-          <!-- YouTube Navigation Button (only if YouTube is connected) -->
-          @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
+          <!-- Platform Navigation Buttons (reuse YouTube POV for now) -->
+          @if (isUserLoggedIn()) {
             <div class="youtube-section">
-              <button class="youtube-nav-btn" (click)="handleYouTubeClick()">
-                📺 Go to YouTube
+              @if (isPlatformConnected('youtube')) {
+                <button class="youtube-nav-btn" (click)="navigatePlatform('youtube')">
+                  📺 YouTube
+                </button>
+              }
+              <button class="youtube-nav-btn" (click)="navigatePlatform('spotify')">
+                🎵 Spotify
+              </button>
+              <button class="youtube-nav-btn" (click)="navigatePlatform('soundcloud')">
+                ☁️ SoundCloud
               </button>
             </div>
           }
