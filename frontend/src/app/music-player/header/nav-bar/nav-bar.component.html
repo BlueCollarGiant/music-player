@@ -87,8 +87,7 @@
                   </button>
                 }
 
-                <!-- Spotify/SoundCloud placeholders (uncomment when ready) -->
-                <!--
+                <!-- Spotify connect/disconnect (enabled) -->
                 @if (!isPlatformConnected('spotify')) {
                   <form
                     [attr.action]="environment.apiUrl + '/auth/spotify'"
@@ -113,30 +112,8 @@
                   </button>
                 }
 
-                @if (!isPlatformConnected('soundcloud')) {
-                  <form
-                    [attr.action]="environment.apiUrl + '/auth/soundcloud'"
-                    method="post"
-                    target="_self"
-                    class="inline-form"
-                  >
-                    <button type="submit" class="platform-btn soundcloud-btn" aria-label="Connect SoundCloud">
-                      <span class="platform-icon">☁️</span>
-                      SoundCloud (Click to connect)
-                    </button>
-                  </form>
-                } @else {
-                  <button
-                    class="platform-btn soundcloud-btn connected"
-                    type="button"
-                    (click)="disconnectPlatform('soundcloud')"
-                    aria-label="Disconnect SoundCloud"
-                  >
-                    <span class="platform-icon">☁️</span>
-                    SoundCloud ✓ (Click to disconnect)
-                  </button>
-                }
-                -->
+                <!-- SoundCloud temporarily disabled -->
+                <!-- SoundCloud connect UI intentionally hidden for now -->
 
               </div>
             </div>
@@ -164,12 +141,12 @@
                   📺 YouTube
                 </button>
               }
-              <button class="youtube-nav-btn" (click)="navigatePlatform('spotify')">
-                🎵 Spotify
-              </button>
-              <button class="youtube-nav-btn" (click)="navigatePlatform('soundcloud')">
-                ☁️ SoundCloud
-              </button>
+              @if (isPlatformConnected('spotify')) {
+                <button class="youtube-nav-btn" (click)="navigatePlatform('spotify')">
+                  🎵 Spotify
+                </button>
+              }
+              <!-- SoundCloud nav button hidden for now -->
             </div>
           }
 
