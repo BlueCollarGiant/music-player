@@ -1,4 +1,20 @@
 # OmniAuth configuration for Rails 7.x with proper CSRF protection
+#
+# Spotify Redirect URI notes:
+# In the Spotify Developer Dashboard add BOTH exact redirect URIs:
+#   http://127.0.0.1:3000/auth/spotify/callback
+#   https://your-api-host/auth/spotify/callback
+# We use 127.0.0.1 (not localhost) because Spotify rejects 'localhost' for some flows.
+# PKCE is enabled below for Authorization Code w/ PKCE.
+
+# Dynamic full_host: ensures OmniAuth builds callback / authorize URLs with correct host.
+OmniAuth.config.full_host = lambda do |env|
+  if Rails.env.development?
+    'http://127.0.0.1:3000'
+  else
+    ENV.fetch('BACKEND_BASE_URL', 'https://your-api-host')
+  end
+end
 Rails.application.config.middleware.use OmniAuth::Builder do
   # Configure OmniAuth with proper CSRF protection
   configure do |config|
@@ -42,8 +58,11 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     ENV['SPOTIFY_CLIENT_ID'],
     ENV['SPOTIFY_CLIENT_SECRET'],
     {
-      scope: 'user-read-email playlist-read-private playlist-read-collaborative',
-      show_dialog: false
+      scope: 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative',
+      callback_path: '/auth/spotify/callback',
+      provider_ignores_state: false,
+      pkce: true,
+      redirect_uri: (Rails.env.development? ? 'http://127.0.0.1:3000/auth/spotify/callback' : 'https://your-api-host/auth/spotify/callback')
     }
 end
 
