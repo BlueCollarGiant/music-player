@@ -72,7 +72,7 @@
 
           <!-- Spotify connect/disconnect (enabled) -->
           @if (!isPlatformConnected('spotify')) {
-          <form [attr.action]="environment.apiUrl + '/auth/spotify'" method="post" target="_self" class="inline-form">
+          <form action="http://127.0.0.1:3000/auth/spotify" method="post" target="_self" class="inline-form">
             <button type="submit" class="platform-btn spotify-btn" aria-label="Connect Spotify">
               <span class="platform-icon">🎵</span>
               Connect Spotify
