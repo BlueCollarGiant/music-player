@@ -73,6 +73,7 @@ module SpotifyPlatform
         id: track['id'],
         title: track['name'],
         artist: (track['artists'] || []).map { |a| a['name'] }.first,
+  duration_ms: track['duration_ms'],
         duration: format_spotify_duration(track['duration_ms']),
         thumbnail_url: track.dig('album','images',0,'url'),
         position: pos

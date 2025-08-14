@@ -29,15 +29,21 @@ module Api
         when 'spotify'
           connection = spotify_connection
           return render(json: { error: 'Spotify not connected' }, status: :forbidden) unless connection
-          raw_playlists = fetch_spotify_playlists(connection)
-          total = raw_playlists.length
-          sliced = raw_playlists.slice((page - 1) * per_page, per_page) || []
-          return render json: {
-            playlists: sliced.map { |pl| normalize_playlist(pl) },
-            page: page,
-            per_page: per_page,
-            total: total
-          }
+          client = Platforms::SpotifyClient.new(connection: connection)
+          begin
+            data = client.playlists(page: page, per_page: per_page)
+            return render json: {
+              playlists: data[:items].map { |pl| normalize_playlist(pl) },
+              page: page,
+              per_page: per_page,
+              total: data[:total]
+            }
+          rescue Platforms::SpotifyClient::UnauthorizedError
+            render json: { error: 'Spotify authorization expired' }, status: :unauthorized
+          rescue => e
+            Rails.logger.error("Spotify playlists fetch error: #{e.message}")
+            render json: { error: 'Unable to fetch Spotify playlists' }, status: :service_unavailable
+          end
         end
       end
 
@@ -66,15 +72,21 @@ module Api
         when 'spotify'
           connection = spotify_connection
           return render(json: { error: 'Spotify not connected' }, status: :forbidden) unless connection
-          raw_tracks = fetch_spotify_playlist_tracks(connection, playlist_id)
-          total = raw_tracks.length
-          sliced = raw_tracks.slice((page - 1) * per_page, per_page) || []
-          return render json: {
-            tracks: sliced.map { |t| normalize_track(t, platform) },
-            page: page,
-            per_page: per_page,
-            total: total
-          }
+          client = Platforms::SpotifyClient.new(connection: connection)
+          begin
+            data = client.playlist_tracks(playlist_id: playlist_id, page: page, per_page: per_page)
+            return render json: {
+              tracks: data[:items].map { |t| normalize_track(t, platform) },
+              page: page,
+              per_page: per_page,
+              total: data[:total]
+            }
+          rescue Platforms::SpotifyClient::UnauthorizedError
+            render json: { error: 'Spotify authorization expired' }, status: :unauthorized
+          rescue => e
+            Rails.logger.error("Spotify tracks fetch error: #{e.message}")
+            render json: { error: 'Unable to fetch Spotify tracks' }, status: :service_unavailable
+          end
         end
       end
 
@@ -113,7 +125,7 @@ module Api
           id: raw[:id],
           title: raw[:title],
           artist: raw[:artist],
-          duration_ms: nil, # placeholder per contract
+          duration_ms: raw[:duration_ms],
           thumbnail_url: raw[:thumbnail_url],
           platform: platform
         }
