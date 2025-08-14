@@ -121,6 +121,44 @@ class UserProfilesController < ApplicationController
     end
   end
 
+  # GET /user_profiles/spotify_connection
+  def spotify_connection
+    connection = current_user.spotify_connection
+
+    if connection
+      render json: {
+        spotify_connection: {
+          id: connection.id,
+          connected_at: connection.connected_at,
+          expires_at: connection.expires_at,
+          is_active: connection.expires_at.nil? || connection.expires_at > Time.current,
+          supports_refresh: connection.supports_refresh?
+        }
+      }
+    else
+      render json: {
+        spotify_connection: nil,
+        message: "No Spotify connection found"
+      }
+    end
+  end
+
+  # DELETE /user_profiles/spotify_connection
+  def unlink_spotify
+    connection = current_user.spotify_connection
+
+    if connection
+      connection.destroy
+      render json: {
+        message: "Spotify connection removed successfully"
+      }, status: :ok
+    else
+      render json: {
+        error: "No Spotify connection found"
+      }, status: :not_found
+    end
+  end
+
   # GET /user_profiles/platform_connections
   def platform_connections
     connections = current_user.platform_connections.includes(:user)

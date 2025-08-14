@@ -30,7 +30,10 @@ export class AppComponent {
 
   // Only show player controls on music platform pages
   showPlayerControls(): boolean {
-    return this.currentRoute() === '/player' || this.currentRoute() === '/youtube';
+  const route = this.currentRoute();
+  if (route === '/player' || route === '/youtube') return true;
+  // Show on any platform route (e.g., /platform/spotify, /platform/youtube)
+  return route.startsWith('/platform/');
   }
 }
 

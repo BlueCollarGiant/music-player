@@ -73,7 +73,7 @@ export class PlaylistPanelComponent implements OnInit {
         id: t.id,
         name: t.title,
         artist: t.artist,
-        duration: t.duration,
+  duration: t.duration || '00:00',
         video_url: undefined,
         thumbnail_url: t.thumbnail_url,
         isPlaceholder: false

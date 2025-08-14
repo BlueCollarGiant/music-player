@@ -24,6 +24,8 @@ Rails.application.routes.draw do
     get '/youtube/playlists/:playlist_id/tracks', to: 'youtube#playlist_tracks'
     # Platform-agnostic (initially YouTube-only) endpoints
     namespace :platforms, module: 'api/platforms' do
+  # Specific Spotify controller endpoint (must precede dynamic :platform route to override)
+  get 'spotify/playlists', to: 'spotify#playlists'
       # Access / connection checks
       get    ':platform/check_access',          to: 'connections#check_access'
 
@@ -46,6 +48,9 @@ Rails.application.routes.draw do
       get :current                      # GET /user_profiles/current
       get :youtube_connection           # GET /user_profiles/youtube_connection
       delete :youtube_connection, action: :unlink_youtube  # DELETE /user_profiles/youtube_connection (calls unlink_youtube action)
+  # Spotify connection management
+  get :spotify_connection           # GET /user_profiles/spotify_connection
+  delete :spotify_connection, action: :unlink_spotify  # DELETE /user_profiles/spotify_connection
       get :platform_connections        # GET /user_profiles/platform_connections
     end
   end

@@ -42,9 +42,11 @@ export class SpotifyService {
     this.isLoading.set(true);
     this.http.get<{ playlists: any[] }>(`${this.apiBase}/playlists`, { headers: this.authHeaders() }).subscribe({
       next: (res) => {
+        console.debug('[SpotifyService] playlists response', res);
         this.playlists.set(res.playlists as SpotifyPlaylist[]);
       },
-      error: () => {
+      error: (err) => {
+        console.error('[SpotifyService] playlists load error', err);
         this.playlists.set([]);
       },
       complete: () => this.isLoading.set(false)
@@ -54,8 +56,29 @@ export class SpotifyService {
   loadPlaylistTracks(id: string) {
     this.isLoading.set(true);
     this.http.get<{ tracks: any[] }>(`${this.apiBase}/playlists/${id}/tracks`, { headers: this.authHeaders() }).subscribe({
-      next: (res) => this.playlistTracks.set(res.tracks as SpotifyTrack[]),
-      error: () => this.playlistTracks.set([]),
+      next: (res) => {
+        console.debug('[SpotifyService] tracks response', res);
+        // Convert duration_ms if present to mm:ss
+        const tracks = (res.tracks || []).map((t: any, idx: number) => {
+          const durationMs = t.duration_ms || 0;
+          const mins = Math.floor(durationMs / 60000);
+            const secs = Math.floor((durationMs % 60000) / 1000);
+            const pad = (n: number) => n.toString().padStart(2, '0');
+          return {
+            id: t.id,
+            title: t.title,
+            artist: t.artist,
+            duration: `${pad(mins)}:${pad(secs)}`,
+            thumbnail_url: t.thumbnail_url,
+            position: idx
+          } as SpotifyTrack;
+        });
+        this.playlistTracks.set(tracks);
+      },
+      error: (err) => {
+        console.error('[SpotifyService] tracks load error', err);
+        this.playlistTracks.set([]);
+      },
       complete: () => this.isLoading.set(false)
     });
   }

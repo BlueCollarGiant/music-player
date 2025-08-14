@@ -16,7 +16,7 @@ html {
   background-color: #0f1631;
 }
 
-/* Default (app/youtube base) */
+/*/* Default (app/youtube base) 
 :root, .platform--youtube {
   --accent-color: #ff0000;
   --accent-color-alt: #cc0000;
@@ -33,5 +33,5 @@ html {
   --accent-color: #ff7700;
   --accent-color-alt: #ff5500;
   --accent-gradient: linear-gradient(135deg, #ff7700, #ff5500);
-}
+}*/
 

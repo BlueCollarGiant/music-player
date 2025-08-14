@@ -29,7 +29,9 @@ module Api
         when 'spotify'
           connection = spotify_connection
           return render(json: { error: 'Spotify not connected' }, status: :forbidden) unless connection
-          client = Platforms::SpotifyClient.new(connection: connection)
+          # Ensure the service class is loaded and reference with absolute namespace to avoid Ruby scoping to Api::Platforms
+          require_dependency Rails.root.join('app/services/platforms/spotify_client').to_s unless defined?(::Platforms::SpotifyClient)
+          client = ::Platforms::SpotifyClient.new(connection: connection)
           begin
             data = client.playlists(page: page, per_page: per_page)
             return render json: {
@@ -72,7 +74,8 @@ module Api
         when 'spotify'
           connection = spotify_connection
           return render(json: { error: 'Spotify not connected' }, status: :forbidden) unless connection
-          client = Platforms::SpotifyClient.new(connection: connection)
+          require_dependency Rails.root.join('app/services/platforms/spotify_client').to_s unless defined?(::Platforms::SpotifyClient)
+          client = ::Platforms::SpotifyClient.new(connection: connection)
           begin
             data = client.playlist_tracks(playlist_id: playlist_id, page: page, per_page: per_page)
             return render json: {

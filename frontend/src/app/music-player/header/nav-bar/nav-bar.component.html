@@ -79,18 +79,11 @@
             </button>
           </form>
           } @else {
-          <div class="platform-actions">
-            <button class="platform-btn spotify-btn connected" type="button" (click)="disconnectPlatform('spotify')"
-              aria-label="Disconnect Spotify">
-              <span class="platform-icon">🎵</span>
-              Spotify ✓ Disconnect
-            </button>
-
-            <!-- Optional: jump into your Spotify POV (theme/route) -->
-            <button class="platform-btn spotify-nav" type="button" (click)="goToSpotify()" aria-label="Go to Spotify">
-              ➡ Go to Spotify
-            </button>
-          </div>
+          <button class="platform-btn spotify-btn connected" type="button" (click)="disconnectPlatform('spotify')"
+            aria-label="Disconnect Spotify">
+            <span class="platform-icon">🎵</span>
+            Spotify ✓ (Click to disconnect)
+          </button>
           }
 
           <!-- Navigation Tabs (only show if logged in and on player page) -->
