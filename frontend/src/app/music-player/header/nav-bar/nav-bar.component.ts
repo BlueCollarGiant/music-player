@@ -171,7 +171,13 @@ export class NavBarComponent {
     this.router.navigate(['/youtube']);
     this.closeMobileMenu();
   }
-
+  goToSpotify() {
+  if (!this.isPlatformConnected('spotify')) {
+    alert('Spotify not connected! Please connect Spotify first.');
+    return;
+  }
+  this.router.navigate(['/platform/spotify']);
+}
   // Handle YouTube button click - auto-load playlists if connected
   handleYouTubeClick() {
     if (this.isPlatformConnected('youtube')) {

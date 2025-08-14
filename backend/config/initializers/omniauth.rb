@@ -7,12 +7,17 @@
 # We use 127.0.0.1 (not localhost) because Spotify rejects 'localhost' for some flows.
 # PKCE is enabled below for Authorization Code w/ PKCE.
 
-# Dynamic full_host: ensures OmniAuth builds callback / authorize URLs with correct host.
+# Dynamic full_host (scoped): Only coerce host to 127.0.0.1 for Spotify; let other providers use incoming host
 OmniAuth.config.full_host = lambda do |env|
-  if Rails.env.development?
-    'http://127.0.0.1:3000'
+  req = Rack::Request.new(env)
+  if req.path.start_with?('/auth/spotify')
+    if Rails.env.development?
+      'http://127.0.0.1:3000'
+    else
+      ENV.fetch('BACKEND_BASE_URL', 'https://your-api-host')
+    end
   else
-    ENV.fetch('BACKEND_BASE_URL', 'https://your-api-host')
+    "#{req.scheme}://#{req.host_with_port}"
   end
 end
 Rails.application.config.middleware.use OmniAuth::Builder do

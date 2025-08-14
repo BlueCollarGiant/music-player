@@ -245,6 +245,14 @@
   font-size: 1.25rem;
 }
 
+.platform-note {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  color: #aaa;
+  max-width: 220px;
+}
+
 .youtube-section {
   margin-top: 15px;
   padding-top: 15px;
