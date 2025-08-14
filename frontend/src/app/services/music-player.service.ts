@@ -105,11 +105,8 @@ export class MusicPlayerService {
     const track = this.currentTrack();
     if (!track) return;
     if (track.platform === 'spotify') {
-      if (!this.isPlaying()) {
-        this.playCurrent();
-      } else {
-        this.pause();
-      }
+  // Delegate to SDK toggle; coordinator will sync isPlaying from SDK events.
+  if (!this.isPlaying()) this.playCurrent(); else this.spotifyPlayback.togglePlay();
       return;
     }
     const nowPlaying = !this.isPlaying();

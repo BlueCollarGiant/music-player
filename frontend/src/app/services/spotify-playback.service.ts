@@ -22,6 +22,7 @@ export class SpotifyPlaybackService {
   private deviceId: string | null = null;
   private player: any = null;
   private loadingScript = false;
+  private _deviceActivated = false; // becomes true after successful transfer to this SDK device
 
   // Playback state
   private _isPlaying = signal(false);
@@ -68,7 +69,8 @@ export class SpotifyPlaybackService {
   }
 
   async startPlayback(opts: { uris?: string[]; contextUri?: string; offsetIndex?: number; }): Promise<void> {
-    if (!this.deviceId) return;
+    await this.ensureDeviceActive();
+    if (!this.deviceId) return; // safety
     const token = await this.fetchToken();
     if (!token) return;
     const body: any = {};
@@ -83,37 +85,53 @@ export class SpotifyPlaybackService {
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     }).catch(()=>{});
+    // Prime local UI/state in case the SDK event is slightly delayed
+    await this.primeStateAfterPlay();
   }
 
-  async togglePlay(): Promise<void> { try { await this.player?.togglePlay(); } catch {} }
-  async next(): Promise<void> { try { await this.player?.nextTrack(); } catch {} }
-  async previous(): Promise<void> { try { await this.player?.previousTrack(); } catch {} }
-  async seek(ms: number): Promise<void> { try { await this.player?.seek(ms); } catch {} }
+  async togglePlay(): Promise<void> { try { await this.ensureDeviceActive(); await this.player?.togglePlay(); } catch {} }
+  async next(): Promise<void> { try { await this.ensureDeviceActive(); await this.player?.nextTrack(); } catch {} }
+  async previous(): Promise<void> { try { await this.ensureDeviceActive(); await this.player?.previousTrack(); } catch {} }
+  async seek(ms: number): Promise<void> {
+    try {
+      await this.ensureDeviceActive();
+      await this.player?.seek(ms);
+      // Optimistic immediate signal updates (coordinator will derive smooth progress)
+      const s = await this.player?.getCurrentState?.();
+      if (s) {
+        // Mutate state locally so UI jumps instantly; then reconcile shortly after
+        s.position = ms; // override for optimism
+        this.emitStateFromSdk(s);
+      } else {
+        this._progressMs.set(ms);
+      }
+      setTimeout(async () => {
+        try {
+          const st = await this.player?.getCurrentState?.();
+          if (st) this.emitStateFromSdk(st); // reconcile if drift
+        } catch {}
+      }, 300);
+    } catch {}
+  }
   async setVolume(v: number): Promise<void> { try { await this.player?.setVolume(v); } catch {} }
 
   // Internal helpers
   private registerPlayerListeners() {
     if (!this.player) return;
-    this.player.addListener('ready', ({ device_id }: any) => {
+    this.player.addListener('ready', async ({ device_id }: any) => {
       this.deviceId = device_id;
       this.playerReady.set(true);
+      // Attempt transferring playback to this new web device WITHOUT auto-play.
+      try {
+        await this.ensureDeviceActive();
+      } catch (e) {
+        console.warn('[SpotifyPlayback] device activation failed', e);
+      }
     });
     this.player.addListener('not_ready', () => { this.playerReady.set(false); });
     this.player.addListener('player_state_changed', (state: any) => {
       if (!state) return;
-      this._isPlaying.set(!state.paused);
-      this._progressMs.set(state.position || 0);
-      const track = state.track_window?.current_track;
-      if (track) {
-        this._durationMs.set(track.duration_ms || 0);
-        this._track.set({
-          uri: track.uri,
-            name: track.name,
-            artist: (track.artists || []).map((a: any) => a.name).join(', '),
-            image: track.album?.images?.[0]?.url || '',
-            durationMs: track.duration_ms || 0
-        });
-      }
+      this.emitStateFromSdk(state);
     });
     this.player.addListener('initialization_error', (e: any) => this.handleError(e));
     this.player.addListener('authentication_error', (e: any) => this.handleError(e));
@@ -151,5 +169,83 @@ export class SpotifyPlaybackService {
   private defaultHeaders(): HeadersInit {
     const token = localStorage.getItem('auth_token');
     return token ? { 'Authorization': 'Bearer ' + token } : {};
+  }
+
+  //----------- Device Activation & State Priming -----------//
+  private async ensureDeviceActive(): Promise<void> {
+    if (this._deviceActivated) return;
+    if (!this.deviceId) {
+      await this.waitFor(() => !!this.deviceId);
+    }
+    if (!this.deviceId) throw new Error('No device id');
+    // Transfer playback (no autoplay) so subsequent play commands target our SDK device.
+    const ok = await this.apiPut('/me/player', { device_ids: [this.deviceId], play: false });
+    if (ok) this._deviceActivated = true;
+  }
+
+  private async primeStateAfterPlay(): Promise<void> {
+    // Query current state repeatedly until available (SDK can lag immediately after /play)
+    for (let i = 0; i < 8; i++) {
+      try {
+        const s = await this.player?.getCurrentState?.();
+        if (s) { this.emitStateFromSdk(s); return; }
+      } catch {}
+      await new Promise(r => setTimeout(r, 150));
+    }
+  }
+
+  private emitStateFromSdk(state: any) {
+    // Consolidated mapping; allows reuse by primeStateAfterPlay & listener
+    try {
+      this._isPlaying.set(!state.paused);
+      this._progressMs.set(state.position || 0);
+      const track = state.track_window?.current_track;
+      if (track) {
+        const duration = track.duration_ms || state.duration || 0;
+        this._durationMs.set(duration);
+        this._track.set({
+          uri: track.uri,
+          name: track.name,
+          artist: (track.artists || []).map((a: any) => a.name).join(', '),
+          image: track.album?.images?.[0]?.url || '',
+          durationMs: duration
+        });
+      }
+    } catch (e) {
+      // Swallow mapping errors to avoid breaking listener chain
+    }
+  }
+
+  private async apiPut(path: string, body: any): Promise<boolean> {
+    const token = await this.fetchToken();
+    if (!token) return false;
+    const attempt = async () => fetch(`https://api.spotify.com/v1${path}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(body)
+    });
+    try {
+      const resp = await attempt();
+      if (resp.status === 401 || resp.status === 403) {
+        // try refresh once
+        const t2 = await this.fetchToken();
+        if (!t2) return false;
+        const resp2 = await fetch(`https://api.spotify.com/v1${path}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t2 },
+          body: JSON.stringify(body)
+        });
+        return resp2.ok;
+      }
+      return resp.ok;
+    } catch { return false; }
+  }
+
+  private async waitFor(cond: () => boolean, timeoutMs = 5000, stepMs = 100): Promise<void> {
+    const start = Date.now();
+    while (!cond()) {
+      if (Date.now() - start > timeoutMs) throw new Error('timeout waiting for condition');
+      await new Promise(r => setTimeout(r, stepMs));
+    }
   }
 }
