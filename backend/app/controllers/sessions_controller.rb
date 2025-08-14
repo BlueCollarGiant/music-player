@@ -39,14 +39,32 @@ class SessionsController < ApplicationController
   # Handles OAuth callback from Google or YouTube
   def omniauth
     auth = request.env['omniauth.auth']
-    provider = params[:provider]
+    provider = auth&.provider
     user = User.from_omniauth(auth)
 
     if user
       token = JsonWebToken.encode(user_id: user.id)
 
+      # Normalize fields defensively
+      raw_expires_at = (auth.credentials.expires_at rescue nil)
+      expires_at = case raw_expires_at
+                   when Integer then Time.at(raw_expires_at)
+                   when String  then Time.at(raw_expires_at.to_i) rescue nil
+                   else nil
+                   end
+      if expires_at.nil? && auth.credentials.respond_to?(:expires) && auth.credentials.expires
+        expires_at = Time.current + 1.hour
+      end
+
+      # scopes may be array or string
+      scopes = case auth.credentials.scope
+               when Array  then auth.credentials.scope.join(' ')
+               when String then auth.credentials.scope
+               else nil
+               end
+
       case provider
-      when "youtube"
+      when 'youtube'
         connection = user.platform_connections.find_or_initialize_by(platform: 'youtube')
         connection.update!(
           platform_user_id: auth.uid,
@@ -57,18 +75,19 @@ class SessionsController < ApplicationController
           scopes: auth.credentials.scope
         )
         redirect_to "#{frontend_base_url}/landing?token=#{token}&youtube_connected=true"
-      when "spotify"
-        connection = user.platform_connections.find_or_initialize_by(platform: 'spotify')
-        connection.update!(
+      when 'spotify'
+        conn = user.platform_connections.find_or_initialize_by(platform: 'spotify')
+        conn.update!(
           platform_user_id: auth.uid,
           access_token: auth.credentials.token,
           refresh_token: auth.credentials.refresh_token,
-          expires_at: auth.credentials.expires_at ? Time.at(auth.credentials.expires_at) : (Time.current + 1.hour),
-          connected_at: Time.current,
-          scopes: auth.credentials.scope
+          expires_at: expires_at,
+          connected_at: conn.connected_at || Time.current,
+          scopes: scopes
         )
-        redirect_to "#{frontend_base_url}/landing?token=#{token}&spotify_connected=true"
+        redirect_to "#{frontend_base_url}/landing?token=#{token}&platform=spotify&status=success"
       else
+        Rails.logger.warn "Unhandled OAuth provider: #{provider.inspect}"
         redirect_to "#{frontend_base_url}/landing?token=#{token}"
       end
     else
