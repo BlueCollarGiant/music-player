@@ -75,7 +75,9 @@ export class PlaylistPanelComponent implements OnInit {
         artist: t.artist,
   duration: t.duration || '00:00',
         video_url: undefined,
-        thumbnail_url: t.thumbnail_url,
+  thumbnail_url: t.thumbnail_url,
+  thumbnailUrl: t.thumbnail_url,
+  platform: 'spotify',
         isPlaceholder: false
       }));
     }

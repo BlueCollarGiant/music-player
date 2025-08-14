@@ -2,15 +2,21 @@ import { Injectable, signal, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Song } from '../music-player/Models/song.model';
 import { YouTubeService, YouTubePlaylistTrack } from './youtube.service';
+import { SpotifyService } from './spotify.service';
+import { SpotifyPlaybackService } from './spotify-playback.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
   //-----Dependency Injection-----//
   private readonly sanitizer = inject(DomSanitizer);
   private readonly youtubeService = inject(YouTubeService);
+  private readonly spotifyService = inject(SpotifyService);
+  private readonly spotifyPlayback = inject(SpotifyPlaybackService);
 
   //-----Private Properties-----//
   private youtubePlayer: any = null;
+  private audioEl?: HTMLAudioElement;
 
   //-----Navigation State-----//
   readonly activeTab = signal<string>('Songs');
@@ -34,30 +40,51 @@ export class MusicPlayerService {
 
   //-----Unified Track Navigation-----//
   goToNextTrack(): void {
-    const tracks = this.youtubeService.playlistTracks();
     const current = this.currentTrack();
-    if (!current || tracks.length === 0) return;
-
-    const currentIndex = tracks.findIndex(t => t.id === current.id);
-    const nextIndex = currentIndex !== -1 ? (currentIndex + 1) % tracks.length : 0;
-    
-    if (nextIndex < tracks.length) {
-      const nextTrack = tracks[nextIndex];
-      this.selectTrack(this.convertYouTubeTrackToSong(nextTrack));
+    if (!current) return;
+    if (current.platform === 'spotify') {
+      const tracks = this.spotifyService.playlistTracks();
+      if (!tracks.length) return;
+      const idx = tracks.findIndex(t => t.id === current.id);
+      const nextIdx = idx !== -1 ? (idx + 1) % tracks.length : 0;
+      const next = tracks[nextIdx];
+      if (next) {
+        const song = this.spotifyService.toSong(next);
+        // Enforce literal type for platform
+        (song as any).platform = 'spotify';
+        this.selectTrack(song);
+      }
+    } else {
+      const tracks = this.youtubeService.playlistTracks();
+      if (!tracks.length) return;
+      const idx = tracks.findIndex(t => t.id === current.id);
+      const nextIdx = idx !== -1 ? (idx + 1) % tracks.length : 0;
+      const next = tracks[nextIdx];
+      if (next) this.selectTrack(this.convertYouTubeTrackToSong(next));
     }
   }
 
   goToPreviousTrack(): void {
-    const tracks = this.youtubeService.playlistTracks();
     const current = this.currentTrack();
-    if (!current || tracks.length === 0) return;
-
-    const currentIndex = tracks.findIndex(t => t.id === current.id);
-    const prevIndex = currentIndex > 0 ? currentIndex - 1 : tracks.length - 1;
-    
-    if (prevIndex >= 0) {
-      const prevTrack = tracks[prevIndex];
-      this.selectTrack(this.convertYouTubeTrackToSong(prevTrack));
+    if (!current) return;
+    if (current.platform === 'spotify') {
+      const tracks = this.spotifyService.playlistTracks();
+      if (!tracks.length) return;
+      const idx = tracks.findIndex(t => t.id === current.id);
+      const prevIdx = idx > 0 ? idx - 1 : tracks.length - 1;
+      const prev = tracks[prevIdx];
+      if (prev) {
+        const song = this.spotifyService.toSong(prev);
+        (song as any).platform = 'spotify';
+        this.selectTrack(song);
+      }
+    } else {
+      const tracks = this.youtubeService.playlistTracks();
+      if (!tracks.length) return;
+      const idx = tracks.findIndex(t => t.id === current.id);
+      const prevIdx = idx > 0 ? idx - 1 : tracks.length - 1;
+      const prev = tracks[prevIdx];
+      if (prev) this.selectTrack(this.convertYouTubeTrackToSong(prev));
     }
   }
 
@@ -75,19 +102,93 @@ export class MusicPlayerService {
 
   //-----Playback Control Methods-----//
   togglePlayPause(): void {
+    const track = this.currentTrack();
+    if (!track) return;
+    if (track.platform === 'spotify') {
+      if (!this.isPlaying()) {
+        this.playCurrent();
+      } else {
+        this.pause();
+      }
+      return;
+    }
     const nowPlaying = !this.isPlaying();
     this.isPlaying.set(nowPlaying);
   }
 
   seekTo(percentage: number): void {
-    // For basic progress update - PlaybackCoordinator will handle YouTube seeking
+    const track = this.currentTrack();
+    if (track?.platform === 'spotify' && this.audioEl) {
+      const target = Math.max(0, Math.min(100, percentage));
+      const dur = this.audioEl.duration || 30;
+      this.audioEl.currentTime = (target / 100) * dur;
+      this.currentProgress.set(target);
+      return;
+    }
     this.currentProgress.set(Math.max(0, Math.min(100, percentage)));
   }
 
   selectTrack(song: Song): void {
     if (!song.isPlaceholder) {
       this.currentTrack.set(song);
+      // stop any existing spotify audio
+      if (this.audioEl) {
+        this.audioEl.pause();
+        this.audioEl.currentTime = 0;
+      }
       this.isPlaying.set(false);      
+    }
+  }
+
+  // Unified play entry
+  playCurrent() {
+    const t = this.currentTrack();
+    if (!t) return;
+    if (t.platform === 'spotify') {
+      // Attempt full playback via Web Playback SDK
+      this.ensureSpotifyPlayback(t).catch(() => {
+        // fallback preview logic
+        const preview = t.previewUrl || null;
+        const external = t.externalUrl || null;
+        if (preview) return this.playSpotifyPreview(preview);
+        if (external) { window.open(external, '_blank'); this.isPlaying.set(false); }
+      });
+      return;
+    }
+    // YouTube handled via playback coordinator
+    this.isPlaying.set(true);
+  }
+
+  pause() {
+    const t = this.currentTrack();
+    if (t?.platform === 'spotify') {
+  this.spotifyPlayback.togglePlay(); // toggle handles pause
+  this.audioEl?.pause(); // ensure preview (if any) stops
+  this.isPlaying.set(false); // UI will be updated via state callback when resumed/paused
+      return;
+    }
+    this.isPlaying.set(false);
+  }
+
+  private playSpotifyPreview(url: string) {
+    if (!this.audioEl) {
+      this.audioEl = new Audio();
+      this.audioEl.addEventListener('ended', () => this.isPlaying.set(false));
+      this.audioEl.addEventListener('timeupdate', () => {
+        if (!this.audioEl) return;
+        const dur = this.audioEl.duration || 30;
+        if (dur > 0) {
+          const pct = (this.audioEl.currentTime / dur) * 100;
+          this.updateProgress(pct, this.audioEl.currentTime);
+        }
+      });
+    }
+    try {
+      this.audioEl.src = url;
+      this.audioEl.currentTime = 0;
+      this.audioEl.play().then(() => this.isPlaying.set(true)).catch(() => this.isPlaying.set(false));
+    } catch {
+      this.isPlaying.set(false);
     }
   }
 
@@ -176,5 +277,31 @@ export class MusicPlayerService {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  private async ensureSpotifyPlayback(track: Song) {
+    const playlist = this.spotifyService.selectedPlaylist();
+    const tracks = this.spotifyService.playlistTracks();
+    const index = tracks.findIndex(t => t.id === track.id);
+    // Initialize player if needed
+    await this.spotifyPlayback.ensurePlayer(async () => {
+      const resp = await fetch(`${environment.apiUrl}/api/platforms/spotify/token`, { headers: this.authHeader() });
+      if (!resp.ok) throw new Error('token');
+      const data = await resp.json();
+      return data.access_token;
+    });
+    await this.spotifyPlayback.connect();
+    // Start playback using playlist context if possible
+    if (playlist && index >= 0) {
+      await this.spotifyPlayback.startPlayback({ contextUri: `spotify:playlist:${playlist.id}`, offsetIndex: index });
+    } else {
+      await this.spotifyPlayback.startPlayback({ uris: [`spotify:track:${track.id}`] });
+    }
+    this.isPlaying.set(true);
+  }
+
+  private authHeader(): HeadersInit {
+    const token = localStorage.getItem('auth_token');
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
   }
 }

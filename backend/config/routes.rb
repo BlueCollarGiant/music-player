@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     namespace :platforms, module: 'api/platforms' do
   # Specific Spotify controller endpoint (must precede dynamic :platform route to override)
   get 'spotify/playlists', to: 'spotify#playlists'
+  get 'spotify/token', to: 'spotify#token'
       # Access / connection checks
       get    ':platform/check_access',          to: 'connections#check_access'
 

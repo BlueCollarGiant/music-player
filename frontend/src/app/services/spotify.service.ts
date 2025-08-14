@@ -18,6 +18,8 @@ export interface SpotifyTrack {
   duration: string; // mm:ss
   thumbnail_url?: string;
   position: number;
+  preview_url?: string | null;
+  external_url?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -59,7 +61,7 @@ export class SpotifyService {
       next: (res) => {
         console.debug('[SpotifyService] tracks response', res);
         // Convert duration_ms if present to mm:ss
-        const tracks = (res.tracks || []).map((t: any, idx: number) => {
+    const tracks = (res.tracks || []).map((t: any, idx: number) => {
           const durationMs = t.duration_ms || 0;
           const mins = Math.floor(durationMs / 60000);
             const secs = Math.floor((durationMs % 60000) / 1000);
@@ -70,7 +72,9 @@ export class SpotifyService {
             artist: t.artist,
             duration: `${pad(mins)}:${pad(secs)}`,
             thumbnail_url: t.thumbnail_url,
-            position: idx
+      position: idx,
+      preview_url: t.preview_url || null,
+      external_url: t.external_url || null
           } as SpotifyTrack;
         });
         this.playlistTracks.set(tracks);
@@ -86,5 +90,22 @@ export class SpotifyService {
   selectPlaylist(pl: SpotifyPlaylist) {
     this.selectedPlaylist.set(pl);
     this.loadPlaylistTracks(pl.id);
+  }
+
+  // Convert a SpotifyTrack to unified Song shape
+  toSong(t: SpotifyTrack) {
+    return {
+      id: t.id,
+      name: t.title,
+      artist: t.artist,
+      duration: t.duration,
+      platform: 'spotify' as const,
+      thumbnail_url: t.thumbnail_url,
+      thumbnailUrl: t.thumbnail_url,
+      previewUrl: t.preview_url || null,
+      externalUrl: t.external_url || null,
+      durationMs: undefined,
+      isPlaceholder: false
+    };
   }
 }

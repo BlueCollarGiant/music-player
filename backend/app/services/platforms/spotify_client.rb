@@ -39,7 +39,9 @@ module Platforms
           artist: (artists.first && artists.first['name']) || artists.map { |a| a['name'] }.join(', '),
           duration_ms: tr['duration_ms'],
           thumbnail_url: best_image && best_image['url'],
-          platform: 'spotify'
+          platform: 'spotify',
+          preview_url: tr['preview_url'],
+          external_url: tr.dig('external_urls','spotify')
         }
       end
       total = json.dig('tracks','total') || json['total'] || items.size
