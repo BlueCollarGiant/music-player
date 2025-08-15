@@ -22,26 +22,21 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   readonly currentTrack = computed<Song | null>(() => this.musicService.currentTrack());
   readonly isPlaying = computed(() => this.musicService.isPlaying());
   readonly hasVideoUrl = computed(() => !!this.currentTrack()?.video_url);
-  
-  // Show video iframe when track has video URL (regardless of playing state)
-  readonly showVideo = computed(() => {
-    const track = this.currentTrack();
-    return !!(track && track.video_url);
-  });
-  
-  // Show thumbnail overlay when video exists but not playing
-  readonly showThumbnailOverlay = computed(() => this.hasVideoUrl() && !this.isPlaying());
-  
-  // Show static thumbnail when no video URL
-  readonly showStaticThumbnail = computed(() => {
-    const track = this.currentTrack();
-    return !!(track && !track.video_url);
-  });
 
-  readonly thumbnailUrl = computed(() => {
-    const track = this.currentTrack();
-    return track?.thumbnail_url || 'assets/images/thumbnail.png';
-  });
+  // New helpers to distinguish platform display logic
+  showVideo() {
+    const t = this.currentTrack();
+    return !!t && !!t.video_url && (t.platform === 'youtube' || !t.platform);
+  }
+  showStaticThumbnail() {
+    const t = this.currentTrack();
+    return !!t && !t.video_url; // any non-youtube or youtube without video_url
+  }
+  thumbnailUrl() {
+    const t = this.currentTrack();
+    return t?.thumbnailUrl || t?.thumbnail_url || 'assets/images/thumbnail.png';
+  }
+  readonly showThumbnailOverlay = computed(() => this.hasVideoUrl() && !this.isPlaying());
 
   // Player state tracking
   private currentPlayer: any = null;

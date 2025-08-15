@@ -1,54 +1,29 @@
 <!-- Now Playing Panel (Right Side) -->
 <div class="now-playing">
-  <!-- Media Container - Takes up most of the space -->
   <div class="media-container">
     @if (showVideo()) {
-      <!-- YouTube Video Container -->
       <div class="video-container">
-        <!-- YouTube Player Container - YouTube API will create iframe inside this div -->
-        <div #youtubePlayer
-             class="youtube-player">
-        </div>
-        
-        <!-- Thumbnail Overlay (when video exists but not playing) -->
+        <div #youtubePlayer class="youtube-player"></div>
         @if (showThumbnailOverlay()) {
           <div class="thumbnail-overlay" (click)="onThumbnailClick()">
-            <img [src]="thumbnailUrl()" alt="Video Thumbnail" class="overlay-thumbnail"/>
-            <div class="play-overlay">
-              <div class="play-button">▶</div>
-            </div>
+            <img [src]="thumbnailUrl()" alt="Video Thumbnail" class="overlay-thumbnail" />
+            <div class="play-overlay"><div class="play-button">▶</div></div>
           </div>
         }
       </div>
-      
-    } @else if (showStaticThumbnail()) {
-      <!-- Static Thumbnail (no video URL) -->
-      <div class="thumbnail-container" (click)="onThumbnailClick()">
-        <img class="album-art"
-             [src]="thumbnailUrl()"
-             [alt]="currentTrack()?.name + ' Album Art' || 'Album Art'"
-             loading="eager"/>
-      </div>
-    } @else {
-      <!-- Show visualizer when no current track -->
-      <div class="visualizer-container">
-        <app-visualizer [isPlaying]="isPlaying()"/>
-      </div>
+    }
+    @if (!showVideo() && showStaticThumbnail()) {
+      <img class="album-art" [src]="thumbnailUrl()" [alt]="currentTrack()?.name || 'Album Art'" />
+    }
+    @if (!currentTrack()) {
+      <div class="visualizer-container"><app-visualizer [isPlaying]="isPlaying()"/></div>
     }
   </div>
-
-  <!-- Song Info Container - Fixed at bottom -->
   @if (currentTrack()) {
     <div class="song-info-container">
-      <h2 class="title">{{ currentTrack()?.name || 'No Song Playing' }}</h2>
-      <p class="artist">{{ currentTrack()?.artist || 'Unknown Artist' }}</p>
+      <div class="title">{{ currentTrack()?.name }}</div>
+      <div class="artist">{{ currentTrack()?.artist }}</div>
     </div>
-  }
-
-  <!-- Visualizer - Always show when track exists -->
-  @if (currentTrack()) {
-    <div class="bottom-visualizer">
-      <app-visualizer [isPlaying]="isPlaying()"/>
-    </div>
+    <div class="bottom-visualizer"><app-visualizer [isPlaying]="isPlaying()"/></div>
   }
 </div>

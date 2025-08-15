@@ -1,0 +1,17 @@
+/* Scoped theme tokens: only children rendered under this shell inherit them 
+.platform-shell {
+  --accent: #e53935; /* youtube default 
+  --bg: #0f0f0f;
+  --fg: #fafafa;
+  color: var(--fg);
+}
+
+/*.platform--youtube    { --accent: #e53935; }
+.platform--spotify    { --accent: #1db954; }
+.platform--soundcloud { --accent: #ff7700; }
+.platform--app        { --accent: #6aa0ff; }*/
+
+/* Optional helpers you can opt-in to inside your existing components 
+.accent-bg { background: var(--accent); }
+.accent-fg { color: var(--accent); }
+*/

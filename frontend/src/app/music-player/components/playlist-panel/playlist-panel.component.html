@@ -8,8 +8,8 @@
     <div class="info">
       <!--<div class="thumbnail"></div>-->
       <div class="playlist-selector">
-        <select class="playlist-dropdown" (change)="onPlaylistChange($event)" [disabled]="isYouTubeMode && youtubeService.isLoading()">
-          @if (isYouTubeMode) {
+        <select class="playlist-dropdown" (change)="onPlaylistChange($event)" [disabled]="(platform==='youtube' && youtubeService.isLoading()) || (platform==='spotify' && spotifyService.isLoading())">
+          @if (platform === 'youtube') {
             @if (youtubeService.isLoading()) {
               <option value="">Loading YouTube Playlists...</option>
             } @else if (youtubeService.playlists().length === 0) {
@@ -17,6 +17,17 @@
             } @else {
               <option value="">Select YouTube Playlist</option>
               @for (playlist of youtubeService.playlists(); track playlist.id) {
+                <option [value]="playlist.id">{{ playlist.title }} ({{ playlist.video_count }} tracks)</option>
+              }
+            }
+          } @else if (platform === 'spotify') {
+            @if (spotifyService.isLoading()) {
+              <option value="">Loading Spotify Playlists...</option>
+            } @else if (spotifyService.playlists().length === 0) {
+              <option value="">No Spotify Playlists Found</option>
+            } @else {
+              <option value="">Select Spotify Playlist</option>
+              @for (playlist of spotifyService.playlists(); track playlist.id) {
                 <option [value]="playlist.id">{{ playlist.title }} ({{ playlist.video_count }} tracks)</option>
               }
             }

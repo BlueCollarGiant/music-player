@@ -7,6 +7,7 @@ import { MusicPlayerService } from '../../../services/music-player.service';
 import { AuthService } from '../../../services/auth.service';
 import { YouTubeService } from '../../../services/youtube.service';
 import { environment } from '../../../../environments/environment';
+import { PlatformStateService } from '../../../services/platform-state.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -21,6 +22,7 @@ export class NavBarComponent {
   private youtubeService = inject(YouTubeService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private platformState = inject(PlatformStateService);
 
   tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
   isMobileMenuOpen = signal(false);
@@ -169,7 +171,6 @@ export class NavBarComponent {
     this.router.navigate(['/youtube']);
     this.closeMobileMenu();
   }
-
   // Handle YouTube button click - auto-load playlists if connected
   handleYouTubeClick() {
     if (this.isPlatformConnected('youtube')) {
@@ -179,6 +180,19 @@ export class NavBarComponent {
     } else {
       alert('YouTube not connected! Please connect YouTube first.');
     }
+    this.closeMobileMenu();
+  }
+
+  navigatePlatform(platform: 'youtube' | 'spotify' | 'soundcloud') {
+    // set theme state
+    this.platformState.set(platform);
+    // For platforms other than youtube we still reuse youtube POV for now
+    if (platform === 'youtube') {
+      this.handleYouTubeClick();
+      return;
+    }
+    // Reuse same component under /platform/<platform>
+    this.router.navigate(['/platform', platform]);
     this.closeMobileMenu();
   }
 }
