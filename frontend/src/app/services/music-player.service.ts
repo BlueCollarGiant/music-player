@@ -43,17 +43,8 @@ export class MusicPlayerService {
     const current = this.currentTrack();
     if (!current) return;
     if (current.platform === 'spotify') {
-      const tracks = this.spotifyService.playlistTracks();
-      if (!tracks.length) return;
-      const idx = tracks.findIndex(t => t.id === current.id);
-      const nextIdx = idx !== -1 ? (idx + 1) % tracks.length : 0;
-      const next = tracks[nextIdx];
-      if (next) {
-        const song = this.spotifyService.toSong(next);
-        // Enforce literal type for platform
-        (song as any).platform = 'spotify';
-        this.selectTrack(song);
-      }
+  // Auto-advance disabled for Spotify per requirements – do nothing.
+  return;
     } else {
       const tracks = this.youtubeService.playlistTracks();
       if (!tracks.length) return;
@@ -105,8 +96,7 @@ export class MusicPlayerService {
     const track = this.currentTrack();
     if (!track) return;
     if (track.platform === 'spotify') {
-  // Delegate to SDK toggle; coordinator will sync isPlaying from SDK events.
-  if (!this.isPlaying()) this.playCurrent(); else this.spotifyPlayback.togglePlay();
+  // Coordinator manages toggle; no direct action here now.
       return;
     }
     const nowPlaying = !this.isPlaying();
@@ -142,14 +132,7 @@ export class MusicPlayerService {
     const t = this.currentTrack();
     if (!t) return;
     if (t.platform === 'spotify') {
-      // Attempt full playback via Web Playback SDK
-      this.ensureSpotifyPlayback(t).catch(() => {
-        // fallback preview logic
-        const preview = t.previewUrl || null;
-        const external = t.externalUrl || null;
-        if (preview) return this.playSpotifyPreview(preview);
-        if (external) { window.open(external, '_blank'); this.isPlaying.set(false); }
-      });
+  // Coordinator will invoke load/start; nothing here
       return;
     }
     // YouTube handled via playback coordinator
@@ -159,9 +142,9 @@ export class MusicPlayerService {
   pause() {
     const t = this.currentTrack();
     if (t?.platform === 'spotify') {
-  this.spotifyPlayback.togglePlay(); // toggle handles pause
-  this.audioEl?.pause(); // ensure preview (if any) stops
-  this.isPlaying.set(false); // UI will be updated via state callback when resumed/paused
+  this.spotifyPlayback.pause().catch(()=>{});
+  this.audioEl?.pause();
+  this.isPlaying.set(false);
       return;
     }
     this.isPlaying.set(false);
@@ -276,26 +259,7 @@ export class MusicPlayerService {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
-  private async ensureSpotifyPlayback(track: Song) {
-    const playlist = this.spotifyService.selectedPlaylist();
-    const tracks = this.spotifyService.playlistTracks();
-    const index = tracks.findIndex(t => t.id === track.id);
-    // Initialize player if needed
-    await this.spotifyPlayback.ensurePlayer(async () => {
-      const resp = await fetch(`${environment.apiUrl}/api/platforms/spotify/token`, { headers: this.authHeader() });
-      if (!resp.ok) throw new Error('token');
-      const data = await resp.json();
-      return data.access_token;
-    });
-    await this.spotifyPlayback.connect();
-    // Start playback using playlist context if possible
-    if (playlist && index >= 0) {
-      await this.spotifyPlayback.startPlayback({ contextUri: `spotify:playlist:${playlist.id}`, offsetIndex: index });
-    } else {
-      await this.spotifyPlayback.startPlayback({ uris: [`spotify:track:${track.id}`] });
-    }
-    this.isPlaying.set(true);
-  }
+  // Removed legacy ensureSpotify* helpers – coordinator + spotifyPlayback.handle unified API now.
 
   private authHeader(): HeadersInit {
     const token = localStorage.getItem('auth_token');

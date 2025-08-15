@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment';
 
+// Normalized track meta similar to YouTube path expectations
 interface SpotifyTrackMeta {
   uri: string;
   name: string;
@@ -23,23 +24,34 @@ export class SpotifyPlaybackService {
   private player: any = null;
   private loadingScript = false;
   private _deviceActivated = false; // becomes true after successful transfer to this SDK device
+  private _elementActivated = false; // user gesture activation for autoplay policies
 
-  // Playback state
+  // Playback state (mirrors YouTube public API expectations)
   private _isPlaying = signal(false);
   private _progressMs = signal(0);
   private _durationMs = signal(0);
   private _track = signal<SpotifyTrackMeta | null>(null);
+  private _error = signal<string | null>(null);
   private premiumBlocked = signal(false);
 
-  readonly isReady = computed(() => this.playerReady());
+  // Track currently loaded (selected) but not yet started (set by load())
+  private pendingTrackUri: string | null = null;
+
+  // Public reactive surface
+  readonly ready = computed(() => this.playerReady());
   readonly isPlaying = computed(() => this._isPlaying());
-  readonly progressMs = computed(() => this._progressMs());
-  readonly durationMs = computed(() => this._durationMs());
+  readonly durationSeconds = computed(() => Math.floor(this._durationMs() / 1000));
+  readonly currentTimeSeconds = computed(() => Math.floor(this._progressMs() / 1000));
   readonly track = computed(() => this._track());
+  readonly error = computed(() => this._error());
   readonly isPremiumBlocked = computed(() => this.premiumBlocked());
 
-  // Public API
-  async ensurePlayer(getToken: () => Promise<string>): Promise<void> {
+  // Legacy accessors used by coordinator before refactor (kept for compatibility during transition)
+  readonly durationMs = computed(() => this._durationMs());
+  readonly progressMs = computed(() => this._progressMs());
+
+  // Internal: ensure SDK/player created. Token retrieval encapsulated (no external getToken needed now)
+  async ensurePlayer(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
     await this.loadScript();
     if (this.player) return; // already created
@@ -51,7 +63,7 @@ export class SpotifyPlaybackService {
         this.player = new w.Spotify.Player({
           name: 'Web Player (App)',
           getOAuthToken: async (cb: (t: string) => void) => {
-            try { cb(await getToken()); } catch { cb(''); }
+            try { const t = await this.fetchToken(); cb(t || ''); } catch { cb(''); }
           },
           volume: 0.6
         });
@@ -67,34 +79,56 @@ export class SpotifyPlaybackService {
     const ok = await this.player.connect();
     return ok;
   }
-
-  async startPlayback(opts: { uris?: string[]; contextUri?: string; offsetIndex?: number; }): Promise<void> {
-    await this.ensureDeviceActive();
-    if (!this.deviceId) return; // safety
-    const token = await this.fetchToken();
-    if (!token) return;
-    const body: any = {};
-    if (opts.contextUri) {
-      body.context_uri = opts.contextUri;
-      if (typeof opts.offsetIndex === 'number') body.offset = { position: opts.offsetIndex };
-    } else if (opts.uris) {
-      body.uris = opts.uris;
+  //--------------- Public API (Parody with YouTube) ---------------//
+  // load(track) stores URI & ensures player/device ready but does NOT start playback
+  async load(track: { id: string } & any): Promise<void> {
+    try {
+      await this.ensurePlayer();
+      await this.connect();
+      this.pendingTrackUri = `spotify:track:${track.id}`;
+      // Reset state for fresh start (mirror YouTube load then start pattern)
+      this._progressMs.set(0);
+      this._durationMs.set(0);
+      // Do not clear existing currently playing track if user is switching before pause; coordinator manages.
+    } catch (e: any) {
+      this._error.set(e?.message || 'spotify_load_failed');
+      throw e;
     }
-    await fetch('https://api.spotify.com/v1/me/player/play?device_id=' + this.deviceId, {
-      method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    }).catch(()=>{});
-    // Prime local UI/state in case the SDK event is slightly delayed
-    await this.primeStateAfterPlay();
   }
 
-  async togglePlay(): Promise<void> { try { await this.ensureDeviceActive(); await this.player?.togglePlay(); } catch {} }
-  async next(): Promise<void> { try { await this.ensureDeviceActive(); await this.player?.nextTrack(); } catch {} }
-  async previous(): Promise<void> { try { await this.ensureDeviceActive(); await this.player?.previousTrack(); } catch {} }
-  async seek(ms: number): Promise<void> {
+  async start(): Promise<void> {
+    if (!this.pendingTrackUri) throw new Error('no_track_loaded');
+    await this.ensureDeviceActive();
+    if (!this.deviceId) throw new Error('device_unavailable');
+    const token = await this.fetchToken();
+    if (!token) throw new Error('no_token');
+    try {
+      // Deterministic single-track play from 0
+      await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${encodeURIComponent(this.deviceId)}` , {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uris: [this.pendingTrackUri], position_ms: 0 })
+      });
+      await this.primeStateAfterPlay();
+    } catch (e: any) {
+      this._error.set('spotify_start_failed');
+      throw e;
+    }
+  }
+
+  async pause(): Promise<void> { try { await this.ensureDeviceActive(); await this.player?.pause(); } catch (e: any) { this._error.set('spotify_pause_failed'); throw e; } }
+  async resume(): Promise<void> { try { await this.ensureDeviceActive(); await this.player?.resume(); } catch (e: any) { this._error.set('spotify_resume_failed'); throw e; } }
+  async toggle(): Promise<void> {
+    if (!this.pendingTrackUri && !this._track()) throw new Error('nothing_loaded');
+    if (this._isPlaying()) return this.pause();
+    // If we have a loaded (pending) track not yet started, start it; else resume
+    if (this.pendingTrackUri && (!this._track() || this._progressMs() === 0)) return this.start();
+    return this.resume();
+  }
+  async seek(seconds: number): Promise<void> {
     try {
       await this.ensureDeviceActive();
+      const ms = Math.max(0, Math.floor(seconds * 1000));
       await this.player?.seek(ms);
       // Optimistic immediate signal updates (coordinator will derive smooth progress)
       const s = await this.player?.getCurrentState?.();
@@ -112,6 +146,17 @@ export class SpotifyPlaybackService {
         } catch {}
       }, 300);
     } catch {}
+  }
+  async teardown(): Promise<void> {
+    try { await this.player?.pause(); } catch {}
+    try { this.player?.removeListener('player_state_changed'); } catch {}
+    try { this.player?.disconnect(); } catch {}
+    this.player = null;
+    this.playerReady.set(false);
+    this.deviceId = null;
+    this._deviceActivated = false;
+    this._elementActivated = false;
+    this.pendingTrackUri = null;
   }
   async setVolume(v: number): Promise<void> { try { await this.player?.setVolume(v); } catch {} }
 
@@ -140,7 +185,8 @@ export class SpotifyPlaybackService {
   }
 
   private handleError(e: any) {
-    console.warn('[SpotifyPlayback] error', e?.message || e);
+  console.warn('[SpotifyPlayback] error', e?.message || e);
+  this._error.set(e?.message || 'spotify_error');
   }
 
   private async loadScript(): Promise<void> {
@@ -172,15 +218,23 @@ export class SpotifyPlaybackService {
   }
 
   //----------- Device Activation & State Priming -----------//
-  private async ensureDeviceActive(): Promise<void> {
-    if (this._deviceActivated) return;
+  private async ensureDeviceActive(): Promise<string> {
     if (!this.deviceId) {
       await this.waitFor(() => !!this.deviceId);
     }
-    if (!this.deviceId) throw new Error('No device id');
-    // Transfer playback (no autoplay) so subsequent play commands target our SDK device.
-    const ok = await this.apiPut('/me/player', { device_ids: [this.deviceId], play: false });
-    if (ok) this._deviceActivated = true;
+    if (!this.deviceId) throw new Error('Spotify device not ready');
+    if (!this._deviceActivated) {
+      // Transfer playback silently so future play commands target this device; ignore errors if already active.
+      try {
+        await this.apiPut('/me/player', { device_ids: [this.deviceId], play: false });
+        this._deviceActivated = true;
+      } catch {}
+    }
+    // Attempt activation of audio element once on a user gesture path.
+    if (!this._elementActivated) {
+      try { (this.player as any)?.activateElement?.(); this._elementActivated = true; } catch {}
+    }
+    return this.deviceId;
   }
 
   private async primeStateAfterPlay(): Promise<void> {

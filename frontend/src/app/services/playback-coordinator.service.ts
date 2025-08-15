@@ -13,10 +13,10 @@ export class PlaybackCoordinatorService {
   private readonly timerTick = signal<number>(0);
   private timerInterval: number | null = null;
 
-  //-----Spotify Timebase (mirrors YouTube logic but reuses SAME timer loop)-----//
-  private readonly spotifyBasePositionMs = signal<number>(0); // position at last state event / seek
+  //-----Spotify derived timebase (kept minimal; driven by SDK state events)-----//
+  private readonly spotifyBasePositionMs = signal<number>(0);
   private readonly spotifyDurationMs = signal<number>(0);
-  private readonly spotifyLastUpdateTs = signal<number>(0); // epoch ms when base captured
+  private readonly spotifyLastUpdateTs = signal<number>(0);
   private readonly spotifyIsPlaying = signal<boolean>(false);
   private lastSpotifyTrackUri: string | null = null;
 
@@ -110,10 +110,10 @@ export class PlaybackCoordinatorService {
     const track = this.musicPlayer.currentTrack();
     if (track?.platform !== 'spotify') return; // only react when active track is spotify
 
-    const sdkTrack = this.spotifyPlayback.track(); // triggers effect when SDK track updates
-    const isPlaying = this.spotifyPlayback.isPlaying();
-    const position = this.spotifyPlayback.progressMs();
-    const duration = this.spotifyPlayback.durationMs();
+  const sdkTrack = this.spotifyPlayback.track();
+  const isPlaying = this.spotifyPlayback.isPlaying();
+  const position = this.spotifyPlayback.progressMs();
+  const duration = this.spotifyPlayback.durationMs();
 
     // Detect track change by uri (reset base position)
     const uri = sdkTrack?.uri || null;
@@ -177,7 +177,7 @@ export class PlaybackCoordinatorService {
       case YT.PlayerState.ENDED:
         this.musicPlayer.setPlayingState(false);
         this.stopTimer();
-        // Auto-advance to next track
+        // Keep existing auto-advance for YouTube only (Spotify disabled elsewhere)
         this.musicPlayer.goToNextTrack();
         break;
     }
@@ -203,6 +203,30 @@ export class PlaybackCoordinatorService {
   togglePlayPause(): void {
     const player = this.youtubePlayerSignal();
     const isReady = this.isPlayerReadySignal();
+    const track = this.musicPlayer.currentTrack();
+
+    // Spotify path: rely entirely on SDK toggle after initial single-track start.
+    if (track?.platform === 'spotify') {
+      // Parity toggle: pause if playing, resume if paused+loaded, else load+start
+      const playing = this.musicPlayer.isPlaying();
+      if (playing) {
+        this.spotifyPlayback.pause().catch(()=>{});
+        this.musicPlayer.setPlayingState(false);
+        return;
+      }
+      // If same track loaded previously (uri matches) resume, else fresh load+start
+      const currentUri = this.spotifyPlayback.track()?.uri || null;
+      const targetUri = track.id ? `spotify:track:${track.id}` : null;
+      if (currentUri && targetUri && currentUri === targetUri) {
+        this.spotifyPlayback.resume().then(()=> this.musicPlayer.setPlayingState(true)).catch(()=>{});
+      } else {
+        this.spotifyPlayback.load(track as any)
+          .then(()=> this.spotifyPlayback.start())
+          .then(()=> this.musicPlayer.setPlayingState(true))
+          .catch(()=>{});
+      }
+      return;
+    }
     
     if (!player || !isReady) {
       this.musicPlayer.togglePlayPause();
@@ -235,8 +259,8 @@ export class PlaybackCoordinatorService {
       const duration = this.spotifyDurationMs();
       if (duration > 0) {
         const targetMs = (clamped / 100) * duration;
-  this.onExternalSeek(targetMs); // optimistic local update
-  this.spotifyPlayback.seek(targetMs).catch(()=>{});
+        this.onExternalSeek(targetMs);
+        this.spotifyPlayback.seek(targetMs / 1000).catch(()=>{}); // API seeks in seconds
       }
       return;
     }
