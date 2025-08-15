@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment';
 
@@ -16,6 +16,7 @@ interface SpotifyPlayerWindow extends Window { Spotify?: any; }
 @Injectable({ providedIn: 'root' })
 export class SpotifyPlaybackService {
   private platformId = inject(PLATFORM_ID);
+  private destroyRef = inject(DestroyRef);
 
   // SDK / Player state
   private sdkReady = signal(false);
@@ -23,6 +24,7 @@ export class SpotifyPlaybackService {
   private deviceId: string | null = null;
   private player: any = null;
   private loadingScript = false;
+  private ensurePlayerPromise: Promise<void> | null = null; // guard concurrent ensurePlayer calls
   private _deviceActivated = false; // becomes true after successful transfer to this SDK device
   private _elementActivated = false; // user gesture activation for autoplay policies
 
@@ -36,6 +38,8 @@ export class SpotifyPlaybackService {
 
   // Track currently loaded (selected) but not yet started (set by load())
   private pendingTrackUri: string | null = null;
+  private cachedToken: { value: string; fetchedAt: number } | null = null;
+  private static readonly TOKEN_TTL_MS = 50_000; // token cache TTL (adjust relative to backend token lifetime)
 
   // Public reactive surface
   readonly ready = computed(() => this.playerReady());
@@ -53,25 +57,30 @@ export class SpotifyPlaybackService {
   // Internal: ensure SDK/player created. Token retrieval encapsulated (no external getToken needed now)
   async ensurePlayer(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
-    await this.loadScript();
-    if (this.player) return; // already created
+    if (this.player) return;
+    if (this.ensurePlayerPromise) return this.ensurePlayerPromise;
 
-    await new Promise<void>((resolve) => {
-      const w = window as SpotifyPlayerWindow;
-      const tryCreate = () => {
-        if (!w.Spotify) { setTimeout(tryCreate, 100); return; }
-        this.player = new w.Spotify.Player({
-          name: 'Web Player (App)',
-          getOAuthToken: async (cb: (t: string) => void) => {
-            try { const t = await this.fetchToken(); cb(t || ''); } catch { cb(''); }
-          },
-          volume: 0.6
-        });
-        this.registerPlayerListeners();
-        resolve();
-      };
-      tryCreate();
-    });
+    this.ensurePlayerPromise = (async () => {
+      await this.loadScript();
+      if (this.player) return;
+      await new Promise<void>((resolve) => {
+        const w = window as SpotifyPlayerWindow;
+        const tryCreate = () => {
+          if (!w.Spotify) { setTimeout(tryCreate, 100); return; }
+          this.player = new w.Spotify.Player({
+            name: 'Web Player (App)',
+            getOAuthToken: async (cb: (t: string) => void) => {
+              try { const t = await this.fetchToken(); cb(t || ''); } catch { cb(''); }
+            },
+            volume: 0.6
+          });
+          this.registerPlayerListeners();
+          resolve();
+        };
+        tryCreate();
+      });
+    })();
+    try { await this.ensurePlayerPromise; } finally { this.ensurePlayerPromise = null; }
   }
 
   async connect(): Promise<boolean> {
@@ -205,10 +214,16 @@ export class SpotifyPlaybackService {
 
   private async fetchToken(): Promise<string | null> {
     try {
+      if (this.cachedToken && (Date.now() - this.cachedToken.fetchedAt) < SpotifyPlaybackService.TOKEN_TTL_MS) {
+        return this.cachedToken.value;
+      }
       const resp = await fetch(`${environment.apiUrl}/api/platforms/spotify/token`, { headers: this.defaultHeaders() });
       if (!resp.ok) return null;
       const data = await resp.json();
-      return data.access_token;
+      if (data?.access_token) {
+        this.cachedToken = { value: data.access_token, fetchedAt: Date.now() };
+      }
+      return data?.access_token || null;
     } catch { return null; }
   }
 
