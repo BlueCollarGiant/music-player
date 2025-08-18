@@ -344,6 +344,17 @@ export class AuthService {
             
           });
           break;
+        case 'spotify':
+          response = await fetch(`${environment.apiUrl}/user_profiles/spotify_connection`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            
+          });
+          break;
         
           
         default:

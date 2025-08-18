@@ -245,10 +245,21 @@
   font-size: 1.25rem;
 }
 
+.platform-note {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  color: #aaa;
+  max-width: 220px;
+}
+
 .youtube-section {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* space between platform nav buttons */
 }
 
 .youtube-nav-btn {

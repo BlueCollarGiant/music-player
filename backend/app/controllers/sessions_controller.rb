@@ -39,17 +39,34 @@ class SessionsController < ApplicationController
   # Handles OAuth callback from Google or YouTube
   def omniauth
     auth = request.env['omniauth.auth']
-    provider = params[:provider]
+    provider = auth&.provider
     user = User.from_omniauth(auth)
 
     if user
       token = JsonWebToken.encode(user_id: user.id)
 
-      if provider == "youtube"
-        # Handle YouTube platform connection
-        youtube_connection = user.platform_connections.find_or_initialize_by(platform: 'youtube')
+      # Normalize fields defensively
+      raw_expires_at = (auth.credentials.expires_at rescue nil)
+      expires_at = case raw_expires_at
+                   when Integer then Time.at(raw_expires_at)
+                   when String  then Time.at(raw_expires_at.to_i) rescue nil
+                   else nil
+                   end
+      if expires_at.nil? && auth.credentials.respond_to?(:expires) && auth.credentials.expires
+        expires_at = Time.current + 1.hour
+      end
 
-        youtube_connection.update!(
+      # scopes may be array or string
+      scopes = case auth.credentials.scope
+               when Array  then auth.credentials.scope.join(' ')
+               when String then auth.credentials.scope
+               else nil
+               end
+
+      case provider
+      when 'youtube'
+        connection = user.platform_connections.find_or_initialize_by(platform: 'youtube')
+        connection.update!(
           platform_user_id: auth.uid,
           access_token: auth.credentials.token,
           refresh_token: auth.credentials.refresh_token,
@@ -57,11 +74,20 @@ class SessionsController < ApplicationController
           connected_at: Time.current,
           scopes: auth.credentials.scope
         )
-
-        has_youtube = youtube_connection.persisted?
-        redirect_to "#{frontend_base_url}/landing?token=#{token}&youtube_connected=#{has_youtube}"
+        redirect_to "#{frontend_base_url}/landing?token=#{token}&youtube_connected=true"
+      when 'spotify'
+        conn = user.platform_connections.find_or_initialize_by(platform: 'spotify')
+        conn.update!(
+          platform_user_id: auth.uid,
+          access_token: auth.credentials.token,
+          refresh_token: auth.credentials.refresh_token,
+          expires_at: expires_at,
+          connected_at: conn.connected_at || Time.current,
+          scopes: scopes
+        )
+        redirect_to "#{frontend_base_url}/landing?token=#{token}&platform=spotify&status=success"
       else
-        # For Google login, just redirect with token
+        Rails.logger.warn "Unhandled OAuth provider: #{provider.inspect}"
         redirect_to "#{frontend_base_url}/landing?token=#{token}"
       end
     else
