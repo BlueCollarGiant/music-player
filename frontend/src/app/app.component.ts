@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { MusicPlayerService } from './services/music-player.service';
-import { NavBarComponent } from './music-player/header/nav-bar/nav-bar.component';
-import { PlayerControlsComponent } from './music-player/footer/player-controls/player-controls.component';
+import { MusicPlayerService } from './features/music-player/services/music-player.service';
+import { NavBarComponent } from './features/music-player/components/header/nav-bar/nav-bar.component';
+import { PlayerControlsComponent } from './features/music-player/components/footer/player-controls/player-controls.component';
 
 @Component({
   selector: 'app-root',
