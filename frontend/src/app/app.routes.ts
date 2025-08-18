@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { OauthCallbackComponent } from './oauth-callback/oauth-callback.component';
-import { LandingComponent } from './music-player/main/landing/landing.component';
-import { YoutubeComponent } from './music-player/main/youtube/youtube.component';
-import { PlatformShellComponent } from './music-player/components/platform-shell.component';
+import { OauthCallbackComponent } from './features/oauth/oauth-callback.component';
+import { LandingComponent } from './features/music-player/main/landing/landing.component';
+import { YoutubeComponent } from './features/youtube/youtube.component';
+import { PlatformShellComponent } from './features/music-player/components/platform-shell/platform-shell.component';
 export const routes: Routes = [
   { path: '', component: LandingComponent },
   { path: 'landing', component: LandingComponent },
