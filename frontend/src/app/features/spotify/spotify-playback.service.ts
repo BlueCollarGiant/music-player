@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
@@ -15,10 +15,14 @@ interface SpotifyPlayerWindow extends Window { Spotify?: any; }
 
 @Injectable({ providedIn: 'root' })
 export class SpotifyPlaybackService {
+  //==================================================
+  // SECTION: Platform / Environment Dependencies
+  //==================================================
   private platformId = inject(PLATFORM_ID);
-  private destroyRef = inject(DestroyRef);
 
-  // SDK / Player state
+  //==================================================
+  // SECTION: Spotify SDK Internal State (Spotify-specific)
+  //==================================================
   private sdkReady = signal(false);
   private playerReady = signal(false);
   private deviceId: string | null = null;
@@ -28,7 +32,9 @@ export class SpotifyPlaybackService {
   private _deviceActivated = false; // becomes true after successful transfer to this SDK device
   private _elementActivated = false; // user gesture activation for autoplay policies
 
-  // Playback state (mirrors YouTube public API expectations)
+  //==================================================
+  // SECTION: Shared Playback State (mirrors YouTube public API expectations)
+  //==================================================
   private _isPlaying = signal(false);
   private _progressMs = signal(0);
   private _durationMs = signal(0);
@@ -41,7 +47,10 @@ export class SpotifyPlaybackService {
   private cachedToken: { value: string; fetchedAt: number } | null = null;
   private static readonly TOKEN_TTL_MS = 50_000; // token cache TTL (adjust relative to backend token lifetime)
 
-  // Public reactive surface
+  //==================================================
+  // SECTION: Shared / Cross-platform Public Reactive Surface
+  // (Naming aligned with a YouTube-style coordinator interface.)
+  //==================================================
   readonly ready = computed(() => this.playerReady());
   readonly isPlaying = computed(() => this._isPlaying());
   readonly durationSeconds = computed(() => Math.floor(this._durationMs() / 1000));
@@ -54,41 +63,9 @@ export class SpotifyPlaybackService {
   readonly durationMs = computed(() => this._durationMs());
   readonly progressMs = computed(() => this._progressMs());
 
-  // Internal: ensure SDK/player created. Token retrieval encapsulated (no external getToken needed now)
-  async ensurePlayer(): Promise<void> {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (this.player) return;
-    if (this.ensurePlayerPromise) return this.ensurePlayerPromise;
-
-    this.ensurePlayerPromise = (async () => {
-      await this.loadScript();
-      if (this.player) return;
-      await new Promise<void>((resolve) => {
-        const w = window as SpotifyPlayerWindow;
-        const tryCreate = () => {
-          if (!w.Spotify) { setTimeout(tryCreate, 100); return; }
-          this.player = new w.Spotify.Player({
-            name: 'Web Player (App)',
-            getOAuthToken: async (cb: (t: string) => void) => {
-              try { const t = await this.fetchToken(); cb(t || ''); } catch { cb(''); }
-            },
-            volume: 0.6
-          });
-          this.registerPlayerListeners();
-          resolve();
-        };
-        tryCreate();
-      });
-    })();
-    try { await this.ensurePlayerPromise; } finally { this.ensurePlayerPromise = null; }
-  }
-
-  async connect(): Promise<boolean> {
-    if (!this.player) return false;
-    const ok = await this.player.connect();
-    return ok;
-  }
-  //--------------- Public API (Parody with YouTube) ---------------//
+  //==================================================
+  // SECTION: Playback Control (Shared semantics across platforms)
+  //==================================================
   // load(track) stores URI & ensures player/device ready but does NOT start playback
   async load(track: { id: string } & any): Promise<void> {
     try {
@@ -169,7 +146,44 @@ export class SpotifyPlaybackService {
   }
   async setVolume(v: number): Promise<void> { try { await this.player?.setVolume(v); } catch {} }
 
-  // Internal helpers
+  //==================================================
+  // SECTION: Spotify SDK Initialization & Lifecycle (Spotify-specific)
+  //==================================================
+  // Internal: ensure SDK/player created. Token retrieval encapsulated (no external getToken needed now)
+  async ensurePlayer(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (this.player) return;
+    if (this.ensurePlayerPromise) return this.ensurePlayerPromise;
+
+    this.ensurePlayerPromise = (async () => {
+      await this.loadScript();
+      if (this.player) return;
+      await new Promise<void>((resolve) => {
+        const w = window as SpotifyPlayerWindow;
+        const tryCreate = () => {
+          if (!w.Spotify) { setTimeout(tryCreate, 100); return; }
+          this.player = new w.Spotify.Player({
+            name: 'Web Player (App)',
+            getOAuthToken: async (cb: (t: string) => void) => {
+              try { const t = await this.fetchToken(); cb(t || ''); } catch { cb(''); }
+            },
+            volume: 0.6
+          });
+          this.registerPlayerListeners();
+          resolve();
+        };
+        tryCreate();
+      });
+    })();
+    try { await this.ensurePlayerPromise; } finally { this.ensurePlayerPromise = null; }
+  }
+
+  async connect(): Promise<boolean> {
+    if (!this.player) return false;
+    const ok = await this.player.connect();
+    return ok;
+  }
+
   private registerPlayerListeners() {
     if (!this.player) return;
     this.player.addListener('ready', async ({ device_id }: any) => {
@@ -193,11 +207,6 @@ export class SpotifyPlaybackService {
     this.player.addListener('playback_error', (e: any) => this.handleError(e));
   }
 
-  private handleError(e: any) {
-  console.warn('[SpotifyPlayback] error', e?.message || e);
-  this._error.set(e?.message || 'spotify_error');
-  }
-
   private async loadScript(): Promise<void> {
     if (this.sdkReady() || this.loadingScript) return;
     this.loadingScript = true;
@@ -212,6 +221,9 @@ export class SpotifyPlaybackService {
     this.loadingScript = false;
   }
 
+  //==================================================
+  // SECTION: Spotify Authentication & API (Spotify-specific)
+  //==================================================
   private async fetchToken(): Promise<string | null> {
     try {
       if (this.cachedToken && (Date.now() - this.cachedToken.fetchedAt) < SpotifyPlaybackService.TOKEN_TTL_MS) {
@@ -232,7 +244,34 @@ export class SpotifyPlaybackService {
     return token ? { 'Authorization': 'Bearer ' + token } : {};
   }
 
-  //----------- Device Activation & State Priming -----------//
+  private async apiPut(path: string, body: any): Promise<boolean> {
+    const token = await this.fetchToken();
+    if (!token) return false;
+    const attempt = async () => fetch(`https://api.spotify.com/v1${path}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(body)
+    });
+    try {
+      const resp = await attempt();
+      if (resp.status === 401 || resp.status === 403) {
+        // try refresh once
+        const t2 = await this.fetchToken();
+        if (!t2) return false;
+        const resp2 = await fetch(`https://api.spotify.com/v1${path}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t2 },
+          body: JSON.stringify(body)
+        });
+        return resp2.ok;
+      }
+      return resp.ok;
+    } catch { return false; }
+  }
+
+  //==================================================
+  // SECTION: Device Activation & Playback State Mapping (Spotify-specific)
+  //==================================================
   private async ensureDeviceActive(): Promise<string> {
     if (!this.deviceId) {
       await this.waitFor(() => !!this.deviceId);
@@ -285,29 +324,12 @@ export class SpotifyPlaybackService {
     }
   }
 
-  private async apiPut(path: string, body: any): Promise<boolean> {
-    const token = await this.fetchToken();
-    if (!token) return false;
-    const attempt = async () => fetch(`https://api.spotify.com/v1${path}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(body)
-    });
-    try {
-      const resp = await attempt();
-      if (resp.status === 401 || resp.status === 403) {
-        // try refresh once
-        const t2 = await this.fetchToken();
-        if (!t2) return false;
-        const resp2 = await fetch(`https://api.spotify.com/v1${path}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t2 },
-          body: JSON.stringify(body)
-        });
-        return resp2.ok;
-      }
-      return resp.ok;
-    } catch { return false; }
+  //==================================================
+  // SECTION: Error Handling & Utilities (Shared helper logic)
+  //==================================================
+  private handleError(e: any) {
+    console.warn('[SpotifyPlayback] error', e?.message || e);
+    this._error.set(e?.message || 'spotify_error');
   }
 
   private async waitFor(cond: () => boolean, timeoutMs = 5000, stepMs = 100): Promise<void> {

@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, PLATFORM_ID, computed } from '@angular/core';
+import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
@@ -24,96 +24,88 @@ export interface YouTubePlaylistTrack {
   position: number;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class YouTubeService {
+  //==================================================
+  // SECTION: Platform Dependencies (YouTube-specific)
+  //==================================================
   private readonly apiUrl = `${environment.apiUrl}/api/youtube`;
   private readonly platformId = inject(PLATFORM_ID);
+  constructor(private http: HttpClient) {}
 
-  public readonly playlists = signal<YouTubePlaylist[]>([]);
-  public readonly selectedPlaylist = signal<YouTubePlaylist | null>(null);
-  public readonly playlistTracks = signal<YouTubePlaylistTrack[]>([]);
-  public readonly isLoading = signal<boolean>(false);
+  //==================================================
+  // SECTION: Reactive State (YouTube-specific)
+  //==================================================
+  readonly playlists = signal<YouTubePlaylist[]>([]);              // user playlists
+  readonly selectedPlaylist = signal<YouTubePlaylist | null>(null); // current playlist
+  readonly playlistTracks = signal<YouTubePlaylistTrack[]>([]);     // tracks for selected playlist
+  readonly isLoading = signal<boolean>(false);                      // network activity flag
 
-  constructor(private http: HttpClient) { }
-
-  //-----Private methods for API calls and headers-----//
+  //==================================================
+  // SECTION: Auth / Headers (Shared infra for YouTube API calls)
+  //==================================================
   private getAuthHeaders(): HttpHeaders {
-    const baseHeaders = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-
-    if (!isPlatformBrowser(this.platformId)) {
-      return baseHeaders;
-    }
-
+    const base = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (!isPlatformBrowser(this.platformId)) return base; // SSR / tests
     const token = localStorage.getItem('auth_token');
-    return token
-      ? baseHeaders.set('Authorization', `Bearer ${token}`)
-      : baseHeaders;
+    return token ? base.set('Authorization', `Bearer ${token}`) : base;
   }
 
-  getUserPlaylists(): Observable<{ playlists: YouTubePlaylist[], total: number }> {
-    this.isLoading.set(true);
-    return this.http.get<{ playlists: YouTubePlaylist[], total: number }>(
+  //==================================================
+  // SECTION: API Calls (YouTube-specific)
+  //==================================================
+  getUserPlaylists(): Observable<{ playlists: YouTubePlaylist[]; total: number }> {
+    this.isLoading.set(true); // caller responsible for resetting via subscription completion
+    return this.http.get<{ playlists: YouTubePlaylist[]; total: number }>(
       `${this.apiUrl}/playlists`,
       { headers: this.getAuthHeaders() }
     );
   }
 
-  getPlaylistTracks(playlistId: string): Observable<{ tracks: YouTubePlaylistTrack[], playlist_id: string, total: number }> {
-    return this.http.get<{ tracks: YouTubePlaylistTrack[], playlist_id: string, total: number }>(
+  getPlaylistTracks(playlistId: string): Observable<{ tracks: YouTubePlaylistTrack[]; playlist_id: string; total: number }> {
+    return this.http.get<{ tracks: YouTubePlaylistTrack[]; playlist_id: string; total: number }>(
       `${this.apiUrl}/playlists/${playlistId}/tracks`,
       { headers: this.getAuthHeaders() }
     );
   }
 
+  //==================================================
+  // SECTION: Loading Orchestration (YouTube-specific)
+  //==================================================
   loadPlaylists(): void {
     this.isLoading.set(true);
-
     this.getUserPlaylists().subscribe({
-      next: (response) => {
-        this.playlists.set(response.playlists);
-      },
-      error: () => {
-        this.playlists.set([]);
-      },
-      complete: () => {
-        this.isLoading.set(false);
-      }
+      next: res => this.playlists.set(res.playlists),
+      error: () => this.playlists.set([]),
+      complete: () => this.isLoading.set(false)
     });
   }
 
   loadPlaylistTracks(playlistId: string): void {
     this.isLoading.set(true);
-
     this.getPlaylistTracks(playlistId).subscribe({
-      next: (response) => {
-        this.playlistTracks.set(response.tracks);
-      },
-      error: () => {
-        this.playlistTracks.set([]);
-      },
-      complete: () => {
-        this.isLoading.set(false);
-      }
+      next: res => this.playlistTracks.set(res.tracks),
+      error: () => this.playlistTracks.set([]),
+      complete: () => this.isLoading.set(false)
     });
   }
 
-  selectPlaylist(playlist: YouTubePlaylist): void {
-    this.selectedPlaylist.set(playlist);
-    this.loadPlaylistTracks(playlist.id);
+  //==================================================
+  // SECTION: Selection & Conversion (Cross-platform adaptation)
+  //==================================================
+  selectPlaylist(pl: YouTubePlaylist): void {
+    this.selectedPlaylist.set(pl);
+    this.loadPlaylistTracks(pl.id);
   }
 
-  convertTracksToSongs(): Song[] {
-    return this.playlistTracks().map((track) => ({
-      id: track.id,
-      name: track.title,
-      artist: track.artist,
-      duration: track.duration,
-      video_url: track.video_url,
-      thumbnail_url: track.thumbnail_url,
+  convertTracksToSongs(): Song[] { // Produces normalized Song objects consumed by shared player
+    return this.playlistTracks().map(t => ({
+      id: t.id,
+      name: t.title,
+      artist: t.artist,
+      duration: t.duration,
+      video_url: t.video_url,
+      thumbnail_url: t.thumbnail_url,
       isPlaceholder: false
     }));
   }

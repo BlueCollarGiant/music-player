@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { SharedModule } from '../../shared/shared.module';
 import { PlaylistPanelComponent } from '../music-player/components/playlist-panel/playlist-panel.component';
 import { RightPanelComponent } from '../music-player/components/right-panel/right-panel.component';
-import { SharedModule } from '../../shared/shared.module';
 import { YouTubeService } from './youtube.service';
-import { AuthService } from '../../core/auth/auth.service';
-import { ActivatedRoute } from '@angular/router';
-import { PlatformStateService } from '../../core/platform-state/platform-state.service';
 import { SpotifyService } from '../spotify/spotify.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { PlatformStateService } from '../../core/platform-state/platform-state.service';
 
 @Component({
   selector: 'app-youtube',
@@ -15,35 +15,60 @@ import { SpotifyService } from '../spotify/spotify.service';
   styleUrl: './youtube.component.css'
 })
 export class YoutubeComponent implements OnInit {
-  private youtubeService = inject(YouTubeService);
-  private authService = inject(AuthService);
-  private route = inject(ActivatedRoute);
-  private platformState = inject(PlatformStateService);
-  private spotifyService = inject(SpotifyService);
+  //==================================================
+  // SECTION: Dependency Injection
+  //==================================================
+  private readonly youtubeService = inject(YouTubeService);
+  private readonly spotifyService = inject(SpotifyService);
+  private readonly authService = inject(AuthService);
+  private readonly platformState = inject(PlatformStateService);
+  private readonly route = inject(ActivatedRoute);
 
+  //==================================================
+  // SECTION: Cross-platform State
+  //==================================================
   platform: 'youtube' | 'spotify' | 'soundcloud' = 'youtube';
-  isYouTube = true;
+  isYouTube = true; // convenience flag for template binding
 
+  //==================================================
+  // SECTION: Angular Lifecycle
+  //==================================================
   ngOnInit(): void {
-    // Determine platform from parent route segment (under /platform/<name>)
-    const parentSeg = this.route.parent?.snapshot.url[0]?.path;
-    if (parentSeg === 'platform') {
-      const platSeg = this.route.snapshot.url[0]?.path?.toLowerCase();
-      if (platSeg === 'spotify' || platSeg === 'soundcloud') {
-        this.platform = platSeg;
-      }
-    }
-    this.isYouTube = this.platform === 'youtube';
+    this.resolvePlatformFromRoute();
     this.platformState.set(this.platform);
+    this.isYouTube = this.platform === 'youtube';
+    this.loadPlatformPlaylists();
+  }
 
-    if (this.isYouTube) {
+  //==================================================
+  // SECTION: Route-derived Platform Resolution (Shared)
+  //==================================================
+  private resolvePlatformFromRoute(): void {
+    // Parent route expected form: /platform/<name>
+    const parentSeg = this.route.parent?.snapshot.url[0]?.path;
+    if (parentSeg !== 'platform') return;
+    const platSeg = this.route.snapshot.url[0]?.path?.toLowerCase();
+    if (platSeg === 'spotify' || platSeg === 'soundcloud') {
+      this.platform = platSeg;
+    }
+  }
+
+  //==================================================
+  // SECTION: Platform-specific Playlist Loading
+  //==================================================
+  private loadPlatformPlaylists(): void {
+    if (this.platform === 'youtube') {
       if (this.authService.isPlatformConnected('youtube')) {
         this.youtubeService.loadPlaylists();
       }
-    } else if (this.platform === 'spotify') {
+      return;
+    }
+    if (this.platform === 'spotify') {
       if (this.authService.isPlatformConnected('spotify')) {
         this.spotifyService.loadPlaylists();
       }
+      return;
     }
+    // soundcloud (future) – no-op for now
   }
 }
