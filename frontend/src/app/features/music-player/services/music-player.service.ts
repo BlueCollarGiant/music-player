@@ -5,6 +5,7 @@ import { YouTubeService, YouTubePlaylistTrack } from '../../youtube/youtube.serv
 import { SpotifyService } from '../../spotify/spotify.service';
 import { SpotifyPlaybackService } from '../../spotify/spotify-playback.service';
 import { environment } from '../../../../environments/environment';
+import { formatTime } from '../../../shared/utils/time-format.util';
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayerService {
@@ -217,7 +218,7 @@ export class MusicPlayerService {
   //-----Time Management Methods-----//
   updateCurrentTime(currentSeconds: number): void {
     if (typeof currentSeconds === 'number' && !isNaN(currentSeconds)) {
-      this.currentTime.set(this.formatTime(currentSeconds));
+      this.currentTime.set(formatTime(currentSeconds));
     }
   }
 
@@ -228,7 +229,7 @@ export class MusicPlayerService {
 
   updateDuration(durationSeconds: number): void {
     // Convert seconds to MM:SS format and update current track duration if needed
-    const formattedDuration = this.formatTime(durationSeconds);
+    const formattedDuration = formatTime(durationSeconds);
     const track = this.currentTrack();
     if (track && (!track.duration || track.duration === '0:00')) {
       // Update the track duration if it's not set
@@ -249,18 +250,6 @@ export class MusicPlayerService {
   }
 
   //-----Private Helper Methods-----//
-  private formatTime(seconds: number): string {
-    if (!seconds || isNaN(seconds) || seconds < 0) {
-      return '0:00';
-    }
-    
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }
-
-  // Removed legacy ensureSpotify* helpers – coordinator + spotifyPlayback.handle unified API now.
-
   private authHeader(): HeadersInit {
     const token = localStorage.getItem('auth_token');
     return token ? { 'Authorization': 'Bearer ' + token } : {};

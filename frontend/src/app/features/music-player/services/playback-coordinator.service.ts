@@ -1,6 +1,7 @@
 import { Injectable, inject, signal, linkedSignal, effect, DestroyRef, untracked } from '@angular/core';
 import { MusicPlayerService } from './music-player.service';
 import { SpotifyPlaybackService } from '../../spotify/spotify-playback.service';
+import { formatTime } from '../../../shared/utils/time-format.util';
 // TODO: Future step – refactor to depend on PlayerPort adapters instead of direct SpotifyPlaybackService.
 
 @Injectable({ providedIn: 'root' })
@@ -89,14 +90,14 @@ export class PlaybackCoordinatorService {
     if (track?.video_url && player && this.isPlayerReadySignal()) {
       try {
         const seconds = player.getCurrentTime();
-        return this.formatTime(seconds);
+        return formatTime(seconds);
       } catch {
         return '0:00';
       }
     }
     if (track?.platform === 'spotify') {
       const pos = this.computeSpotifyPositionMs();
-      return this.formatTime(pos / 1000);
+      return formatTime(pos / 1000);
     }
     return this.musicPlayer.currentTime();
   });
@@ -108,7 +109,7 @@ export class PlaybackCoordinatorService {
     if (track?.video_url && player && this.isPlayerReadySignal()) {
       try {
         const seconds = player.getDuration();
-        return this.formatTime(seconds);
+        return formatTime(seconds);
       } catch {
         return track?.duration || '0:00';
       }
@@ -116,7 +117,7 @@ export class PlaybackCoordinatorService {
     if (track?.platform === 'spotify') {
       const ms = this.spotifyDurationMs();
       if (!ms) return '0:00';
-      return this.formatTime(ms / 1000);
+      return formatTime(ms / 1000);
     }
     return track?.duration || '0:00';
   });
@@ -329,13 +330,5 @@ export class PlaybackCoordinatorService {
         console.warn('Error loading YouTube video:', error);
       }
     }
-  }
-
-  //-----Private Helper Methods-----//
-  private formatTime(seconds: number): string {
-    if (!seconds || isNaN(seconds) || seconds < 0) return '0:00';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 }
