@@ -28,15 +28,20 @@ export interface PlayerPort {
   /** Seek to absolute time (seconds) */
   seek(seconds: number): Promise<void> | void;
 
+   /** Skip to next item in the active queue/playlist */
+  next(): Promise<void> | void;
+
+  /** Skip to previous item in the active queue/playlist */
+  previous(): Promise<void> | void;
+
   /** Optional cleanup / teardown (idempotent) */
   teardown?(): Promise<void> | void;
 
-  // ── Legacy aliases (optional) ───────────────────────────────────────────────
-  /** @deprecated Use resume(); fallback shim allowed during migration */
-  playOrResume?(): Promise<void> | void;
+   /** Set output volume [0.0, 1.0] (implementations may clamp) */
+  setVolume(value: number): Promise<void> | void;
 
-  /** @deprecated Use seek(seconds) */
-  seekTo?(seconds: number): Promise<void> | void;
+  /** Mute output (implementations may also track pre-mute volume) */
+  mute(): Promise<void> | void;
 
   /** Optional: used by coordinators to compare track identity */
   currentIdOrUri?(): string | null;

@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { AdapterRegistryService } from './adapter-registry.service';
-import { PlaybackStateStore } from './playback-state.store';
-import { PlayerPort } from './player-port';
+import { PlayerPort } from '../../../core/playback/player-port';
+import { PlaybackStateStore } from '../../../core/playback/playback-state.store';
+import { AdapterRegistryService } from '../../../core/playback/adapter-registry.service';
+
 
 @Injectable({ providedIn: 'root' })
 export class PlaybackCoordinatorService {
@@ -16,19 +17,30 @@ export class PlaybackCoordinatorService {
   /** === Core transport controls === */
 
   start(): void {
-    this.activeAdapter?.play?.();
-    this.state.setPlayingState(true);
+    this.activeAdapter?.start?.();
+    this.state.setPlaying(true);
   }
 
   pause(): void {
     this.activeAdapter?.pause?.();
-    this.state.setPlayingState(false);
+    this.state.setPlaying(false);
+  }
+
+
+  resume(): void {
+    this.activeAdapter?.resume?.();
+    this.state.setPlaying(true);
   }
 
   toggle(): void {
     const isPlaying = this.state.isPlaying();
+    const duration = this.state.durationSeconds();
+    const position = this.state.currentTimeSeconds();
+
     if (isPlaying) {
       this.pause();
+    } else if (duration > 0 && position > 0) {
+      this.resume();
     } else {
       this.start();
     }
@@ -43,7 +55,7 @@ export class PlaybackCoordinatorService {
   }
 
   prev(): void {
-    this.activeAdapter?.prev?.();
+    this.activeAdapter?.previous?.();
   }
 
   setVolume(value: number): void {
