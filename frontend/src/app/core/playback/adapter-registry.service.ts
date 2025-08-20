@@ -12,12 +12,9 @@ export class AdapterRegistryService {
 
   get(kind: PlatformKind): PlayerPort | null {
     switch (kind) {
-      case 'youtube':
-        return this.youtube;
-      case 'spotify':
-        return this.spotify;
-      default:
-        return null;
+      case 'youtube': return this.youtube;
+      case 'spotify': return this.spotify;
+      default:        return null;
     }
   }
 
