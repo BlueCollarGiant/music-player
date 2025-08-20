@@ -2,8 +2,8 @@ import { Injectable, signal, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Song } from '../../../shared/models/song.model';
 import { YouTubeService, YouTubePlaylistTrack } from '../../youtube/youtube.service';
-import { SpotifyService } from '../../spotify/spotify.service';
-import { SpotifyPlaybackService } from '../../spotify/spotify-playback.service';
+import { SpotifyService } from './spotify.service';
+import { SpotifyPlaybackService } from './spotify-playback.service';
 import { environment } from '../../../../environments/environment';
 import { formatTime } from '../../../shared/utils/time-format.util';
 
@@ -114,15 +114,6 @@ export class MusicPlayerService {
   //==================================================
   // SECTION: Shared Playback Control (Cross-platform semantics)
   //==================================================
-  togglePlayPause(): void {
-    const track = this.currentTrack();
-    if (!track) return;
-    if (track.platform === 'spotify') {
-      // Coordinator manages actual SDK toggle; no direct action here.
-      return;
-    }
-    this.isPlaying.set(!this.isPlaying());
-  }
 
   seekTo(percentage: number): void {
     const track = this.currentTrack();

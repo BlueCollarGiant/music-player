@@ -1,8 +1,8 @@
 import { Component, inject, computed, Input, OnInit } from '@angular/core';
-import { MusicPlayerService } from '../../services/music-player.service';
+import { PlaybackStateStore } from '../../../../core/playback/playback-state.store';
 import { PlayListLogic } from '../../services/play-list-logic.service';
 import { YouTubeService } from '../../../youtube/youtube.service';
-import { SpotifyService } from '../../../spotify/spotify.service';
+import { SpotifyService } from '../../services/spotify.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { Song } from '../../../../shared/models/song.model';
 
@@ -24,7 +24,7 @@ export class PlaylistPanelComponent implements OnInit {
   @Input() isYouTubeMode: boolean = false; // backward compatibility
   @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'local' = 'youtube';
   
-  public musicService = inject(MusicPlayerService);
+  public musicService = inject(PlaybackStateStore);
   public playlistLogic = inject(PlayListLogic);
   public youtubeService = inject(YouTubeService);
   public spotifyService = inject(SpotifyService);

@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { MusicPlayerService } from './features/music-player/services/music-player.service';
+import { PlaybackStateStore } from './core/playback/playback-state.store';
 import { NavBarComponent } from './features/music-player/components/header/nav-bar/nav-bar.component';
 import { PlayerControlsComponent } from './features/music-player/components/footer/player-controls/player-controls.component';
 
@@ -16,7 +16,7 @@ export class AppComponent {
   private router = inject(Router);
   currentRoute = signal('');
 
-  constructor(public musicService: MusicPlayerService) {
+  constructor(public musicService: PlaybackStateStore) {
     // Track current route to show/hide player controls
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)

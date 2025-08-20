@@ -3,7 +3,7 @@ import { Component, inject, signal, computed, PLATFORM_ID } from '@angular/core'
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { filter } from 'rxjs/operators';
-import { MusicPlayerService } from '../../../services/music-player.service';
+import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { YouTubeService } from '../../../../../features/youtube/youtube.service';
 import { environment } from '../../../../../../environments/environment';
@@ -17,7 +17,7 @@ import { PlatformStateService } from '../../../../../core/platform-state/platfor
 })
 export class NavBarComponent {
   environment = environment;
-  public musicService = inject(MusicPlayerService);
+  public musicService = inject(PlaybackStateStore);
   public authService = inject(AuthService);
   private youtubeService = inject(YouTubeService);
   private router = inject(Router);

@@ -1,7 +1,10 @@
 import { Component, inject, computed, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MusicPlayerService } from '../../services/music-player.service';
+import { PlaybackStateStore } from '../../../../core/playback/playback-state.store';
 import { PlaybackCoordinatorService } from '../../services/playback-coordinator.service';
+import { AdapterRegistryService } from '../../../../core/playback/adapter-registry.service';
+import { YouTubeAdapter } from '../../adapters/youtube.adapter';
+import { getYouTubeId } from '../../../../shared/utils/youtube.util';
 import { Song } from '../../../../shared/models/song.model';
 import { VisualizerComponent } from './visualizer-container/visualizer/visualizer.component';
 
@@ -17,8 +20,10 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   //==================================================
   // SECTION: Dependency Injection
   //==================================================
-  readonly musicService = inject(MusicPlayerService);
+  readonly musicService = inject(PlaybackStateStore);
   readonly playbackCoordinator = inject(PlaybackCoordinatorService);
+  private readonly adapterRegistry = inject(AdapterRegistryService);
+  private readonly ytAdapter = this.adapterRegistry.get('youtube') as YouTubeAdapter;
 
   //==================================================
   // SECTION: Reactive State / Computed Derivations
@@ -52,7 +57,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
   private createYouTubePlayer(): void {
     const track = this.currentTrack();
-    const videoId = track?.video_url ? this.musicService.getYouTubeId(track.video_url) : null;
+  const videoId = track?.video_url ? getYouTubeId(track.video_url) : null;
     if (!this.youtubePlayer?.nativeElement || !videoId || !(window as any).YT?.Player) return;
 
     this.currentPlayer = new (window as any).YT.Player(this.youtubePlayer.nativeElement, {
@@ -61,12 +66,16 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       height: '100%',
       playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1 },
       events: {
-        onReady: (event: any) => {
-          this.playbackCoordinator.setYouTubePlayer(this.currentPlayer);
-          this.playbackCoordinator.onPlayerReady(event);
+        onReady: () => {
+          this.ytAdapter.setPlayer(this.currentPlayer);
+          this.ytAdapter.onReady();
           this.forcePlayerResize();
         },
-        onStateChange: (event: any) => this.playbackCoordinator.onPlayerStateChange(event)
+        onStateChange: (event: any) => {
+          const YT = (window as any).YT;
+            // TODO: implement next-track handling outside of state store.
+            this.ytAdapter.onStateChange(event.data, YT, () => {/* auto-advance handled elsewhere */});
+        }
       }
     });
   }
@@ -87,7 +96,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   private destroyCurrentPlayer(): void {
     if (!this.currentPlayer) return;
     try {
-      this.playbackCoordinator.setYouTubePlayer(null);
+  this.ytAdapter.teardown();
       if (typeof this.currentPlayer.stopVideo === 'function') this.currentPlayer.stopVideo();
       if (typeof this.currentPlayer.destroy === 'function') this.currentPlayer.destroy();
     } catch { /* silent */ } finally {
@@ -128,6 +137,6 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   // SECTION: Event Handlers (User Interaction)
   //==================================================
   onThumbnailClick(): void {
-    if (this.hasVideoUrl() && !this.isPlaying()) this.playbackCoordinator.togglePlayPause();
+  if (this.hasVideoUrl() && !this.isPlaying()) this.playbackCoordinator.toggle();
   }
 }

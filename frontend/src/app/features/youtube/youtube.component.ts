@@ -4,7 +4,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { PlaylistPanelComponent } from '../music-player/components/playlist-panel/playlist-panel.component';
 import { RightPanelComponent } from '../music-player/components/right-panel/right-panel.component';
 import { YouTubeService } from './youtube.service';
-import { SpotifyService } from '../spotify/spotify.service';
+import { SpotifyService } from '../music-player/services/spotify.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { PlatformStateService } from '../../core/platform-state/platform-state.service';
 

@@ -1,21 +1,32 @@
 import { Injectable } from '@angular/core';
-import { PlayerPort } from '../../features/music-player/services/player.port';
-import { YouTubeAdapter } from '../../features/music-player/services/adapters/youtube.adapter';
-import { SpotifyAdapter } from '../../features/music-player/services/adapters/spotify.adapter';
+import { PlayerPort, PlatformKind } from './player-port';
+import { YouTubeAdapter } from '../../features/music-player/adapters/youtube.adapter';
+import { SpotifyAdapter } from '../../features/music-player/adapters/spotify.adapter';
 
 @Injectable({ providedIn: 'root' })
-export class AdapterRegistry {
+export class AdapterRegistryService {
   constructor(
-    private yt: YouTubeAdapter,
-    private sp: SpotifyAdapter
+    private readonly youtube: YouTubeAdapter,
+    private readonly spotify: SpotifyAdapter
   ) {}
 
-  get(platform: PlayerPort['platform']): PlayerPort {
-    switch (platform) {
-      case 'youtube': return this.yt;
-      case 'spotify': return this.sp;
+  get(kind: PlatformKind): PlayerPort | null {
+    switch (kind) {
+      case 'youtube':
+        return this.youtube;
+      case 'spotify':
+        return this.spotify;
       default:
-        throw new Error(`Unsupported platform: ${platform}`);
+        return null;
     }
+  }
+
+  // Optional convenience getters
+  getYouTubeAdapter(): YouTubeAdapter {
+    return this.youtube;
+  }
+
+  getSpotifyAdapter(): SpotifyAdapter {
+    return this.spotify;
   }
 }

@@ -1,7 +1,7 @@
 
 import { Component, inject } from '@angular/core';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { MusicPlayerService } from '../../../services/music-player.service';
+import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store';
 import { PlaybackCoordinatorService } from '../../../services/playback-coordinator.service';
 
 @Component({
@@ -14,21 +14,22 @@ export class PlayerControlsComponent {
   //==================================================
   // SECTION: Dependency Injection (Shared UI Layer)
   //==================================================
-  readonly musicService = inject(MusicPlayerService);
+  readonly musicService = inject(PlaybackStateStore);
   readonly playbackCoordinator = inject(PlaybackCoordinatorService);
 
   //==================================================
   // SECTION: Playback Control (Cross-platform via coordinator)
   //==================================================
   togglePlayPause(): void {
-    this.playbackCoordinator.togglePlayPause();
+  this.playbackCoordinator.toggle();
   }
 
   //==================================================
   // SECTION: Track Navigation (Delegates to shared music service)
   //==================================================
-  goPrevious(): void { this.musicService.goToPreviousTrack(); }
-  goNext(): void { this.musicService.goToNextTrack(); }
+  // TODO: wire previous/next through a track navigation service.
+  goPrevious(): void { /* navigation service prev */ }
+  goNext(): void { /* navigation service next */ }
 
   //==================================================
   // SECTION: Progress Interaction (Seeking)
@@ -37,7 +38,7 @@ export class PlayerControlsComponent {
     const el = event.currentTarget as HTMLElement;
     const rect = el.getBoundingClientRect();
     const pct = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
-    this.playbackCoordinator.seekTo(pct);
+  this.playbackCoordinator.seekPercent(pct);
   }
 
 
