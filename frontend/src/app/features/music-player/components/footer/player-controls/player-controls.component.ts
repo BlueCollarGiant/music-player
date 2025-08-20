@@ -1,45 +1,39 @@
 
 import { Component, inject } from '@angular/core';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store';
-import { PlaybackCoordinatorService } from '../../../services/playback-coordinator.service';
+import { ControlsFacade } from '../../../../../core/playback/controls-facade.service';
 
 @Component({
   selector: 'app-player-controls',
+  standalone: true,
   imports: [SharedModule],
   templateUrl: './player-controls.component.html',
-  styleUrl: './player-controls.component.css'
+  styleUrls: ['./player-controls.component.css']
 })
 export class PlayerControlsComponent {
-  //==================================================
-  // SECTION: Dependency Injection (Shared UI Layer)
-  //==================================================
-  readonly musicService = inject(PlaybackStateStore);
-  readonly playbackCoordinator = inject(PlaybackCoordinatorService);
+  // Single source for state + commands (no direct coordinator/store usage here)
+  readonly c = inject(ControlsFacade);
 
-  //==================================================
-  // SECTION: Playback Control (Cross-platform via coordinator)
-  //==================================================
-  togglePlayPause(): void {
-  this.playbackCoordinator.toggle();
+  // UI actions (thin wrappers so template stays clean)
+  toggle(): void {
+    this.c.toggle();
   }
 
-  //==================================================
-  // SECTION: Track Navigation (Delegates to shared music service)
-  //==================================================
-  // TODO: wire previous/next through a track navigation service.
-  goPrevious(): void { /* navigation service prev */ }
-  goNext(): void { /* navigation service next */ }
+  prev(): void {
+    this.c.prev();
+  }
 
-  //==================================================
-  // SECTION: Progress Interaction (Seeking)
-  //==================================================
+  next(): void {
+    this.c.next();
+  }
+
+  // Click-to-seek: convert click position to seconds using facade duration()
   onProgressBarClick(event: MouseEvent): void {
     const el = event.currentTarget as HTMLElement;
     const rect = el.getBoundingClientRect();
-    const pct = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
-  this.playbackCoordinator.seekPercent(pct);
+    const ratio = (event.clientX - rect.left) / rect.width;
+    const clamped = Math.max(0, Math.min(1, ratio));
+    const seconds = Math.floor((this.c.duration() || 0) * clamped);
+    this.c.seek(seconds);
   }
-
-
 }
