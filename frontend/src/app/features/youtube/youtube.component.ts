@@ -1,38 +1,34 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+
 import { SharedModule } from '../../shared/shared.module';
 import { PlaylistPanelComponent } from '../music-player/components/playlist-panel/playlist-panel.component';
 import { RightPanelComponent } from '../music-player/components/right-panel/right-panel.component';
-import { YouTubeService } from './youtube.service';
-import { SpotifyService } from '../music-player/services/spotify.service';
+
 import { AuthService } from '../../core/auth/auth.service';
 import { PlatformStateService } from '../../core/platform-state/platform-state.service';
+import { YouTubeService } from '../music-player/services/youtube.service';
+import { SpotifyService } from '../music-player/services/spotify.service'; // keep only if this page handles both
 
 @Component({
   selector: 'app-youtube',
+  standalone: true,
   imports: [SharedModule, PlaylistPanelComponent, RightPanelComponent],
   templateUrl: './youtube.component.html',
-  styleUrl: './youtube.component.css'
+  styleUrls: ['./youtube.component.css'],
 })
 export class YoutubeComponent implements OnInit {
-  //==================================================
-  // SECTION: Dependency Injection
-  //==================================================
-  private readonly youtubeService = inject(YouTubeService);
-  private readonly spotifyService = inject(SpotifyService);
-  private readonly authService = inject(AuthService);
-  private readonly platformState = inject(PlatformStateService);
+  // ── DI ────────────────────────────────────────────────────────────────────
   private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
+  private readonly platformState = inject(PlatformStateService);
+  private readonly yt = inject(YouTubeService);
+  private readonly sp = inject(SpotifyService); // remove if this page should be YouTube-only
 
-  //==================================================
-  // SECTION: Cross-platform State
-  //==================================================
+  // ── Cross‑platform flags (this page still supports both) ──────────────────
   platform: 'youtube' | 'spotify' | 'soundcloud' = 'youtube';
-  isYouTube = true; // convenience flag for template binding
+  isYouTube = true;
 
-  //==================================================
-  // SECTION: Angular Lifecycle
-  //==================================================
   ngOnInit(): void {
     this.resolvePlatformFromRoute();
     this.platformState.set(this.platform);
@@ -40,35 +36,31 @@ export class YoutubeComponent implements OnInit {
     this.loadPlatformPlaylists();
   }
 
-  //==================================================
-  // SECTION: Route-derived Platform Resolution (Shared)
-  //==================================================
+  // Derive platform from /platform/:name routes
   private resolvePlatformFromRoute(): void {
-    // Parent route expected form: /platform/<name>
     const parentSeg = this.route.parent?.snapshot.url[0]?.path;
     if (parentSeg !== 'platform') return;
     const platSeg = this.route.snapshot.url[0]?.path?.toLowerCase();
-    if (platSeg === 'spotify' || platSeg === 'soundcloud') {
+    if (platSeg === 'spotify' || platSeg === 'soundcloud' || platSeg === 'youtube') {
       this.platform = platSeg;
     }
   }
 
-  //==================================================
-  // SECTION: Platform-specific Playlist Loading
-  //==================================================
   private loadPlatformPlaylists(): void {
     if (this.platform === 'youtube') {
-      if (this.authService.isPlatformConnected('youtube')) {
-        this.youtubeService.loadPlaylists();
+      if (this.auth.isPlatformConnected('youtube')) {
+        this.yt.loadPlaylists();
       }
       return;
     }
+
     if (this.platform === 'spotify') {
-      if (this.authService.isPlatformConnected('spotify')) {
-        this.spotifyService.loadPlaylists();
+      if (this.auth.isPlatformConnected('spotify')) {
+        this.sp.loadPlaylists?.();
       }
       return;
     }
-    // soundcloud (future) – no-op for now
+
+    // soundcloud: future
   }
 }
