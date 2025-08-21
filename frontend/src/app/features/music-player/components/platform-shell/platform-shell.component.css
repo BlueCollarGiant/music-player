@@ -15,3 +15,11 @@
 .accent-bg { background: var(--accent); }
 .accent-fg { color: var(--accent); }
 */
+
+/* === Layout scaffolding (2025-08-21) – enables inner scroll regions === */
+:host { display:block; height:100%; min-height:0; }
+.platform-shell { height:100%; min-height:0; }
+/* Ensure the main horizontal layout takes the full viewport height so inner flex children can size and scroll correctly */
+.playlist-layout { display:flex; gap:16px; height:100vh; min-height:0; }
+.left-column { display:flex; flex-direction:column; min-height:0; overflow:visible; }
+.right-column { min-height:0; overflow:auto; }

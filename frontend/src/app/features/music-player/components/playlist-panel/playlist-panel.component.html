@@ -1,6 +1,6 @@
 <!-- Song List Panel (Left Side) -->
 <div class="song-list" 
-     [class.empty]="isEmpty()"
+  [class.empty]="realSongCount() === 0"
      [class.small]="isSmall()"
      [class.medium]="isMedium()"
      [class.large]="isLarge()">
@@ -55,7 +55,7 @@
   <div class="items" [attr.data-count]="realSongCount()">
     @for (song of getDisplaySongs(); track song.id) {
       <div
-        class="item"
+        class="item clickable"
         [class.active]="song.id === currentTrackId()"
         (click)="selectSong(song)">
 

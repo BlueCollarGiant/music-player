@@ -16,6 +16,9 @@ html {
   background-color: #0f1631;
 }
 
+/* Layout chain root (no visual change) */
+app-root { display:block; height:100%; min-height:0; }
+
 /*/* Default (app/youtube base) 
 :root, .platform--youtube {
   --accent-color: #ff0000;

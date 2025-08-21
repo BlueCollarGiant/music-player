@@ -12,7 +12,12 @@ import { Song } from '../../../../shared/models/song.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './playlist-panel.component.html',
-  styleUrls: ['./playlist-panel.component.css'],
+  styleUrls: [
+    './styles/design-system.css',
+    './styles/playlist-panel.css',
+    './styles/global-utils.css',
+    
+  ],
 })
 export class PlaylistPanelComponent {
   // ---- Inputs (to satisfy youtube.component.html bindings) -------------------
