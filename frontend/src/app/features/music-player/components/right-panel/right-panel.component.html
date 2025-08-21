@@ -1,29 +1,39 @@
 <!-- Now Playing Panel (Right Side) -->
 <div class="now-playing">
   <div class="media-container">
-    @if (showVideo()) {
+    @if (isYouTube()) {
       <div class="video-container">
         <div #youtubePlayer class="youtube-player"></div>
+
         @if (showThumbnailOverlay()) {
           <div class="thumbnail-overlay" (click)="onThumbnailClick()">
             <img [src]="thumbnailUrl()" alt="Video Thumbnail" class="overlay-thumbnail" />
-            <div class="play-overlay"><div class="play-button">▶</div></div>
+            <div class="play-overlay">
+              <div class="play-button">▶</div>
+            </div>
           </div>
         }
       </div>
+    } @else {
+      <!-- Non‑YouTube (or no video) → show static art -->
+      <img class="album-art" [src]="thumbnailUrl()" [alt]="track()?.name || 'Album Art'" />
     }
-    @if (!showVideo() && showStaticThumbnail()) {
-      <img class="album-art" [src]="thumbnailUrl()" [alt]="currentTrack()?.name || 'Album Art'" />
-    }
-    @if (!currentTrack()) {
-      <div class="visualizer-container"><app-visualizer [isPlaying]="isPlaying()"/></div>
+
+    @if (!track()) {
+      <div class="visualizer-container">
+        <app-visualizer [isPlaying]="isPlaying()"></app-visualizer>
+      </div>
     }
   </div>
-  @if (currentTrack()) {
+
+  @if (track()) {
     <div class="song-info-container">
-      <div class="title">{{ currentTrack()?.name }}</div>
-      <div class="artist">{{ currentTrack()?.artist }}</div>
+      <div class="title">{{ track()?.name }}</div>
+      <div class="artist">{{ track()?.artist }}</div>
     </div>
-    <div class="bottom-visualizer"><app-visualizer [isPlaying]="isPlaying()"/></div>
+
+    <div class="bottom-visualizer">
+      <app-visualizer [isPlaying]="isPlaying()"></app-visualizer>
+    </div>
   }
 </div>

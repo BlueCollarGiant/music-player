@@ -5,9 +5,10 @@ import { isPlatformBrowser } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store';
 import { AuthService } from '../../../../../core/auth/auth.service';
-import { YouTubeService } from '../../../../../features/youtube/youtube.service';
+
 import { environment } from '../../../../../../environments/environment';
 import { PlatformStateService } from '../../../../../core/platform-state/platform-state.service';
+import { YouTubeService } from '../../../services/youtube.service';
 
 @Component({
   selector: 'app-nav-bar',

@@ -61,10 +61,9 @@ export class PlaybackStateStore {
   }
 
   updateDurationFmt(durationSeconds: number): void {
-    const formattedDuration = formatTime(durationSeconds);
-    const track = this.currentTrackSig();
-    if (track && (!track.duration || track.duration === '0:00')) {
-      this.currentTrackSig.set({ ...track, duration: formattedDuration });
-    }
+  const track = this.currentTrackSig();
+  if (track && (track.durationMs == null || track.durationMs === 0)) {
+    this.currentTrackSig.set({ ...track, durationMs: Math.floor(durationSeconds * 1000) });
   }
+}
 }

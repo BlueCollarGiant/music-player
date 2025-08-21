@@ -1,86 +1,103 @@
-import { Component, inject, computed, Input, OnInit } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
 import { PlaybackStateStore } from '../../../../core/playback/playback-state.store';
-import { PlayListLogic } from '../../services/play-list-logic.service';
-import { YouTubeService } from '../../../youtube/youtube.service';
+import { PlayListLogicService } from '../../services/play-list-logic.service';
+import { YouTubeService, YouTubePlaylist } from '../../services/youtube.service';
 import { SpotifyService } from '../../services/spotify.service';
-import { SharedModule } from '../../../../shared/shared.module';
 import { Song } from '../../../../shared/models/song.model';
 
 @Component({
   selector: 'app-playlist-panel',
-  imports: [SharedModule],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './playlist-panel.component.html',
-  styleUrls: [
-    './styles/design-system.css',
-    './styles/global-utils.css',
-    './styles/song-list-container.css',
-    './styles/song-item.css',
-    './styles/playlist-dropdown.css',
-    './styles/music-animations.css',
-    './styles/mobile-responsive.css'
-  ]
+  styleUrls: ['./playlist-panel.component.css'],
 })
-export class PlaylistPanelComponent implements OnInit {
-  @Input() isYouTubeMode: boolean = false; // backward compatibility
-  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'local' = 'youtube';
-  
-  public musicService = inject(PlaybackStateStore);
-  public playlistLogic = inject(PlayListLogic);
-  public youtubeService = inject(YouTubeService);
-  public spotifyService = inject(SpotifyService);
+export class PlaylistPanelComponent {
+  // ---- Inputs (to satisfy youtube.component.html bindings) -------------------
+  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' = 'youtube';
+  @Input() isYouTubeMode?: boolean; // legacy input used in some templates
 
-  // Computed signals for responsive playlist behavior
-  readonly realSongCount = computed<number>(() => {
-    if (this.platform === 'youtube') return this.youtubeService.playlistTracks().length;
-    if (this.platform === 'spotify') return this.spotifyService.playlistTracks().length;
-    return this.playlistLogic.realSongCount();
-  });
-  
-  readonly isEmpty = computed<boolean>(() => this.realSongCount() === 0);
-  
-  readonly isSmall = computed<boolean>(() => this.realSongCount() > 0 && this.realSongCount() <= 3);
-  
-  readonly isMedium = computed<boolean>(() => this.realSongCount() > 3 && this.realSongCount() <= 8);
-  
-  readonly isLarge = computed<boolean>(() => this.realSongCount() > 8);
+  // ---- DI -------------------------------------------------------------------
+  private readonly state = inject(PlaybackStateStore);
+  private readonly playlistLogic = inject(PlayListLogicService);
+  readonly youtubeService = inject(YouTubeService);
+  readonly spotifyService = inject(SpotifyService);
 
-  ngOnInit(): void {
-  if (this.platform === 'youtube') this.youtubeService.loadPlaylists();
-  if (this.platform === 'spotify') this.spotifyService.loadPlaylists();
-  }
+  // ---- State helpers the template can call ----------------------------------
+  currentTrack = () => this.state.currentTrack();
+  currentTrackId = () => this.state.currentTrack()?.id ?? null;
 
-  selectSong(song: Song) {
-    this.musicService.selectTrack(song);
-  }
+  isEmpty(): boolean  { return this.playlistLogic.isEmpty(); }
+  isSmall(): boolean  { return this.playlistLogic.isSmall(); }
+  isMedium(): boolean { return this.playlistLogic.isMedium(); }
+  isLarge(): boolean  { return this.playlistLogic.isLarge(); }
+  realSongCount(): number { return this.playlistLogic.realSongCount(); }
 
-  onPlaylistChange(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    const selectedValue = target.value;
-    
-    if (this.platform === 'youtube') {
-      const selectedPlaylist = this.youtubeService.playlists().find((p: any) => p.id === selectedValue);
-      if (selectedPlaylist) this.youtubeService.selectPlaylist(selectedPlaylist);
-    } else if (this.platform === 'spotify') {
-      const selectedPlaylist = this.spotifyService.playlists().find((p: any) => p.id === selectedValue);
-      if (selectedPlaylist) this.spotifyService.selectPlaylist(selectedPlaylist);
-    }
-  }
-
+  // Map current platform items into displayable Song[]
   getDisplaySongs(): Song[] {
-    if (this.platform === 'youtube') return this.youtubeService.convertTracksToSongs();
-    if (this.platform === 'spotify') {
-      return this.spotifyService.playlistTracks().map(t => ({
+    if (this.platform === 'youtube') {
+      return this.youtubeService.playlistTracks().map(t => ({
         id: t.id,
         name: t.title,
         artist: t.artist,
-  duration: t.duration || '00:00',
-        video_url: undefined,
-  thumbnail_url: t.thumbnail_url,
-  thumbnailUrl: t.thumbnail_url,
-  platform: 'spotify',
-        isPlaceholder: false
+        platform: 'youtube',
+        durationMs: typeof (t as any).duration_ms === 'number'
+          ? (t as any).duration_ms
+          : parseDurationToMs(t.duration),
+        thumbnailUrl: t.thumbnail_url ?? undefined,
+        uri: t.video_url ?? undefined,
+        meta: { position: t.position }
       }));
     }
-    return this.playlistLogic.displaySongList();
+    if (this.platform === 'spotify') {
+      // If you already have a normalized list in your service, use it.
+      // Otherwise, fall back to the saved playlist items.
+      return (this.spotifyService as any).toSongs?.() ?? this.playlistLogic.items();
+    }
+    return this.playlistLogic.items();
   }
+
+  // Selection
+  selectSong(song: Song): void {
+    this.state.setCurrentTrack(song);
+    this.state.setPlatformKind(song.platform as any);
+  }
+
+  // Playlist dropdown change
+  onPlaylistChange(evt: Event): void {
+    const id = (evt.target as HTMLSelectElement).value;
+    if (!id) return;
+
+    if (this.platform === 'youtube') {
+      const pl = this.youtubeService.playlists().find(p => p.id === id);
+      if (pl) this.youtubeService.selectPlaylist(pl);
+      return;
+    }
+
+    if (this.platform === 'spotify') {
+      const pl = this.spotifyService.playlists().find((p: any) => p.id === id);
+      if ((this.spotifyService as any).selectPlaylist && pl) {
+        (this.spotifyService as any).selectPlaylist(pl);
+      }
+      return;
+    }
+  }
+}
+
+/** "MM:SS" or "H:MM:SS" -> ms (0 if bad) */
+function parseDurationToMs(s?: string): number {
+  if (!s) return 0;
+  const parts = s.split(':').map(n => parseInt(n, 10));
+  if (parts.some(n => Number.isNaN(n))) return 0;
+  if (parts.length === 2) {
+    const [m, sec] = parts;
+    return ((m * 60) + sec) * 1000;
+  }
+  if (parts.length === 3) {
+    const [h, m, sec] = parts;
+    return ((h * 3600) + (m * 60) + sec) * 1000;
+  }
+  return 0;
 }

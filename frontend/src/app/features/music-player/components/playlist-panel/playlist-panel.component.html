@@ -4,11 +4,15 @@
      [class.small]="isSmall()"
      [class.medium]="isMedium()"
      [class.large]="isLarge()">
+
   <div class="header">
     <div class="info">
-      <!--<div class="thumbnail"></div>-->
       <div class="playlist-selector">
-        <select class="playlist-dropdown" (change)="onPlaylistChange($event)" [disabled]="(platform==='youtube' && youtubeService.isLoading()) || (platform==='spotify' && spotifyService.isLoading())">
+        <select
+          class="playlist-dropdown"
+          (change)="onPlaylistChange($event)"
+          [disabled]="(platform==='youtube' && youtubeService.isLoading()) || (platform==='spotify' && spotifyService.isLoading())">
+
           @if (platform === 'youtube') {
             @if (youtubeService.isLoading()) {
               <option value="">Loading YouTube Playlists...</option>
@@ -17,7 +21,9 @@
             } @else {
               <option value="">Select YouTube Playlist</option>
               @for (playlist of youtubeService.playlists(); track playlist.id) {
-                <option [value]="playlist.id">{{ playlist.title }} ({{ playlist.video_count }} tracks)</option>
+                <option [value]="playlist.id">
+                  {{ playlist.title }} ({{ playlist.video_count }} tracks)
+                </option>
               }
             }
           } @else if (platform === 'spotify') {
@@ -28,7 +34,9 @@
             } @else {
               <option value="">Select Spotify Playlist</option>
               @for (playlist of spotifyService.playlists(); track playlist.id) {
-                <option [value]="playlist.id">{{ playlist.title }} ({{ playlist.video_count }} tracks)</option>
+                <option [value]="playlist.id">
+                  {{ playlist.title }} ({{ playlist.video_count }} tracks)
+                </option>
               }
             }
           } @else {
@@ -37,6 +45,7 @@
             <option value="spotify">Spotify Playlist</option>
             <option value="favorites">Favorites</option>
           }
+
         </select>
       </div>
     </div>
@@ -45,17 +54,19 @@
   <!-- Song Items - Responsive to playlist size -->
   <div class="items" [attr.data-count]="realSongCount()">
     @for (song of getDisplaySongs(); track song.id) {
-      <div class="item" 
-           [class.active]="song.id === musicService.currentTrack()?.id"
-           (click)="selectSong(song)"
-           [class.clickable]="!song.isPlaceholder">
+      <div
+        class="item"
+        [class.active]="song.id === currentTrackId()"
+        (click)="selectSong(song)">
+
         <div class="info">
           <div class="thumbnail">
-            <!--youtube thumbnail-->
-            @if (song.video_url && song.id !== musicService.currentTrack()?.id) {
+            <!-- YouTube indicator (aligned to unified Song.platform) -->
+            @if ((platform === 'youtube') && song.id !== currentTrackId()) {
               <img src="assets/images/yt_icon_red_digital.png" alt="YouTube Icon" class="youtube-icon"/>
             }
           </div>
+
           <span>{{ song.name }}</span>
         </div>
       </div>
