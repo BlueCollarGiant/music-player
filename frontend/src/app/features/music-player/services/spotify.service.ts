@@ -1,38 +1,32 @@
+/** SpotifyService: REST playlists/tracks + mapping only.
+ *  Playback & SDK integration live in SpotifyAdapter (implements PlayerPort).
+ */
 import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../../environments/environment';
 
-export interface SpotifyPlaylist {
-  id: string;
-  title: string;
-  description?: string;
-  thumbnail_url?: string;
-  video_count: number;
-}
+import { Song } from '../../../shared/models/song.model';
+import { mapSpotifyTracksToSongs, mapSpotifyTrackToSong } from '../../Spotify/spotify.mapper';
 
-export interface SpotifyTrack {
-  id: string;
-  title: string;
-  artist: string;
-  duration: string; // mm:ss
-  thumbnail_url?: string;
-  position: number;
-  preview_url?: string | null;
-  external_url?: string | null;
-}
+
+export interface SpotifyPlaylist { id: string; title: string; description?: string; thumbnail_url?: string; video_count: number; }
+export interface SpotifyTrack { id: string; title: string; artist: string; duration: string; thumbnail_url?: string; position: number; preview_url?: string | null; external_url?: string | null; }
 
 @Injectable({ providedIn: 'root' })
 export class SpotifyService {
   private readonly apiBase = `${environment.apiUrl}/api/platforms/spotify`;
   private readonly platformId = inject(PLATFORM_ID);
-  private http = inject(HttpClient);
-
+  private readonly http = inject(HttpClient);
+  toSongs(): Song[] { return mapSpotifyTracksToSongs(this.playlistTracks()); }
+  toSong = (t: SpotifyTrack): Song => mapSpotifyTrackToSong(t);
+  // Reactive state (mirrors YouTubeService surface)
   playlists = signal<SpotifyPlaylist[]>([]);
   selectedPlaylist = signal<SpotifyPlaylist | null>(null);
   playlistTracks = signal<SpotifyTrack[]>([]);
   isLoading = signal(false);
 
+  // Auth header helper (kept from prior version)
   private authHeaders(): HttpHeaders {
     const base = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (!isPlatformBrowser(this.platformId)) return base;
@@ -40,12 +34,12 @@ export class SpotifyService {
     return tok ? base.set('Authorization', `Bearer ${tok}`) : base;
   }
 
-  loadPlaylists() {
+  // ================= API =================
+  loadPlaylists(): void {
     this.isLoading.set(true);
-    this.http.get<{ playlists: any[] }>(`${this.apiBase}/playlists`, { headers: this.authHeaders() }).subscribe({
+    this.http.get<{ playlists: SpotifyPlaylist[] }>(`${this.apiBase}/playlists`, { headers: this.authHeaders() }).subscribe({
       next: (res) => {
-        console.debug('[SpotifyService] playlists response', res);
-        this.playlists.set(res.playlists as SpotifyPlaylist[]);
+        this.playlists.set(res.playlists || []);
       },
       error: (err) => {
         console.error('[SpotifyService] playlists load error', err);
@@ -55,28 +49,21 @@ export class SpotifyService {
     });
   }
 
-  loadPlaylistTracks(id: string) {
+  loadPlaylistTracks(id: string): void {
     this.isLoading.set(true);
     this.http.get<{ tracks: any[] }>(`${this.apiBase}/playlists/${id}/tracks`, { headers: this.authHeaders() }).subscribe({
       next: (res) => {
-        console.debug('[SpotifyService] tracks response', res);
-        // Convert duration_ms if present to mm:ss
-    const tracks = (res.tracks || []).map((t: any, idx: number) => {
-          const durationMs = t.duration_ms || 0;
-          const mins = Math.floor(durationMs / 60000);
-            const secs = Math.floor((durationMs % 60000) / 1000);
-            const pad = (n: number) => n.toString().padStart(2, '0');
-          return {
-            id: t.id,
-            title: t.title,
-            artist: t.artist,
-            duration: `${pad(mins)}:${pad(secs)}`,
-            thumbnail_url: t.thumbnail_url,
-      position: idx,
-      preview_url: t.preview_url || null,
-      external_url: t.external_url || null
-          } as SpotifyTrack;
-        });
+        const fmt = (ms: number) => { const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000); return `${m}:${s.toString().padStart(2,'0')}`; };
+        const tracks: SpotifyTrack[] = (res.tracks || []).map((t: any, idx: number) => ({
+          id: t.id,
+          title: t.title,
+          artist: t.artist,
+          duration: t.duration_ms ? fmt(t.duration_ms) : (t.duration || '0:00'),
+          thumbnail_url: t.thumbnail_url,
+          position: idx,
+          preview_url: t.preview_url ?? null,
+          external_url: t.external_url ?? null,
+        }));
         this.playlistTracks.set(tracks);
       },
       error: (err) => {
@@ -87,25 +74,15 @@ export class SpotifyService {
     });
   }
 
-  selectPlaylist(pl: SpotifyPlaylist) {
+  selectPlaylist(pl: SpotifyPlaylist): void {
     this.selectedPlaylist.set(pl);
     this.loadPlaylistTracks(pl.id);
   }
 
-  // Convert a SpotifyTrack to unified Song shape
-  toSong(t: SpotifyTrack) {
-    return {
-      id: t.id,
-      name: t.title,
-      artist: t.artist,
-      duration: t.duration,
-      platform: 'spotify' as const,
-      thumbnail_url: t.thumbnail_url,
-      thumbnailUrl: t.thumbnail_url,
-      previewUrl: t.preview_url || null,
-      externalUrl: t.external_url || null,
-      durationMs: undefined,
-      isPlaceholder: false
-    };
+  selectPlaylistById(id: string): void {
+    const found = this.playlists().find(p => p.id === id) || null;
+    if (found) this.selectedPlaylist.set(found);
+    this.loadPlaylistTracks(id);
   }
+
 }
