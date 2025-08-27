@@ -10,10 +10,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ControlsFacade } from '../../../../core/playback/controls-facade.service';
+// Switched from ControlsFacade to PlaylistInstanceService (single UI surface)
+import { PlaylistInstanceService } from '../../../../core/playback/playlist-instance';
 import { AdapterRegistryService } from '../../../../core/playback/adapter-registry.service';
 import { YouTubeAdapter } from '../../adapters/youtube.adapter';
-import { PlaybackCoordinatorService } from '../../services/playback-coordinator.service';
 import { getYouTubeId } from '../../../../shared/utils/youtube.util';
 import { Song } from '../../../../shared/models/song.model';
 import { VisualizerComponent } from './visualizer-container/visualizer/visualizer.component';
@@ -29,11 +29,10 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   youtubePlayer!: ElementRef<HTMLDivElement>;
 
   // ── DI ─────────────────────────────────────────────────────────────────────
-  private readonly c = inject(ControlsFacade);
+  // Single source of truth (instance service)
+  readonly c = inject(PlaylistInstanceService); // public for template bindings
   private readonly registry = inject(AdapterRegistryService);
   private readonly ytAdapter = this.registry.get('youtube') as YouTubeAdapter | null;
-  // Bridge #4: coordinator attach route
-  private readonly coordinator = inject(PlaybackCoordinatorService);
 
   // ── Canonical model usage (no legacy fields) ───────────────────────────────
   readonly track = computed<Song | null>(() => this.c.track());
@@ -46,8 +45,19 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   readonly youTubeId = computed(() => {
     const t = this.track();
     if (!t || t.platform !== 'youtube') return null;
+    // 1) Prefer explicit ID
+  if (t.id && t.id.length === 11) return t.id;
+
+  // 2) Try parsing from URL
+  const parsedFromUri = getYouTubeId(t.uri);
+
+  // 3) If the uri itself is already an 11-char id, accept it
+  if (!parsedFromUri && t.uri && t.uri.length === 11) return t.uri;
+
+  return parsedFromUri ?? null;
     // Accept either a raw 11-char id or a full URL in song.uri
-    return getYouTubeId(t.uri) ?? (t.uri && t.uri.length === 11 ? t.uri : null);
+    
+    
   });
 
   // Show overlay thumbnail when we have a video but are not playing
@@ -57,7 +67,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
   // Unified thumbnail accessor with a safe fallback
   thumbnailUrl(): string {
-    return this.track()?.thumbnailUrl || 'assets/images/thumbnail.png';
+    return this.track()?.thumbnailUrl || 'assets/images/musiclogo.png';
   }
 
   // ── YouTube player lifecycle (component owns DOM; adapter owns control) ────
@@ -94,13 +104,12 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
   private createYouTubePlayer(): void {
     if (!this.ytAdapter) return;
-
     const videoId = this.youTubeId();
+    console.log('[yt-create-attempt]', { videoId, isYouTube: this.isYouTube?.(), hostReady: !!this.youtubePlayer });
     const host = typeof window !== 'undefined' ? (window as any) : undefined;
     const YT = host?.YT;
-
     if (!this.youtubePlayer?.nativeElement || !videoId || !YT?.Player) return;
-
+    console.log('[yt-create-skip]', { reason: 'guard-failed', hasHost: !!this.youtubePlayer?.nativeElement, hasYT: !!YT?.Player });
     this.player = new YT.Player(this.youtubePlayer.nativeElement, {
       videoId,
       width: '100%',
@@ -108,14 +117,12 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1 },
       events: {
         onReady: () => {
-          // Bridge #4 central attach
-          try { (this.coordinator as any).attachYouTubePlayer(this.player); } catch {}
+          try { this.c.attachYouTubePlayer(this.player); } catch {}
           this.ytAdapter!.onReady();
           this.forcePlayerResize();
         },
         onStateChange: (event: any) => {
           const YTRef = host?.YT;
-          // Let adapter mirror state; let coordinator handle next()
           this.ytAdapter!.onStateChange(event.data, YTRef, () => this.c.next());
         },
       },

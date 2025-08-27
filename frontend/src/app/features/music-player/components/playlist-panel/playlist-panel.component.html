@@ -52,24 +52,24 @@
   </div>
 
   <!-- Song Items - Responsive to playlist size -->
-  <div class="items" [attr.data-count]="realSongCount()">
-    @for (song of getDisplaySongs(); track song.id) {
-      <div
-        class="item clickable"
-        [class.active]="song.id === currentTrackId()"
-        (click)="selectSong(song)">
+<div class="items" [attr.data-count]="realSongCount()">
+  @for (song of getDisplaySongs(); track song.id) {
+    <div
+      class="item clickable"
+      [class.active]="song.id === c.track()?.id"
+      (click)="selectSong(song)">
 
-        <div class="info">
-          <div class="thumbnail">
-            <!-- YouTube indicator (aligned to unified Song.platform) -->
-            @if ((platform === 'youtube') && song.id !== currentTrackId()) {
-              <img src="assets/images/yt_icon_red_digital.png" alt="YouTube Icon" class="youtube-icon"/>
-            }
-          </div>
-
-          <span>{{ song.name }}</span>
+      <div class="info">
+        <div class="thumbnail">
+          <!-- Show YT icon when not on the active track -->
+          @if ((platform === 'youtube') && song.id !== c.track()?.id) {
+            <img src="assets/images/yt_icon_red_digital.png" alt="YouTube Icon" class="youtube-icon"/>
+          }
         </div>
+
+        <span>{{ song.name }}</span>
       </div>
-    }
-  </div>
+    </div>
+  }
+</div>
 </div>

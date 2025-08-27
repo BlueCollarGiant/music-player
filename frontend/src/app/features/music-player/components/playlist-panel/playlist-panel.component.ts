@@ -6,6 +6,7 @@ import { PlayListLogicService } from '../../services/play-list-logic.service';
 import { YouTubeService, YouTubePlaylist } from '../../services/youtube.service';
 import { SpotifyService } from '../../services/spotify.service';
 import { Song } from '../../../../shared/models/song.model';
+import { PlaylistInstanceService } from '../../../../core/playback/playlist-instance';
 
 @Component({
   selector: 'app-playlist-panel',
@@ -29,10 +30,11 @@ export class PlaylistPanelComponent {
   private readonly playlistLogic = inject(PlayListLogicService);
   readonly youtubeService = inject(YouTubeService);
   readonly spotifyService = inject(SpotifyService);
-
+  readonly c = inject(PlaylistInstanceService);
   // ---- State helpers the template can call ----------------------------------
-  currentTrack = () => this.state.currentTrack();
-  currentTrackId = () => this.state.currentTrack()?.id ?? null;
+  // Swap to instance reads so UI stays on the one source of truth
+  currentTrack = () => this.c.track();
+  currentTrackId = () => this.c.track()?.id ?? null;
 
   isEmpty(): boolean  { return this.playlistLogic.isEmpty(); }
   isSmall(): boolean  { return this.playlistLogic.isSmall(); }
@@ -57,17 +59,16 @@ export class PlaylistPanelComponent {
       }));
     }
     if (this.platform === 'spotify') {
-      // If you already have a normalized list in your service, use it.
-      // Otherwise, fall back to the saved playlist items.
       return (this.spotifyService as any).toSongs?.() ?? this.playlistLogic.items();
     }
     return this.playlistLogic.items();
   }
 
-  // Selection
+  
   selectSong(song: Song): void {
-    this.state.setCurrentTrack(song);
-    this.state.setPlatformKind(song.platform as any);
+    console.log('[Instance] selectSong()', { id: song?.id, platform: song?.platform, name: song?.name });
+    this.c.selectTrack(song);
+    this.c.setPlatform(song.platform as any);
   }
 
   // Playlist dropdown change

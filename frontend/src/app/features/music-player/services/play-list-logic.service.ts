@@ -32,6 +32,7 @@ export class PlayListLogicService {
   readonly isSmall  = computed(() => this.realSongCount() > 0 && this.realSongCount() <= 3);
   readonly isMedium = computed(() => this.realSongCount() > 3 && this.realSongCount() <= 8);
   readonly isLarge  = computed(() => this.realSongCount() > 8);
+    index: any;
 
   // ── Persistence ────────────────────────────────────────────────────────────
   private load(): Song[] | null {

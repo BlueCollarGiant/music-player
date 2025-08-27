@@ -1,7 +1,8 @@
 
 import { Component, inject } from '@angular/core';
 import { SharedModule } from '../../../../../shared/shared.module';
-import { ControlsFacade } from '../../../../../core/playback/controls-facade.service';
+import { PlaylistInstanceService } from '../../../../../core/playback/playlist-instance';
+
 
 @Component({
   selector: 'app-player-controls',
@@ -12,7 +13,7 @@ import { ControlsFacade } from '../../../../../core/playback/controls-facade.ser
 })
 export class PlayerControlsComponent {
   // Single source for state + commands (no direct coordinator/store usage here)
-  readonly c = inject(ControlsFacade);
+  readonly c = inject(PlaylistInstanceService);;
 
   // UI actions (thin wrappers so template stays clean)
   toggle(): void {

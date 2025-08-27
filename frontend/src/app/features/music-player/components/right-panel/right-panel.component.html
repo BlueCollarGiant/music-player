@@ -21,7 +21,7 @@
 
     @if (!track()) {
       <div class="visualizer-container">
-        <app-visualizer [isPlaying]="isPlaying()"></app-visualizer>
+  <app-visualizer [isPlaying]="c.isPlaying()"></app-visualizer>
       </div>
     }
   </div>
@@ -33,7 +33,7 @@
     </div>
 
     <div class="bottom-visualizer">
-      <app-visualizer [isPlaying]="isPlaying()"></app-visualizer>
+  <app-visualizer [isPlaying]="c.isPlaying()"></app-visualizer>
     </div>
   }
 </div>
