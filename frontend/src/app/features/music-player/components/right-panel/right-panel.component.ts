@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { ControlsFacade } from '../../../../core/playback/controls-facade.service';
 import { AdapterRegistryService } from '../../../../core/playback/adapter-registry.service';
 import { YouTubeAdapter } from '../../adapters/youtube.adapter';
+import { PlaybackCoordinatorService } from '../../services/playback-coordinator.service';
 import { getYouTubeId } from '../../../../shared/utils/youtube.util';
 import { Song } from '../../../../shared/models/song.model';
 import { VisualizerComponent } from './visualizer-container/visualizer/visualizer.component';
@@ -31,6 +32,8 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   private readonly c = inject(ControlsFacade);
   private readonly registry = inject(AdapterRegistryService);
   private readonly ytAdapter = this.registry.get('youtube') as YouTubeAdapter | null;
+  // Bridge #4: coordinator attach route
+  private readonly coordinator = inject(PlaybackCoordinatorService);
 
   // ── Canonical model usage (no legacy fields) ───────────────────────────────
   readonly track = computed<Song | null>(() => this.c.track());
@@ -105,7 +108,8 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1 },
       events: {
         onReady: () => {
-          this.ytAdapter!.setPlayer(this.player);
+          // Bridge #4 central attach
+          try { (this.coordinator as any).attachYouTubePlayer(this.player); } catch {}
           this.ytAdapter!.onReady();
           this.forcePlayerResize();
         },

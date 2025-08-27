@@ -1,5 +1,6 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, signal, effect, inject } from '@angular/core';
 import { PlayerPort } from '../../../core/playback/player-port';
+import { PlaybackStateStore } from '../../../core/playback/playback-state.store';
 
 type SpotifyPlayer = any;   // If you have types: import type { SpotifyPlayer } from 'spotify-web-playback-sdk';
 
@@ -21,6 +22,8 @@ export class SpotifyAdapter implements PlayerPort {
   // Volume/mute snapshot (SDK has no isMuted, so we track it)
   private mutedSig = signal(false);
   private lastVolume = 1.0;
+  private readonly state = inject(PlaybackStateStore); // Bridge #3
+  private positionTimer: any = null;
 
   // ── Wiring API ─────────────────────────────────────────────────────────────
   /** Call this from your Spotify init code once you have the `new Spotify.Player(...)` instance */
@@ -54,8 +57,25 @@ export class SpotifyAdapter implements PlayerPort {
         this.lastUpdateTs.set(nowTs());
         this.durationMsSig.set(Math.max(0, durationMs));
         this.trackUri = currentUri;
+
+        // Bridge #3 mirrors
+        this.state.setPlaying(!!isPlaying);
+        this.state.setDuration(msToSec(durationMs));
+        this.state.setCurrentTime(msToSec(positionMs));
       });
     } catch {}
+
+    // Start a lightweight interval to mirror extrapolated position
+    if (!this.positionTimer && typeof window !== 'undefined') {
+      this.positionTimer = window.setInterval(() => {
+        try {
+          if (this.playingSig()) {
+            const posSec = this.currentTimeSeconds();
+            this.state.setCurrentTime(posSec);
+          }
+        } catch {}
+      }, 1000);
+    }
   }
 
   private detachListeners(player: SpotifyPlayer | null) {
@@ -90,15 +110,15 @@ export class SpotifyAdapter implements PlayerPort {
 
   async start(): Promise<void> {
     // start ~ play from current position (strict "from 0" requires a prior seek(0))
-    try { await this.playerSig()?.resume?.(); this.playingSig.set(true); } catch {}
+  try { await this.playerSig()?.resume?.(); this.playingSig.set(true); this.state.setPlaying(true);} catch {}
   }
 
   async pause(): Promise<void> {
-    try { await this.playerSig()?.pause?.(); this.playingSig.set(false); } catch {}
+  try { await this.playerSig()?.pause?.(); this.playingSig.set(false); this.state.setPlaying(false);} catch {}
   }
 
   async resume(): Promise<void> {
-    try { await this.playerSig()?.resume?.(); this.playingSig.set(true); } catch {}
+  try { await this.playerSig()?.resume?.(); this.playingSig.set(true); this.state.setPlaying(true);} catch {}
   }
 
   async seek(seconds: number): Promise<void> {
@@ -107,6 +127,7 @@ export class SpotifyAdapter implements PlayerPort {
       await this.playerSig()?.seek?.(ms);
       this.basePositionMs.set(ms);
       this.lastUpdateTs.set(nowTs());
+  this.state.setCurrentTime(seconds);
     } catch {}
   }
 
@@ -147,6 +168,7 @@ export class SpotifyAdapter implements PlayerPort {
     this.durationMsSig.set(0);
     this.basePositionMs.set(0);
     this.trackUri = null;
+  if (this.positionTimer) { try { clearInterval(this.positionTimer); } catch {}; this.positionTimer = null; }
   }
 }
 
