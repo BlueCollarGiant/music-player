@@ -3,7 +3,26 @@ html, body {
   height: 100%; 
   margin: 0; 
   padding: 0;
-  overflow: hidden; /* Prevent any global scrolling */
+  overflow: hidden; /* Desktop: keep internal panel scrolling only */
+}
+
+/* Allow vertical page scroll on smaller screens so entire player is reachable */
+@media (max-width: 820px) {
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto; /* re-enable vertical scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide default scrollbar (keep scrolling) */
+  body {
+    scrollbar-width: none; /* Firefox */
+  }
+  body::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent;
+  }
 }
 
 body { 
@@ -15,6 +34,9 @@ html {
   /* This targets the root of the document (html) */
   background-color: #0f1631;
 }
+
+/* Layout chain root (no visual change) */
+app-root { display:block; height:100%; min-height:0; }
 
 /*/* Default (app/youtube base) 
 :root, .platform--youtube {
@@ -34,4 +56,51 @@ html {
   --accent-color-alt: #ff5500;
   --accent-gradient: linear-gradient(135deg, #ff7700, #ff5500);
 }*/
-
+:root {
+  /* --- Colors --- */
+  --color-primary: #3b82f6;
+  --color-primary-dark: #1a2142;
+  --color-primary-hover: #2563eb;
+  --color-accent: #60a5fa;
+  --color-success: #10b981;
+  --color-text: white;
+  --color-text-muted: rgba(255, 255, 255, 0.7);
+  --color-border: rgba(10, 16, 41, 0.25);
+  --color-border-hover: rgba(59, 130, 246, 0.5);
+  --color-background-overlay: rgba(255, 255, 255, 0.05);
+  --color-active-bg: rgba(30, 64, 175, 0.4);
+  --color-dashed-border: rgba(255, 255, 255, 0.3);
+  --color-placeholder-bg: rgba(255, 255, 255, 0.02);
+  --color-scrollbar: rgba(255, 255, 255, 0.1);
+  --color-scrollbar-thumb: rgba(255, 255, 255, 0.3);
+  --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.5);
+  /* Item backgrounds (derived from panel gradient) */
+  --color-item-bg: rgba(30, 80, 180, 0.12);
+  --color-item-bg-hover: rgba(30, 100, 210, 0.18);
+  --color-item-bg-active: rgba(30, 64, 175, 0.55);
+  --color-item-border: rgba(255,255,255,0.18);
+  --color-item-border-hover: rgba(255,255,255,0.35);
+  --color-item-border-active: rgba(96,165,250,0.8);
+  
+  /* --- Spacing --- */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+  
+  /* --- Layout --- */
+  --border-radius: 0.375rem;
+  --border-radius-lg: 0.5rem;
+  --transition: all 0.3s ease;
+  --box-shadow-glow: 0 0 8px var(--color-primary);
+  --box-shadow-hover-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --box-shadow-hover-lg: 0 4px 12px rgba(0, 0, 0, 0.2);
+  
+  /* --- Typography --- */
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.1rem;
+  --text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+}

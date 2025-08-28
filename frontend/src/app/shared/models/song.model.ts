@@ -1,17 +1,23 @@
 
+import { PlatformKind } from '../../core/playback/player-port'; // 'youtube' | 'spotify' | ...
+
 export interface Song {
   id: string;
   name: string;
   artist?: string;
-  duration: string;
-  video_url?: string;
-  thumbnail_url?: string;
-  // Extended cross-platform metadata
-  platform?: 'youtube' | 'spotify' | 'soundcloud' | 'local';
+  platform: PlatformKind | 'soundcloud' | 'local';
+
+  /** Canonical duration in milliseconds (UI can format to M:SS). */
   durationMs?: number | null;
-  previewUrl?: string | null;
-  externalUrl?: string | null;
-  thumbnailUrl?: string; // alias to support unified accessor
-  isHeader?: boolean;
-  isPlaceholder?: boolean;
+  thumbnailUrl?: string;
+
+  /** Optional extras for previews/links. */
+  previewUrl?: string | null;     // short audio preview if available
+  externalUrl?: string | null;    // link out to platform page
+
+  /** Platform-native locator (e.g., spotify:track:..., full URL, etc.) */
+  uri?: string;
+
+  /** Free-form bag for platform-specific metadata if you need it. */
+  meta?: Record<string, unknown>;
 }

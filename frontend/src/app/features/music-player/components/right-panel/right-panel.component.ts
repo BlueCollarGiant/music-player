@@ -1,121 +1,137 @@
-import { Component, inject, computed, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect } from '@angular/core';
-import { MusicPlayerService } from '../../services/music-player.service';
-import { PlaybackCoordinatorService } from '../../services/playback-coordinator.service';
+import {
+  Component,
+  inject,
+  computed,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  OnDestroy,
+  effect,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+// Switched from ControlsFacade to PlaylistInstanceService (single UI surface)
+import { PlaylistInstanceService } from '../../../../core/playback/playlist-instance';
+import { AdapterRegistryService } from '../../../../core/playback/adapter-registry.service';
+import { YouTubeAdapter } from '../../adapters/youtube.adapter';
+import { getYouTubeId } from '../../../../shared/utils/youtube.util';
 import { Song } from '../../../../shared/models/song.model';
 import { VisualizerComponent } from './visualizer-container/visualizer/visualizer.component';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-right-panel',
   imports: [VisualizerComponent, CommonModule],
   templateUrl: './right-panel.component.html',
-  styleUrl: './right-panel.component.css'
+  styleUrl: './right-panel.component.css',
 })
 export class RightPanelComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('youtubePlayer', { static: false }) youtubePlayer!: ElementRef<HTMLDivElement>;
-  
-  //-----Injections-----//
-  musicService = inject(MusicPlayerService);
-  playbackCoordinator = inject(PlaybackCoordinatorService);
+  @ViewChild('youtubePlayer', { static: false })
+  youtubePlayer!: ElementRef<HTMLDivElement>;
 
-  //-----Computed Properties-----//
-  readonly currentTrack = computed<Song | null>(() => this.musicService.currentTrack());
-  readonly isPlaying = computed(() => this.musicService.isPlaying());
-  readonly hasVideoUrl = computed(() => !!this.currentTrack()?.video_url);
+  // ── DI ─────────────────────────────────────────────────────────────────────
+  // Single source of truth (instance service)
+  readonly c = inject(PlaylistInstanceService); // public for template bindings
+  private readonly registry = inject(AdapterRegistryService);
+  private readonly ytAdapter = this.registry.get('youtube') as YouTubeAdapter | null;
 
-  // New helpers to distinguish platform display logic
-  showVideo() {
-    const t = this.currentTrack();
-    return !!t && !!t.video_url && (t.platform === 'youtube' || !t.platform);
-  }
-  showStaticThumbnail() {
-    const t = this.currentTrack();
-    return !!t && !t.video_url; // any non-youtube or youtube without video_url
-  }
-  thumbnailUrl() {
-    const t = this.currentTrack();
-    return t?.thumbnailUrl || t?.thumbnail_url || 'assets/images/thumbnail.png';
-  }
-  readonly showThumbnailOverlay = computed(() => this.hasVideoUrl() && !this.isPlaying());
+  // ── Canonical model usage (no legacy fields) ───────────────────────────────
+  readonly track = computed<Song | null>(() => this.c.track());
+  readonly isPlaying = computed(() => this.c.isPlaying());
 
-  // Player state tracking
-  private currentPlayer: any = null;
-  private previousTrackId: string | null = null;
+  // Is this a YouTube track (by platform)?
+  readonly isYouTube = computed(() => this.track()?.platform === 'youtube');
+
+  // Do we have a usable YouTube video id?
+  readonly youTubeId = computed(() => {
+    const t = this.track();
+    if (!t || t.platform !== 'youtube') return null;
+    // 1) Prefer explicit ID
+  if (t.id && t.id.length === 11) return t.id;
+
+  // 2) Try parsing from URL
+  const parsedFromUri = getYouTubeId(t.uri);
+
+  // 3) If the uri itself is already an 11-char id, accept it
+  if (!parsedFromUri && t.uri && t.uri.length === 11) return t.uri;
+
+  return parsedFromUri ?? null;
+    // Accept either a raw 11-char id or a full URL in song.uri
+    
+    
+  });
+
+  // Show overlay thumbnail when we have a video but are not playing
+  readonly showThumbnailOverlay = computed(
+    () => !!this.youTubeId() && !this.isPlaying()
+  );
+
+  // Unified thumbnail accessor with a safe fallback
+  thumbnailUrl(): string {
+    return this.track()?.thumbnailUrl || 'assets/images/musiclogo.png';
+  }
+
+  // ── YouTube player lifecycle (component owns DOM; adapter owns control) ────
+  private player: any = null;
+  private lastTrackKey: string | null = null;
 
   constructor() {
-    // Watch for TRACK changes only (not play state changes)
+    // Rebuild player when the track identity changes
     effect(() => {
-      const track = this.currentTrack();
-      const trackId = track?.id || null;
-      
-      // Only recreate player when track actually changes
-      if (trackId !== this.previousTrackId) {
-        this.destroyCurrentPlayer();
-        
-        if (track?.video_url) {
-          setTimeout(() => this.createYouTubePlayer(), 500);
-        }
-        
-        this.previousTrackId = trackId;
+      const t = this.track();
+      const key = t ? `${t.platform}:${t.id}:${t.uri ?? ''}` : null;
+      if (key === this.lastTrackKey) return;
+
+      this.destroyYouTubePlayer();
+
+      // Create player only for valid YouTube items
+      if (this.isYouTube() && this.youTubeId()) {
+        setTimeout(() => this.createYouTubePlayer(), 0);
       }
+
+      this.lastTrackKey = key;
     });
   }
 
-  ngAfterViewInit() {
-    // Initial player creation if track already selected
-    const currentTrack = this.currentTrack();
-    if (currentTrack?.video_url) {
-      this.previousTrackId = currentTrack.id;
-      setTimeout(() => this.createYouTubePlayer(), 500);
+  ngAfterViewInit(): void {
+    if (this.isYouTube() && this.youTubeId()) {
+      setTimeout(() => this.createYouTubePlayer(), 0);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroyYouTubePlayer();
   }
 
   private createYouTubePlayer(): void {
-  const track = this.currentTrack();
-  const videoId = track?.video_url ? this.musicService.getYouTubeId(track.video_url) : null;
-  
-  if (!this.youtubePlayer?.nativeElement || !videoId || !(window as any).YT?.Player) {
-    return;
+    if (!this.ytAdapter) return;
+    const videoId = this.youTubeId();
+    console.log('[yt-create-attempt]', { videoId, isYouTube: this.isYouTube?.(), hostReady: !!this.youtubePlayer });
+    const host = typeof window !== 'undefined' ? (window as any) : undefined;
+    const YT = host?.YT;
+    if (!this.youtubePlayer?.nativeElement || !videoId || !YT?.Player) return;
+    console.log('[yt-create-skip]', { reason: 'guard-failed', hasHost: !!this.youtubePlayer?.nativeElement, hasYT: !!YT?.Player });
+    this.player = new YT.Player(this.youtubePlayer.nativeElement, {
+      videoId,
+      width: '100%',
+      height: '100%',
+      playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1 },
+      events: {
+        onReady: () => {
+          try { this.c.attachYouTubePlayer(this.player); } catch {}
+          this.ytAdapter!.onReady();
+          this.forcePlayerResize();
+        },
+        onStateChange: (event: any) => {
+          const YTRef = host?.YT;
+          this.ytAdapter!.onStateChange(event.data, YTRef, () => this.c.next());
+        },
+      },
+    });
   }
 
-  this.currentPlayer = new (window as any).YT.Player(this.youtubePlayer.nativeElement, {
-    videoId,
-    width: '100%',
-    height: '100%',
-    playerVars: {
-      autoplay: 0,
-      controls: 0,
-      rel: 0,
-      modestbranding: 1
-    },
-    events: {
-      onReady: (event: any) => {
-        this.playbackCoordinator.setYouTubePlayer(this.currentPlayer);
-        this.playbackCoordinator.onPlayerReady(event);
-
-        //force player resize
-        this.forcePlayerResize();
-      },
-      onStateChange: (event: any) => {
-        this.playbackCoordinator.onPlayerStateChange(event);
-      }
-    }
-  });
-}
-  
-private forcePlayerResize(): void {
-  if (this.currentPlayer && this.youtubePlayer) {
-    //get the container dimensions
-    const container = this.youtubePlayer.nativeElement;
-    //const rect = container.getBoundingClientRect();
-
-    // Force the YouTube player to resize
-    //if (this.currentPlayer.setSize) {
-      //this.currentPlayer.setSize(rect.width, rect.height);
-    //}
-    
-    // Also force the iframe directly
-    const iframe = container.querySelector('iframe');
+  private forcePlayerResize(): void {
+    if (!this.player || !this.youtubePlayer) return;
+    const iframe = this.youtubePlayer.nativeElement.querySelector('iframe');
     if (iframe) {
       iframe.style.width = '100%';
       iframe.style.height = '100%';
@@ -124,41 +140,22 @@ private forcePlayerResize(): void {
       iframe.style.left = '';
     }
   }
-}
 
-
-private destroyCurrentPlayer(): void {
-    if (this.currentPlayer) {
-      try {
-        // Clear the player reference in the service first
-        this.playbackCoordinator.setYouTubePlayer(null);
-        
-        // Stop the player before destroying
-        if (typeof this.currentPlayer.stopVideo === 'function') {
-          this.currentPlayer.stopVideo();
-        }
-        
-        // Destroy the player
-        if (typeof this.currentPlayer.destroy === 'function') {
-          this.currentPlayer.destroy();
-        }
-      } catch (error) {
-        // Silent fail
-      } finally {
-        this.currentPlayer = null;
-      }
+  private destroyYouTubePlayer(): void {
+    if (!this.player) return;
+    try {
+      this.ytAdapter?.teardown?.();
+      if (typeof this.player.stopVideo === 'function') this.player.stopVideo();
+      if (typeof this.player.destroy === 'function') this.player.destroy();
+    } catch {
+      // noop
+    } finally {
+      this.player = null;
     }
   }
 
-  //-----Event Handlers-----//
+  // ── UI handlers ────────────────────────────────────────────────────────────
   onThumbnailClick(): void {
-    // This should trigger play, not just toggle
-    if (this.hasVideoUrl() && !this.isPlaying()) {
-      this.playbackCoordinator.togglePlayPause(); // This will start playing
-    }
-  }
-
-  ngOnDestroy() {
-    this.destroyCurrentPlayer();
+    if (this.youTubeId() && !this.isPlaying()) this.c.toggle();
   }
 }

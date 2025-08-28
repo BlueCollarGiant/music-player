@@ -1,1 +1,10 @@
-<router-outlet></router-outlet>
+<div class="platform-shell">
+  <div class="content">
+    <app-playlist-panel
+      [isYouTubeMode]="isYouTube"
+      [platform]="platform">
+    </app-playlist-panel>
+
+    <app-right-panel></app-right-panel>
+  </div>
+</div>

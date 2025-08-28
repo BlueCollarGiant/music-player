@@ -1,6 +1,7 @@
 <!-- Hamburger Menu Navigation (for all screen sizes) -->
 <div class="mobile-nav">
-  <button class="hamburger-button" (click)="toggleMobileMenu()">
+  <button class="hamburger-button" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen()"
+    aria-controls="mobile-menu" aria-label="Open menu">
     <div class="hamburger-line"></div>
     <div class="hamburger-line"></div>
     <div class="hamburger-line"></div>
@@ -8,7 +9,7 @@
 
   @if (isMobileMenuOpen()) {
   <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
-    <div class="mobile-menu" (click)="$event.stopPropagation()">
+    <div id="mobile-menu" class="mobile-menu" (click)="$event.stopPropagation()">
       <div class="mobile-menu-header">
 
         <!-- User Authentication Section -->
@@ -28,8 +29,7 @@
         <div class="auth-section">
           <h3>Get Started</h3>
           <div class="auth-buttons">
-            <!-- Manual Login/Signup (for users without Gmail) -->
-            <button class="auth-btn login-btn" (click)="openManualLogin()">
+            <button class="auth-btn login-btn" type="button" (click)="openManualLogin()">
               <span class="btn-icon">📧</span>
               Login / Sign Up
             </button>
@@ -48,13 +48,13 @@
 
       </div>
 
-      <!-- Platform Connection Section (only show if logged in) -->
+      <!-- Platform Connection + Navigation (only show if logged in) -->
       @if (isUserLoggedIn()) {
       <div class="platform-section">
         <h4>Connect Platforms</h4>
+        <div class="divider"></div>
         <div class="platform-buttons">
-
-          <!-- YouTube: connect with POST when NOT connected; disconnect via TS when connected -->
+          <!-- YouTube connect/disconnect -->
           @if (!isPlatformConnected('youtube')) {
           <form [attr.action]="environment.apiUrl + '/auth/youtube'" method="post" target="_self" class="inline-form">
             <button type="submit" class="platform-btn youtube-btn" aria-label="Connect YouTube">
@@ -70,7 +70,7 @@
           </button>
           }
 
-          <!-- Spotify connect/disconnect (enabled) -->
+          <!-- Spotify connect/disconnect -->
           @if (!isPlatformConnected('spotify')) {
           <form action="http://127.0.0.1:3000/auth/spotify" method="post" target="_self" class="inline-form">
             <button type="submit" class="platform-btn spotify-btn" aria-label="Connect Spotify">
@@ -85,46 +85,39 @@
             Spotify ✓ (Click to disconnect)
           </button>
           }
+        </div>
 
-          <!-- Navigation Tabs (only show if logged in and on player page) -->
-          @if (isUserLoggedIn() && isPlayerActive()) {
-          <div class="mobile-menu-tabs">
-            @for (tab of tabs; track tab) {
-            <button [class.active]="musicService.activeTab() === tab" (click)="setActiveTabMobile(tab)">
-              {{ tab }}
-            </button>
-            }
-          </div>
-          }
+        <!-- Player Tabs (only when on /platform/*) -->
+        
+        <div class="divider"></div>
+        <!-- Platform Navigation Buttons -->
+        <!-- Platform Navigation (only if logged in & YouTube connected) -->
+        @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
+        <div class="platform-switch">
+          <button class="glass-platform-btn youtube" (click)="navigatePlatform('youtube')">
+            <span class="icon">📺</span>
+            Open YouTube Player
+          </button>
+        </div>
+        }
+        @if (isOAuthConnected('spotify')) {
+        <button class="glass-platform-btn spotify" (click)="navigatePlatform('spotify')">
+          🎵 Spotify
+        </button>
+        }
+        @if (isOAuthConnected('soundcloud')) {
+        <button class="soundcloud-nav-btn" (click)="navigatePlatform('soundcloud')">
+          ☁️ SoundCloud
+        </button>
+        }
 
-          <!-- Platform Navigation Buttons (reuse YouTube POV for now) -->
-          @if (isUserLoggedIn()) {
-          <div class="youtube-section">
-            @if (isPlatformConnected('youtube')) {
-            <button class="youtube-nav-btn" (click)="navigatePlatform('youtube')">
-              📺 YouTube
-            </button>
-            }
-            @if (isPlatformConnected('spotify')) {
-            <button class="youtube-nav-btn" (click)="navigatePlatform('spotify')">
-              🎵 Spotify
-            </button>
-            }
-            <!-- SoundCloud nav button hidden for now -->
-          </div>
-          }
-
-          <!-- Logout option (only show if logged in) -->
-          @if (isUserLoggedIn()) {
-          <div class="logout-section">
-            <button class="logout-btn" (click)="logout()">Logout</button>
-          </div>
-          }
-
+        <!-- Logout -->
+        <div class="logout-section">
+          <button class="logout-btn" type="button" (click)="logout()">Logout</button>
         </div>
       </div>
       }
     </div>
-    </div> <!-- close mobile-menu-overlay -->
+  </div>
   }
- </div>
+</div>
