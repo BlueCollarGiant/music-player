@@ -65,7 +65,7 @@ getDisplaySongs(): Song[] {
     if (songs && Array.isArray(songs)) return songs;
 
     return this.spotifyService.playlistTracks().map((t: any) => ({
-      id: t.id ?? t.track?.id,
+      id: t.id ?? t.track?.id ?? t.uri ?? t.track?.uri,
       name: t.title ?? t.name ?? t.track?.name,
       artist: t.artist ?? t.artists?.map((a: any) => a.name).join(', ') ?? t.track?.artists?.map((a: any) => a.name).join(', '),
       platform: 'spotify',

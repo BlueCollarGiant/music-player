@@ -64,6 +64,10 @@
           @if ((platform === 'youtube') && song.id !== c.track()?.id) {
             <img src="assets/images/yt_icon_red_digital.png" alt="YouTube Icon" class="youtube-icon"/>
           }
+          <!-- Show Spotify icon when platform is spotify and not the active track -->
+          @if ((platform === 'spotify') && (!c.track() || song.id !== c.track()?.id)) {
+            <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify Icon" class="spotify-icon"/>
+          }
         </div>
 
         <span>{{ song.name }}</span>
