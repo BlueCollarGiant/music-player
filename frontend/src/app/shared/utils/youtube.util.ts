@@ -8,11 +8,6 @@ export function getYouTubeId(url?: string | null): string | null {
   return m?.[1] ?? null;
 }
 
-export function hasYouTubeVideo(url?: string | null): boolean {
-  if (!url) return false;
-  return url.includes('youtube.com') || url.includes('youtu.be');
-}
-
 
 export type YouTubeEmbedOpts = {
   autoplay?: 0 | 1;
@@ -40,21 +35,3 @@ export function buildYouTubeEmbedUrl(
 }
 
 
-export function getSafeVideoUrl(url: string, sanitizer: DomSanitizer): SafeResourceUrl {
-  const id = getYouTubeId(url);
-  return sanitizer.bypassSecurityTrustResourceUrl(
-    buildYouTubeEmbedUrl(id, { autoplay: 0, controls: 1, modestbranding: 1, rel: 0 })
-  );
-}
-
-
-export function getVideoEmbedUrl(
-  url: string,
-  sanitizer: DomSanitizer
-): SafeResourceUrl | null {
-  const id = getYouTubeId(url);
-  if (!id) return null;
-  return sanitizer.bypassSecurityTrustResourceUrl(
-    buildYouTubeEmbedUrl(id, { autoplay: 1, controls: 1, modestbranding: 1, rel: 0 })
-  );
-}

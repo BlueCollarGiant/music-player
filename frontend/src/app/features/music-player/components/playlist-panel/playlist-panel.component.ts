@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { PlaybackStateStore } from '../../../../core/playback/playback-state.store';
 import { PlayListLogicService } from '../../services/play-list-logic.service';
-import { YouTubeService, YouTubePlaylist } from '../../services/youtube.service';
+import { YouTubeService } from '../../services/youtube.service';
 import { SpotifyService } from '../../services/spotify.service';
 import { Song } from '../../../../shared/models/song.model';
 import { PlaylistInstanceService } from '../../../../core/playback/playlist-instance';
@@ -23,19 +23,15 @@ import { PlaylistInstanceService } from '../../../../core/playback/playlist-inst
 export class PlaylistPanelComponent {
   // ---- Inputs (to satisfy youtube.component.html bindings) -------------------
   @Input() platform: 'youtube' | 'spotify' | 'soundcloud' = 'youtube';
-  @Input() isYouTubeMode?: boolean; // legacy input used in some templates
+  // @Input() isYouTubeMode?: boolean; // (UNUSED) legacy input retained for potential template migrations
 
   // ---- DI -------------------------------------------------------------------
-  private readonly state = inject(PlaybackStateStore);
+  private readonly state = inject(PlaybackStateStore); // state store currently not read directly in template
   private readonly playlistLogic = inject(PlayListLogicService);
   readonly youtubeService = inject(YouTubeService);
   readonly spotifyService = inject(SpotifyService);
   readonly c = inject(PlaylistInstanceService);
   // ---- State helpers the template can call ----------------------------------
-  // Swap to instance reads so UI stays on the one source of truth
-  currentTrack = () => this.c.track();
-  currentTrackId = () => this.c.track()?.id ?? null;
-
   isEmpty(): boolean  { return this.playlistLogic.isEmpty(); }
   isSmall(): boolean  { return this.playlistLogic.isSmall(); }
   isMedium(): boolean { return this.playlistLogic.isMedium(); }
@@ -83,9 +79,7 @@ getDisplaySongs(): Song[] {
   // For “other” platforms, 
   return this.playlistLogic.items();
 }
-  ngOnChanges(): void {
-  console.log('[Panel] platform @Input changed →', this.platform);
-}
+
   selectSong(song: Song): void {
     console.log('[Instance] selectSong()', { id: song?.id, platform: song?.platform, name: song?.name });
     const songs = this.getDisplaySongs();

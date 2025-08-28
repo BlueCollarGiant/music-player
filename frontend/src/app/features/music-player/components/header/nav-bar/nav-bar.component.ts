@@ -1,12 +1,10 @@
 
 import { Component, inject, signal, computed, PLATFORM_ID } from '@angular/core';
-import { Router, NavigationEnd, RouterLink, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
-import { filter } from 'rxjs/operators';
 
 import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store';
 import { AuthService } from '../../../../../core/auth/auth.service';
-import { PlatformStateService } from '../../../../../core/platform-state/platform-state.service';
 import { environment } from '../../../../../../environments/environment';
 
 type PlatformKind = 'youtube' | 'spotify' | 'soundcloud';
@@ -21,18 +19,15 @@ type PlatformKind = 'youtube' | 'spotify' | 'soundcloud';
 export class NavBarComponent {
   // --- DI & simple bindings ---
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private platformId = inject(PLATFORM_ID);
-  private platformState = inject(PlatformStateService);
 
   environment = environment;
   musicService = inject(PlaybackStateStore);
   authService = inject(AuthService);
 
   // --- UI state ---
-  tabs: string[] = ['Songs', 'Albums', 'Artists', 'Genres'];
   isMobileMenuOpen = signal(false);
-  currentRoute = signal(this.router.url);
+  
 
   // --- Auth state (signals from AuthService) ---
   isUserLoggedIn = this.authService.isAuthenticated;
@@ -53,48 +48,22 @@ export class NavBarComponent {
       : `${this.environment.apiUrl}/assets/avatars/default-avatar.png`;
   });
 
-  constructor() {
-    // track route changes for active state
-    this.router.events.pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe((e: NavigationEnd) => this.currentRoute.set(e.urlAfterRedirects));
-
-    // open drawer via global event (browser only)
+  constructor() {// open drawer via global event (browser only)
     if (isPlatformBrowser(this.platformId)) {
       window.addEventListener('openHamburgerMenu', () => this.isMobileMenuOpen.set(true));
     }
   }
 
-  // --- Route helpers ---
-  onPlatformRoute(): boolean {
-    return this.router.url.startsWith('/platform/');
-  }
-
-  isCurrentPlatform(p: PlatformKind): boolean {
-    const seg =
-      this.route.snapshot.paramMap.get('platform') ??
-      this.route.firstChild?.snapshot.paramMap.get('platform') ??
-      this.router.url.split('/')[2]; // /platform/<seg>
-    return seg === p;
-  }
-
-  isHomeActive(): boolean { return this.currentRoute() === '/'; }
-  isPlayerActive(): boolean { return this.onPlatformRoute(); }
-
-  // --- Tabs ---
-  setActiveTab(tab: string) { this.musicService.setActiveTab(tab); }
-  setActiveTabMobile(tab: string) { this.setActiveTab(tab); this.closeMobileMenu(); }
-
+ 
   // --- Drawer ---
   toggleMobileMenu() { this.isMobileMenuOpen.update(v => !v); }
   closeMobileMenu() { this.isMobileMenuOpen.set(false); }
 
   // --- Auth actions ---
   openManualLogin() { alert('Manual login/signup coming soon.'); this.closeMobileMenu(); }
-  openLogin() { this.authService.loginWithGoogle(); this.closeMobileMenu(); }
   async logout() { await this.authService.logout(); this.closeMobileMenu(); }
 
-  // --- Platform connection helpers (template uses these) ---
-  /** True if the given platform is connected for this user (OAuth completed). */
+  // --- Platform connection helpers ---
   isOAuthConnected(platform?: PlatformKind): boolean {
   if (platform) {
     return this.authService.isPlatformConnected(platform);
@@ -104,12 +73,11 @@ export class NavBarComponent {
 
   /** Navigate to /platform/:platform and set theme/state. */
   navigatePlatform(platform: PlatformKind): void {
-    this.platformState.set(platform);
     this.router.navigate(['/platform', platform]);
     this.closeMobileMenu();
   }
 
-  // Keep for disconnect buttons in the drawer
+  // Keep for disconnect buttons 
   async disconnectPlatform(p: PlatformKind) {
     if (!confirm(`Disconnect ${p}?`)) return;
     try {

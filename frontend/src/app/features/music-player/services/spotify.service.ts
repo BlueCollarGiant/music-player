@@ -262,11 +262,4 @@ export class SpotifyService {
   try { this.instance.setPlatform('spotify' as any); } catch {}
     this.loadPlaylistTracks(pl.id);
   }
-
-  selectPlaylistById(id: string): void {
-    const found = this.playlists().find((p) => p.id === id) || null;
-    if (found) this.selectedPlaylist.set(found);
-  try { this.instance.setPlatform('spotify' as any); } catch {}
-    this.loadPlaylistTracks(id);
-  }
 }

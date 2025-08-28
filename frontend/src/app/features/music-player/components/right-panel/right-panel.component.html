@@ -15,15 +15,8 @@
         }
       </div>
     } @else {
-      <!-- Non‑YouTube (or no video) → show static art -->
       <img class="album-art" [src]="thumbnailUrl()" [alt]="track()?.name || 'Album Art'" />
     }
-
-    <!--@if (!track()) {
-      <div class="visualizer-container">
-  <app-visualizer [isPlaying]="c.isPlaying()"></app-visualizer>
-      </div>
-    }-->
   </div>
 
   @if (track()) {
