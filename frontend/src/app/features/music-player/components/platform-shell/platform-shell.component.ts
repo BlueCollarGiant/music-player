@@ -59,6 +59,7 @@ export class PlatformShellComponent implements OnInit, OnDestroy {
   // -------- internal helpers --------
   private applyPlatformFromRoute(): void {
     const detected = this.resolvePlatformFromUrl();
+    console.log('[Shell] applyPlatformFromRoute detected =', detected, 'current =', this.platform);
     if (detected && detected !== this.platform) {
       this.platform = detected;
       this.isYouTube = detected === 'youtube';
@@ -67,30 +68,25 @@ export class PlatformShellComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // initial mount or unchanged: still ensure state + playlists once
+    // unchanged platform: still ensure state + playlists once
     this.platformState.set(this.platform);
     this.loadPlaylistsFor(this.platform);
   }
 
   private resolvePlatformFromUrl(): PlatformName {
-    // expecting routes like /platform/:name/...
-    const parentSeg = this.route.parent?.snapshot.url[0]?.path;
-    const seg = (this.route.snapshot.url[0]?.path || '').toLowerCase();
-
-    // if mounted under /platform/*
-    if (parentSeg === 'platform') {
-      if (seg === 'spotify' || seg === 'soundcloud' || seg === 'youtube') {
-        return seg as PlatformName;
-      }
+    const url = this.router.url.toLowerCase();
+    let detected: PlatformName;
+    if (url.includes('/platform/spotify')) {
+      detected = 'spotify';
+    } else if (url.includes('/platform/youtube')) {
+      detected = 'youtube';
+    } else if (url.includes('/platform/soundcloud')) {
+      detected = 'soundcloud';
+    } else {
+      detected = (this.platformState as any).get?.() || 'youtube';
     }
-
-    // fallback: try first child segment if shell is parent
-    const firstChildSeg = this.route.firstChild?.snapshot.url[0]?.path?.toLowerCase();
-    if (firstChildSeg === 'spotify' || firstChildSeg === 'soundcloud' || firstChildSeg === 'youtube') {
-      return firstChildSeg as PlatformName;
-    }
-
-    return 'youtube';
+    console.log('[Shell] resolved platform from url', url, '=>', detected);
+    return detected;
   }
 
   private loadPlaylistsFor(p: PlatformName): void {
@@ -102,10 +98,13 @@ export class PlatformShellComponent implements OnInit, OnDestroy {
     }
     if (p === 'spotify') {
       if (this.auth.isPlatformConnected('spotify')) {
+  try { (this.sp as any).ensureSdkLoaded?.(); } catch {}
         this.sp.loadPlaylists?.();
       }
       return;
     }
-    // soundcloud: future hook
+    // soundcloud: future hoo
   }
+
+  
 }

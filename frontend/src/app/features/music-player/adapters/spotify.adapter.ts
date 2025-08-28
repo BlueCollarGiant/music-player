@@ -102,15 +102,22 @@ export class SpotifyAdapter implements PlayerPort {
 
   // ── PlayerPort controls ────────────────────────────────────────────────────
   async load(track: unknown): Promise<void> {
-    // Spotify playback device can only begin with a "play" call against the Web API for the device_id.
-    // If your app uses Web API to load URIs to this device, you might not need to do anything here.
-    // You can keep this as a no-op or trigger your Web API call here.
-    return;
+    // Only record intended track URI; actual playback triggered on start()/resume()
+    try {
+      if (!track || typeof track !== 'object') return;
+      const song: any = track;
+      const uri = song.uri || (song.id ? `spotify:track:${song.id}` : null);
+      if (uri) this.trackUri = uri;
+    } catch (e) {
+      console.warn('[SpotifyAdapter] load() record uri failed', e);
+    }
   }
 
   async start(): Promise<void> {
-    // start ~ play from current position (strict "from 0" requires a prior seek(0))
-  try { await this.playerSig()?.resume?.(); this.playingSig.set(true); this.state.setPlaying(true);} catch {}
+    try {
+      if (!this.trackUri) return; // nothing selected
+      await this.ensureWebApiPlay(this.trackUri, false);
+    } catch (e) { console.warn('[SpotifyAdapter] start() failed', e); }
   }
 
   async pause(): Promise<void> {
@@ -118,7 +125,16 @@ export class SpotifyAdapter implements PlayerPort {
   }
 
   async resume(): Promise<void> {
-  try { await this.playerSig()?.resume?.(); this.playingSig.set(true); this.state.setPlaying(true);} catch {}
+    try {
+      if (this.playingSig()) return; // already playing
+      if (this.trackUri) {
+        // Use Web API to guarantee playback resumes even if SDK thinks paused
+        await this.ensureWebApiPlay(this.trackUri, true);
+      } else {
+        await this.playerSig()?.resume?.();
+      }
+      this.playingSig.set(true); this.state.setPlaying(true);
+    } catch (e) { console.warn('[SpotifyAdapter] resume() failed', e); }
   }
 
   async seek(seconds: number): Promise<void> {
@@ -137,6 +153,19 @@ export class SpotifyAdapter implements PlayerPort {
 
   async previous(): Promise<void> {
     try { await this.playerSig()?.previousTrack?.(); } catch {}
+  }
+
+  // --- Internal helpers ----------------------------------------------------
+  private async ensureWebApiPlay(uri: string, allowIfAlreadyPlaying: boolean): Promise<void> {
+    const deviceId = localStorage.getItem('spotify_device_id');
+    const accessToken = localStorage.getItem('spotify_access_token');
+    if (!deviceId || !accessToken) return;
+    if (!allowIfAlreadyPlaying && this.playingSig()) return;
+    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${encodeURIComponent(deviceId)}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uris: [uri] })
+    });
   }
 
   async setVolume(value: number): Promise<void> {

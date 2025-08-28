@@ -43,30 +43,53 @@ export class PlaylistPanelComponent {
   realSongCount(): number { return this.playlistLogic.realSongCount(); }
 
   // Map current platform items into displayable Song[]
-  getDisplaySongs(): Song[] {
-    if (this.platform === 'youtube') {
-      return this.youtubeService.playlistTracks().map(t => ({
-        id: t.id,
-        name: t.title,
-        artist: t.artist,
-        platform: 'youtube',
-        durationMs: typeof (t as any).duration_ms === 'number'
-          ? (t as any).duration_ms
-          : parseDurationToMs(t.duration),
-        thumbnailUrl: t.thumbnail_url ?? undefined,
-        uri: t.video_url ?? undefined,
-        meta: { position: t.position }
-      }));
-    }
-    if (this.platform === 'spotify') {
-      return (this.spotifyService as any).toSongs?.() ?? this.playlistLogic.items();
-    }
-    return this.playlistLogic.items();
+getDisplaySongs(): Song[] {
+  if (this.platform === 'youtube') {
+    return this.youtubeService.playlistTracks().map(t => ({
+      id: t.id,
+      name: t.title,
+      artist: t.artist,
+      platform: 'youtube',
+      durationMs: typeof (t as any).duration_ms === 'number'
+        ? (t as any).duration_ms
+        : parseDurationToMs(t.duration),
+      thumbnailUrl: t.thumbnail_url ?? undefined,
+      uri: t.video_url ?? undefined,
+      meta: { position: t.position }
+    }));
   }
 
-  
+  if (this.platform === 'spotify') {
+    // Prefer a normalized helper if you have it; otherwise map directly
+    const songs = (this.spotifyService as any).toSongs?.();
+    if (songs && Array.isArray(songs)) return songs;
+
+    return this.spotifyService.playlistTracks().map((t: any) => ({
+      id: t.id ?? t.track?.id,
+      name: t.title ?? t.name ?? t.track?.name,
+      artist: t.artist ?? t.artists?.map((a: any) => a.name).join(', ') ?? t.track?.artists?.map((a: any) => a.name).join(', '),
+      platform: 'spotify',
+      durationMs: t.duration_ms ?? t.track?.duration_ms ?? 0,
+      thumbnailUrl:
+        t.thumbnail_url ??
+        t.album?.images?.[0]?.url ??
+        t.track?.album?.images?.[0]?.url ??
+        undefined,
+      uri: t.uri ?? t.track?.uri ?? undefined,
+      meta: { position: t.position ?? t.track_number ?? undefined }
+    }));
+  }
+
+  // For “other” platforms, 
+  return this.playlistLogic.items();
+}
+  ngOnChanges(): void {
+  console.log('[Panel] platform @Input changed →', this.platform);
+}
   selectSong(song: Song): void {
     console.log('[Instance] selectSong()', { id: song?.id, platform: song?.platform, name: song?.name });
+    const songs = this.getDisplaySongs();
+    this.c.syncPlaylist(songs, song.id);
     this.c.selectTrack(song);
     this.c.setPlatform(song.platform as any);
   }

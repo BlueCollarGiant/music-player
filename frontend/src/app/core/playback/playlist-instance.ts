@@ -101,6 +101,32 @@ export class PlaylistInstanceService {
 
   seek(seconds: number): void { this.activeAdapter()?.seek?.(seconds); }
 
+
+  syncPlaylist(songs: Song[], currentId?: string): void {
+  if (!Array.isArray(songs) || songs.length === 0) return;
+
+  // Be defensive about available API on PlayListLogicService
+  const logic: any = this.logic;
+  const sizeBefore = this.logic.size?.() ?? 0;
+
+  if (logic.set) {
+    // Preferred: set(items, startIndex?)
+    const startIndex = currentId ? songs.findIndex(s => s.id === currentId) : 0;
+    logic.set(songs, startIndex >= 0 ? startIndex : 0);
+  } else if (logic.replaceAll) {
+    logic.replaceAll(songs);
+    if (currentId && logic.selectById) logic.selectById(currentId);
+    else if (logic.selectIndex) logic.selectIndex(0);
+  } else if (logic.addMany) {
+    if (sizeBefore === 0) logic.addMany(songs);
+    if (currentId && logic.selectById) logic.selectById(currentId);
+    else if (logic.selectIndex) logic.selectIndex(0);
+  } else {
+    // Last resort: try common spellings
+    if (logic.reset) logic.reset(songs);
+    if (currentId && logic.selectById) logic.selectById(currentId);
+  }
+}
   // Adapter attach passthroughs
   attachYouTubePlayer(player: any) { console.log('[Instance] attachYouTubePlayer()', player ? 'ok' : 'null'); try { this.registry.getYouTubeAdapter().setPlayer(player); } catch {} }
   attachSpotifyPlayer(player: any) {  console.log('[Instance] attachSpotifyPlayer()', player ? 'ok' : 'null'); try { this.registry.getSpotifyAdapter().setPlayer(player); } catch {} }
