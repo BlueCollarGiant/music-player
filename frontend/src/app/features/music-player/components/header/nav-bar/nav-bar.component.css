@@ -471,6 +471,7 @@
     linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)) padding-box,
     linear-gradient(135deg, rgba(128,90,213,0.45), rgba(56,189,248,0.25)) border-box;
   border-color: rgba(128,90,213,0.55); /* indigo base */
+  margin-top: 0.75rem;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.12),
     0 10px 24px rgba(128,90,213,0.25); /* soft purple glow */
@@ -518,5 +519,5 @@
 
 .divider {
   border-top: 1px solid rgba(255, 255, 255, 0.1); /* faint line */
-  margin: 1rem 0; /* space above and below */
+  margin: 1rem 1rem; /* space above and below */
 }
