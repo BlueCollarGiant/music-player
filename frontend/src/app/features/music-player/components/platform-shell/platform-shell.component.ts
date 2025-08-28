@@ -8,7 +8,7 @@ import { YouTubeService } from '../../../music-player/services/youtube.service';
 import { SpotifyService } from '../../../music-player/services/spotify.service';
 import { SharedModule } from '../../../../shared/shared.module';
 
-type PlatformName = 'youtube' | 'spotify' | 'soundcloud';
+type PlatformName = 'youtube' | 'spotify' | 'soundcloud' | 'omniplay';
 
 @Component({
   standalone: true,
@@ -67,8 +67,8 @@ export class PlatformShellComponent implements OnInit, OnDestroy {
       detected = 'spotify';
     } else if (url.includes('/platform/youtube')) {
       detected = 'youtube';
-    } else if (url.includes('/platform/soundcloud')) {
-      detected = 'soundcloud';
+    } else if (url.includes('/platform/omniplay')) {
+      detected = 'omniplay';
     } else {
       detected = 'youtube';
     }
@@ -86,6 +86,17 @@ export class PlatformShellComponent implements OnInit, OnDestroy {
     if (p === 'spotify') {
       if (this.auth.isPlatformConnected('spotify')) {
   try { (this.sp as any).ensureSdkLoaded?.(); } catch {}
+        this.sp.loadPlaylists?.();
+      }
+      return;
+    }
+    if (p === 'omniplay') {
+      // Load both platforms (if connected) for mixed view
+      if (this.auth.isPlatformConnected('youtube')) {
+        this.yt.loadPlaylists();
+      }
+      if (this.auth.isPlatformConnected('spotify')) {
+        try { (this.sp as any).ensureSdkLoaded?.(); } catch {}
         this.sp.loadPlaylists?.();
       }
       return;

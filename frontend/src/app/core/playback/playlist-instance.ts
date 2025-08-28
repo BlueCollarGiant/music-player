@@ -27,6 +27,19 @@ export class PlaylistInstanceService {
     const kind = this.state.platformKind();
     const adapter: any = this.activeAdapter();
     if (!track || !kind || !adapter) return;
+    // If the selected track's platform differs from current platformKind, switch first
+    const trackPlatform = (track as any).platform;
+    if (trackPlatform && trackPlatform !== kind) {
+      // Pause the currently active adapter before switching to avoid dual playback
+      try {
+        const oldAdapter = adapter; // adapter corresponds to old kind
+        oldAdapter?.pause?.();
+      } catch {}
+      // Update platform sync so activeAdapter recomputes to new adapter
+      try { this.state.setPlatformKind(trackPlatform); } catch {}
+  // Defer rest of handling until effect re-runs with new adapter
+  return;
+    }
     const incomingId = track.id || track.uri || null;
     const currentId = adapter.currentIdOrUri?.() || null;
     console.log('[select-effect]', {
@@ -95,12 +108,35 @@ export class PlaylistInstanceService {
 
   next(): void {
     const song = this.logic.next(false);
-    if (song) this.state.setCurrentTrack(song);
+    if (song) {
+      this.state.setCurrentTrack(song);
+      const p: any = (song as any).platform;
+      if (p && p !== this.state.platformKind()) {
+        try {
+          // Pause current adapter before switching
+          this.activeAdapter()?.pause?.();
+          this.state.setPlatformKind(p);
+        } catch {}
+      }
+  // Force auto-play for next
+  this.state.setPlaying(true);
+    }
   }
 
   prev(): void {
     const song = this.logic.previous(false);
-    if (song) this.state.setCurrentTrack(song);
+    if (song) {
+      this.state.setCurrentTrack(song);
+      const p: any = (song as any).platform;
+      if (p && p !== this.state.platformKind()) {
+        try {
+          this.activeAdapter()?.pause?.();
+          this.state.setPlatformKind(p);
+        } catch {}
+      }
+  // Force auto-play for prev
+  this.state.setPlaying(true);
+    }
   }
 
   seek(seconds: number): void { this.activeAdapter()?.seek?.(seconds); }

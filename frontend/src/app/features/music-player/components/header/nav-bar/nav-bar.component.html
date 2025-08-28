@@ -105,9 +105,9 @@
           🎵 Spotify
         </button>
         }
-        @if (isOAuthConnected('soundcloud')) {
-        <button class="soundcloud-nav-btn" (click)="navigatePlatform('soundcloud')">
-          ☁️ SoundCloud
+        @if (isOAuthConnected('spotify') || isOAuthConnected('youtube')) {
+        <button class="glass-platform-btn omniplay" (click)="navigatePlatform('omniplay')">
+          ☁️ OmniPlay
         </button>
         }
 

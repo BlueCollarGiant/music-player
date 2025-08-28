@@ -7,7 +7,7 @@ import { PlaybackStateStore } from '../../../../../core/playback/playback-state.
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { environment } from '../../../../../../environments/environment';
 
-type PlatformKind = 'youtube' | 'spotify' | 'soundcloud';
+type PlatformKind = 'youtube' | 'spotify' | 'soundcloud' | 'omniplay';
 
 @Component({
   selector: 'app-nav-bar',

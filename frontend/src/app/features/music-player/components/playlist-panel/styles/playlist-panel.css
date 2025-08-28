@@ -42,6 +42,20 @@
 /* --- Dropdown / Selector --- */
 .playlist-selector { min-width: 200px; }
 
+/* Omniplay dual dropdown container */
+.omniplay-dropdowns {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  width: 100%;
+}
+.omniplay-dropdowns .dropdown-block { flex: 1 1 0; }
+.omniplay-dropdowns .playlist-dropdown { width: 100%; }
+
+@media (max-width: 640px) {
+  .omniplay-dropdowns { flex-direction: column; gap: 8px; }
+}
+
 .playlist-dropdown {
   background-color: #121225;
   border: 1px solid #6c6cff;
