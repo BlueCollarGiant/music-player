@@ -3,7 +3,26 @@ html, body {
   height: 100%; 
   margin: 0; 
   padding: 0;
-  overflow: hidden; /* Prevent any global scrolling */
+  overflow: hidden; /* Desktop: keep internal panel scrolling only */
+}
+
+/* Allow vertical page scroll on smaller screens so entire player is reachable */
+@media (max-width: 820px) {
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto; /* re-enable vertical scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide default scrollbar (keep scrolling) */
+  body {
+    scrollbar-width: none; /* Firefox */
+  }
+  body::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent;
+  }
 }
 
 body { 
