@@ -1,4 +1,5 @@
 import { Injectable, inject, computed, effect } from '@angular/core';
+import { formatTime } from '../../shared/utils/time-format.util';
 import { PlaybackStateStore } from './playback-state.store';
 import { PlayListLogicService } from '../../features/music-player/services/play-list-logic.service';
 import { AdapterRegistryService } from './adapter-registry.service';
@@ -46,8 +47,11 @@ export class PlaylistInstanceService {
   // ---- Read API (signals mirror) ----
   readonly isReady       = () => this.state.isReady();
   readonly isPlaying     = () => this.state.isPlaying();
-  readonly duration      = () => this.state.durationSeconds();
-  readonly current       = () => this.state.currentTimeSeconds();
+  readonly duration      = () => this.state.duration();
+  readonly current       = () => this.state.currentTime();
+  // Formatted (non-breaking: new getters)
+  readonly durationFmt   = () => formatTime(this.state.duration());
+  readonly currentTimeFmt= () => formatTime(this.state.currentTime());
   readonly track         = () => this.state.currentTrack();
   readonly kind          = () => this.state.platformKind();
 
@@ -76,8 +80,8 @@ export class PlaylistInstanceService {
 
   toggle(): void {
     const isPlaying = this.state.isPlaying();
-    const duration = this.state.durationSeconds();
-    const position = this.state.currentTimeSeconds();
+    const duration = this.state.duration();
+    const position = this.state.currentTime();
     if (isPlaying) {
       this.pause();
     } else if (duration > 0 && position > 0) {

@@ -17,9 +17,9 @@ export class PlaybackStateStore {
   /** True if currently playing */
   private readonly playingSig = signal<boolean>(false);
   /** Current position in seconds */
-  private readonly currentTimeSecSig = signal<number>(0);
+  private readonly currentTimeSig = signal<number>(0);
   /** Track duration in seconds */
-  private readonly durationSecSig = signal<number>(0);
+  private readonly durationSig = signal<number>(0);
   /** Current platform kind: 'youtube' | 'spotify' | null */
   private readonly platformKindSig = signal<PlatformKind | null>(null);
   /** Current track object (app-level metadata, not SDK raw) */
@@ -28,16 +28,16 @@ export class PlaybackStateStore {
   // Public snapshot getters (what ControlsFacade expects)
   isReady(): boolean { return this.readySig(); }
   isPlaying(): boolean { return this.playingSig(); }
-  currentTimeSeconds(): number { return this.currentTimeSecSig(); }
-  durationSeconds(): number { return this.durationSecSig(); }
+  currentTime(): number { return this.currentTimeSig(); }
+  duration(): number { return this.durationSig(); }
   platformKind(): PlatformKind | null { return this.platformKindSig(); }
   currentTrack(): Song | null { return this.currentTrackSig(); }
 
   // Mutators (called by coordinator/adapters)
   setReady(val: boolean): void { this.readySig.set(val); }
   setPlaying(val: boolean): void { this.playingSig.set(val); }
-  setCurrentTime(sec: number): void { this.currentTimeSecSig.set(Math.max(0, sec)); }
-  setDuration(sec: number): void { this.durationSecSig.set(Math.max(0, sec)); }
+  setCurrentTime(sec: number): void { this.currentTimeSig.set(Math.max(0, sec)); }
+  setDuration(sec: number): void { this.durationSig.set(Math.max(0, sec)); }
   setPlatformKind(kind: PlatformKind | null): void { this.platformKindSig.set(kind); }
   setCurrentTrack(track: Song | null): void { this.currentTrackSig.set(track); }
 
