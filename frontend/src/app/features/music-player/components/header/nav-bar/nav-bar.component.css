@@ -153,9 +153,6 @@
   width: 100%;
 }
 
-.btn-icon {
-  font-size: 1rem;
-}
 
 .login-btn {
   display: flex;
@@ -226,10 +223,6 @@
 }
 
 /* Optional: tweak your icon */
-.login-btn .btn-icon {
-  font-size: 1.2rem;
-  line-height: 1;
-}
 
 .oauth-btn {
   background: linear-gradient(135deg, #ea4335 0%, #4285f4 100%);
@@ -321,53 +314,11 @@
   color: #E3E3E3;
 }
 
-.platform-icon {
-  font-size: 1.25rem;
-}
 
-.platform-note {
-  margin-top: 4px;
-  font-size: 0.68rem;
-  line-height: 1.1;
-  color: #aaa;
-  max-width: 220px;
-}
 
-.youtube-section {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #333;
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* space between platform nav buttons */
-}
 
-.youtube-nav-btn {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #ff0000, #cc0000);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
 
-.youtube-nav-btn:hover {
-  background: linear-gradient(135deg, #cc0000, #ff0000);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
-}
 
-.youtube-nav-btn:active {
-  transform: translateY(0);
-}
 
 .logout-section {
   margin-top: 20px;
