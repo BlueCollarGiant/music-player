@@ -7,7 +7,7 @@
 
   <div class="header">
     <div class="info">
-      <div class="playlist-selector">
+  <div class="playlist-selector">
         @if (platform === 'omniplay') {
           <div class="omniplay-dropdowns">
             <div class="dropdown-block">
@@ -39,6 +39,7 @@
               </select>
             </div>
           </div>
+          <button type="button" class="omniplay-reshuffle-btn" (click)="triggerOmniReshuffle()" title="Reshuffle combined order"><span class="text">Shuffle</span></button>
         } @else {
         <select
           class="playlist-dropdown"

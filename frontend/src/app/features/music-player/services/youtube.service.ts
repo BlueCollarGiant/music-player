@@ -5,7 +5,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Song } from '../../../shared/models/song.model';
 import { environment } from '../../../../environments/environment';
 import { mapYouTubeTracksToSongs } from '../../youtube/youtube.mapper';
-import { getYouTubeId, buildYouTubeEmbedUrl} from '../../../shared/utils/youtube.util';
+
 
 export interface YouTubePlaylist {
   id: string;                    // ensure this matches your backend

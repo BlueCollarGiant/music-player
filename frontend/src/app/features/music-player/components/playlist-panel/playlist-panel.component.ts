@@ -48,6 +48,11 @@ export class PlaylistPanelComponent {
     return this.playlistLogic.items(); // fallback / other
   }
 
+  triggerOmniReshuffle(): void {
+    if (this.platform !== 'omniplay') return;
+    (this.omniplay as any).forceReshuffle?.();
+  }
+
   selectSong(song: Song): void {
     console.log('[Instance] selectSong()', { id: song?.id, platform: song?.platform, name: song?.name });
     const songs = this.getDisplaySongs();
@@ -83,4 +88,33 @@ export class PlaylistPanelComponent {
   }
 
   // mergeOmniTracks removed – logic centralized in OmniplayService
+  shuffleCurrentPlatform(): void {
+    if (this.platform === 'omniplay') { this.triggerOmniReshuffle(); return; }
+    if (this.platform === 'youtube') {
+      const tracksSig: any = (this.youtubeService as any).playlistTracks;
+      if (!tracksSig) return;
+      const cur = tracksSig();
+      if (!Array.isArray(cur) || cur.length < 2) return;
+      tracksSig.set(this.fisherYates(cur.slice()));
+      console.log('[Shuffle] youtube playlistTracks shuffled');
+      return;
+    }
+    if (this.platform === 'spotify') {
+      const tracksSig: any = (this.spotifyService as any).playlistTracks;
+      if (!tracksSig) return;
+      const cur = tracksSig();
+      if (!Array.isArray(cur) || cur.length < 2) return;
+      tracksSig.set(this.fisherYates(cur.slice()));
+      console.log('[Shuffle] spotify playlistTracks shuffled');
+      return;
+    }
+  }
+
+  private fisherYates<T>(arr: T[]): T[] {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
 }
