@@ -94,7 +94,7 @@ export class OmniplayService {
     // --------------------------------------------------------------------------
   // Always schedule; internal logic determines if commit is needed.
   this.scheduleSync();
-  }, { allowSignalWrites: true });
+  });
 
   /** Public method kept for backward compatibility; now just schedules a sync. */
   recomputeAndSync(): void { this.scheduleSync(); }
