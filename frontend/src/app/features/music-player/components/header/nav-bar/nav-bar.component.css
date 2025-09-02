@@ -326,6 +326,18 @@
   vertical-align: middle;
 }
 
+/* Small Spotify icon inside connect/disconnect buttons */
+.platform-btn.spotify-btn .spotify-small-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: inline-block;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+  margin-right: 0.5rem;
+  pointer-events: none;
+  vertical-align: middle;
+}
+
 
 
 

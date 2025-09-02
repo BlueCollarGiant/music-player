@@ -57,7 +57,7 @@
           <form [attr.action]="environment.apiUrl + '/auth/youtube'" method="post" target="_self" class="inline-form">
             <button type="submit" class="platform-btn youtube-btn" aria-label="Connect YouTube">
               <img src="assets/images/yt_icon_red_digital.png" alt="YouTube" class="yt-small-icon" />
-              YouTube (Click to connect)
+              Connect YouTube
             </button>
           </form>
           } @else {
@@ -72,14 +72,14 @@
           @if (!isPlatformConnected('spotify')) {
           <form action="http://127.0.0.1:3000/auth/spotify" method="post" target="_self" class="inline-form">
             <button type="submit" class="platform-btn spotify-btn" aria-label="Connect Spotify">
-              <span class="platform-icon">🎵</span>
+              <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify" class="spotify-small-icon" />
               Connect Spotify
             </button>
           </form>
           } @else {
           <button class="platform-btn spotify-btn connected" type="button" (click)="disconnectPlatform('spotify')"
             aria-label="Disconnect Spotify">
-            <span class="platform-icon">🎵</span>
+            <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify" class="spotify-small-icon" />
             Spotify ✓ (Click to disconnect)
           </button>
           }
