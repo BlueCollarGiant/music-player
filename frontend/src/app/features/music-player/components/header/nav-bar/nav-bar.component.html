@@ -92,9 +92,8 @@
         <!-- Platform Navigation (only if logged in & YouTube connected) -->
         @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
         <div class="platform-switch">
-          <button class="glass-platform-btn youtube" (click)="navigatePlatform('youtube')">
-            <span class="icon">📺</span>
-            Open YouTube Player
+          <button class="glass-platform-btn youtube" (click)="navigatePlatform('youtube')" aria-label="Open YouTube Player">
+            <img src="assets/images/yt_logo_almostblack_digital.png" alt="YouTube" class="youtube-full-logo" />
           </button>
         </div>
         }
@@ -112,7 +111,10 @@
 
         <!-- Logout -->
         <div class="logout-section">
-          <button class="logout-btn" type="button" (click)="logout()">Logout</button>
+          <button class="logout-btn" type="button" (click)="logout()">
+            <img src="assets/images/power.png" alt="" aria-hidden="true" class="logout-icon" />
+            Logout
+          </button>
         </div>
       </div>
       }
