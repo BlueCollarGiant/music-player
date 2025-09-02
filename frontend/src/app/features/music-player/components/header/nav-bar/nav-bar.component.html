@@ -104,8 +104,9 @@
         </button>
         }
         @if (isOAuthConnected('spotify') || isOAuthConnected('youtube')) {
-        <button class="glass-platform-btn omniplay" (click)="navigatePlatform('omniplay')">
-          ☁️ OmniPlay
+        <button class="glass-platform-btn omniplay" (click)="navigatePlatform('omniplay')" aria-label="Open OmniPlay">
+          <img src="assets/images/logo1.png" alt="OmniPlay" class="omniplay-logo" />
+          OmniPlay
         </button>
         }
 
