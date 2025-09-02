@@ -56,14 +56,14 @@
           @if (!isPlatformConnected('youtube')) {
           <form [attr.action]="environment.apiUrl + '/auth/youtube'" method="post" target="_self" class="inline-form">
             <button type="submit" class="platform-btn youtube-btn" aria-label="Connect YouTube">
-              <span class="platform-icon">📺</span>
+              <img src="assets/images/yt_icon_red_digital.png" alt="YouTube" class="yt-small-icon" />
               YouTube (Click to connect)
             </button>
           </form>
           } @else {
           <button class="platform-btn youtube-btn connected" type="button" (click)="disconnectPlatform('youtube')"
             aria-label="Disconnect YouTube">
-            <span class="platform-icon">📺</span>
+            <img src="assets/images/yt_icon_red_digital.png" alt="YouTube" class="yt-small-icon" />
             YouTube ✓ (Click to disconnect)
           </button>
           }
