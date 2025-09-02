@@ -30,16 +30,14 @@
           <h3>Get Started</h3>
           <div class="auth-buttons">
             <button class="auth-btn login-btn" type="button" (click)="openManualLogin()">
-              <span class="btn-icon">📧</span>
+              
               Login / Sign Up
             </button>
 
             <!-- Google OAuth (native POST) -->
-            <form [attr.action]="environment.apiUrl + '/auth/google_oauth2'" method="post" target="_self"
-              class="inline-form">
-              <button type="submit" class="auth-btn oauth-btn" aria-label="Login with Google">
-                <span class="btn-icon">🔑</span>
-                Login with Google
+            <form [attr.action]="environment.apiUrl + '/auth/google_oauth2'" method="post" target="_self" class="inline-form">
+              <button type="submit" class="auth-btn oauth-btn google-image-btn" aria-label="Login with Google">
+                <img src="assets/images/web_dark_sq_SU@4x.png" alt="Sign in with Google" class="google-login-img" />
               </button>
             </form>
           </div>
@@ -105,9 +103,9 @@
           🎵 Spotify
         </button>
         }
-        @if (isOAuthConnected('soundcloud')) {
-        <button class="soundcloud-nav-btn" (click)="navigatePlatform('soundcloud')">
-          ☁️ SoundCloud
+        @if (isOAuthConnected('spotify') || isOAuthConnected('youtube')) {
+        <button class="glass-platform-btn omniplay" (click)="navigatePlatform('omniplay')">
+          ☁️ OmniPlay
         </button>
         }
 

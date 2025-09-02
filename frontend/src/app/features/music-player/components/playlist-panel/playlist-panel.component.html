@@ -7,12 +7,44 @@
 
   <div class="header">
     <div class="info">
-      <div class="playlist-selector">
+  <div class="playlist-selector">
+        @if (platform === 'omniplay') {
+          <div class="omniplay-dropdowns">
+            <div class="dropdown-block">
+              <select class="playlist-dropdown" (change)="onPlaylistChange($event, 'youtube')" [disabled]="youtubeService.isLoading()">
+                @if (youtubeService.isLoading()) {
+                  <option value="">Loading YouTube Playlists...</option>
+                } @else if (youtubeService.playlists().length === 0) {
+                  <option value="">No YouTube Playlists Found</option>
+                } @else {
+                  <option value="">YouTube: Select Playlist</option>
+                  @for (playlist of youtubeService.playlists(); track playlist.id) {
+                    <option [value]="playlist.id">{{ playlist.title }}</option>
+                  }
+                }
+              </select>
+            </div>
+            <div class="dropdown-block">
+              <select class="playlist-dropdown" (change)="onPlaylistChange($event, 'spotify')" [disabled]="spotifyService.isLoading()">
+                @if (spotifyService.isLoading()) {
+                  <option value="">Loading Spotify Playlists...</option>
+                } @else if (spotifyService.playlists().length === 0) {
+                  <option value="">No Spotify Playlists Found</option>
+                } @else {
+                  <option value="">Spotify: Select Playlist</option>
+                  @for (playlist of spotifyService.playlists(); track playlist.id) {
+                    <option [value]="playlist.id">{{ playlist.title }}</option>
+                  }
+                }
+              </select>
+            </div>
+          </div>
+          <button type="button" class="omniplay-reshuffle-btn" (click)="triggerOmniReshuffle()" title="Reshuffle combined order"><span class="text">Shuffle</span></button>
+        } @else {
         <select
           class="playlist-dropdown"
           (change)="onPlaylistChange($event)"
           [disabled]="(platform==='youtube' && youtubeService.isLoading()) || (platform==='spotify' && spotifyService.isLoading())">
-
           @if (platform === 'youtube') {
             @if (youtubeService.isLoading()) {
               <option value="">Loading YouTube Playlists...</option>
@@ -45,8 +77,8 @@
             <option value="spotify">Spotify Playlist</option>
             <option value="favorites">Favorites</option>
           }
-
         </select>
+        }
       </div>
     </div>
   </div>
@@ -60,13 +92,21 @@
 
       <div class="info">
         <div class="thumbnail">
-          <!-- Show YT icon when not on the active track -->
-          @if ((platform === 'youtube') && song.id !== c.track()?.id) {
-            <img src="assets/images/yt_icon_red_digital.png" alt="YouTube Icon" class="youtube-icon"/>
-          }
-          <!-- Show Spotify icon when platform is spotify and not the active track -->
-          @if ((platform === 'spotify') && (!c.track() || song.id !== c.track()?.id)) {
-            <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify Icon" class="spotify-icon"/>
+          @if (platform === 'omniplay') {
+            <!-- Omniplay: decide icon per song.platform -->
+            @if (song.platform === 'youtube' && song.id !== c.track()?.id) {
+              <img src="assets/images/yt_icon_red_digital.png" alt="YouTube Icon" class="youtube-icon" />
+            } @else if (song.platform === 'spotify' && song.id !== c.track()?.id) {
+              <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify Icon" class="spotify-icon" />
+            }
+          } @else {
+            <!-- Single-platform modes preserve original behavior -->
+            @if ((platform === 'youtube') && song.id !== c.track()?.id) {
+              <img src="assets/images/yt_icon_red_digital.png" alt="YouTube Icon" class="youtube-icon"/>
+            }
+            @if ((platform === 'spotify') && (!c.track() || song.id !== c.track()?.id)) {
+              <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify Icon" class="spotify-icon"/>
+            }
           }
         </div>
 

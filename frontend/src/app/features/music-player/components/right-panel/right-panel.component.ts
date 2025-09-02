@@ -45,17 +45,10 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   readonly youTubeId = computed(() => {
     const t = this.track();
     if (!t || t.platform !== 'youtube') return null;
-    // 1) Prefer explicit ID
   if (t.id && t.id.length === 11) return t.id;
-
-  // 2) Try parsing from URL
   const parsedFromUri = getYouTubeId(t.uri);
-
-  // 3) If the uri itself is already an 11-char id, accept it
   if (!parsedFromUri && t.uri && t.uri.length === 11) return t.uri;
-
   return parsedFromUri ?? null;
-    // Accept either a raw 11-char id or a full URL in song.uri
     
     
   });
@@ -105,11 +98,9 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   private createYouTubePlayer(): void {
     if (!this.ytAdapter) return;
     const videoId = this.youTubeId();
-    console.log('[yt-create-attempt]', { videoId, isYouTube: this.isYouTube?.(), hostReady: !!this.youtubePlayer });
     const host = typeof window !== 'undefined' ? (window as any) : undefined;
     const YT = host?.YT;
-    if (!this.youtubePlayer?.nativeElement || !videoId || !YT?.Player) return;
-    console.log('[yt-create-skip]', { reason: 'guard-failed', hasHost: !!this.youtubePlayer?.nativeElement, hasYT: !!YT?.Player });
+    if (!this.youtubePlayer?.nativeElement || !videoId || !YT?.Player) return; 
     this.player = new YT.Player(this.youtubePlayer.nativeElement, {
       videoId,
       width: '100%',
@@ -148,7 +139,6 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       if (typeof this.player.stopVideo === 'function') this.player.stopVideo();
       if (typeof this.player.destroy === 'function') this.player.destroy();
     } catch {
-      // noop
     } finally {
       this.player = null;
     }

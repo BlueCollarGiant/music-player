@@ -5,7 +5,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Song } from '../../../shared/models/song.model';
 import { environment } from '../../../../environments/environment';
 import { mapYouTubeTracksToSongs } from '../../youtube/youtube.mapper';
-import { getYouTubeId, buildYouTubeEmbedUrl} from '../../../shared/utils/youtube.util';
+
 
 export interface YouTubePlaylist {
   id: string;                    // ensure this matches your backend
@@ -86,34 +86,14 @@ export class YouTubeService {
     this.loadPlaylistTracks(pl.id);
   }
 
-  /** Select by id (convenience for callers) */
-  selectPlaylistById(playlistId: string): void {
-    const found = this.playlists().find(p => p.id === playlistId) ?? null;
-    this.selectedPlaylist.set(found);
-    this.loadPlaylistTracks(playlistId);
-  }
+
 
   // ── Track helpers (indexing / navigation) ───────────────────────────────────
   getTrackIndex(id: string): number {
     return this.playlistTracks().findIndex(t => t.id === id);
   }
 
-  nextTrackId(currentId: string): string | null {
-    const tracks = this.playlistTracks();
-    if (!tracks.length) return null;
-    const idx = this.getTrackIndex(currentId);
-    const nextIdx = idx >= 0 ? (idx + 1) % tracks.length : 0;
-    return tracks[nextIdx]?.id ?? null;
-  }
-
-  previousTrackId(currentId: string): string | null {
-    const tracks = this.playlistTracks();
-    if (!tracks.length) return null;
-    const idx = this.getTrackIndex(currentId);
-    const prevIdx = idx > 0 ? idx - 1 : tracks.length - 1;
-    return tracks[prevIdx]?.id ?? null;
-  }
-
+  
   // ── Domain conversions ─────────────────────────────────────────────────────
   toSongs(): Song[] {
     return mapYouTubeTracksToSongs(this.playlistTracks());
@@ -122,11 +102,5 @@ export class YouTubeService {
   /** Map a single track (sometimes handy for detail views) */
   toSong(track: YouTubePlaylistTrack): Song {
     return mapYouTubeTracksToSongs([track])[0];
-  }
-
- 
-  buildEmbedUrlForTrack(track: YouTubePlaylistTrack, opts?: Parameters<typeof buildYouTubeEmbedUrl>[1]): string {
-    const id = getYouTubeId(track.video_url) ?? track.id;
-    return buildYouTubeEmbedUrl(id, { autoplay: 0, controls: 1, modestbranding: 1, rel: 0, enablejsapi: 1, ...opts });
   }
 }

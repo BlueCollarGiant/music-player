@@ -2,6 +2,7 @@ import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../../environments/environment';
+import { firstValueFrom } from 'rxjs';
 
 import { Song } from '../../../shared/models/song.model';
 import { mapSpotifyTracksToSongs, mapSpotifyTrackToSong } from '../../Spotify/spotify.mapper';
@@ -35,7 +36,9 @@ export class SpotifyService {
   // --- SDK state ---
   private sdkLoaded = false;
   private player: any = null;
-  private fetchingToken = false; // prevent parallel token fetches
+  private fetchingToken = false; // legacy flag (kept for compatibility)
+  private tokenFetchPromise: Promise<string> | null = null; // central de-duped fetch
+  private lastProvidedToken: string | null = null; // for diagnostics
 
   // Reactive state (kept as-is to mirror YouTubeService)
   playlists = signal<SpotifyPlaylist[]>([]);
@@ -102,7 +105,24 @@ export class SpotifyService {
     this.player = new SpotifyNS.Player({
       name: 'Web Player',
       volume: 0.8,
-      getOAuthToken: (cb: (t: string) => void) => cb(this.getSpotifyAccessToken()),
+      // IMPORTANT: provide token asynchronously; never return empty string
+      getOAuthToken: async (cb: (t: string) => void) => {
+        try {
+          const token = await this.provideSpotifyToken();
+          if (token) {
+            this.lastProvidedToken = token;
+            cb(token);
+          } else {
+            console.warn('[SpotifyService] provideSpotifyToken() returned empty; forcing refresh retry in 750ms');
+            setTimeout(async () => {
+              const retry = await this.provideSpotifyToken(true);
+              if (retry) { this.lastProvidedToken = retry; cb(retry); }
+            }, 750);
+          }
+        } catch (e) {
+          console.error('[SpotifyService] Failed to supply OAuth token', e);
+        }
+      },
     });
 
     // Device is ready → hand to instance (adapter mirrors state)
@@ -119,80 +139,92 @@ export class SpotifyService {
     });
 
     this.player.addListener('initialization_error', (e: any) => console.error('[Spotify SDK] init error', e));
-    this.player.addListener('authentication_error', (e: any) => console.error('[Spotify SDK] auth error', e));
+    this.player.addListener('authentication_error', (e: any) => {
+      console.error('[Spotify SDK] auth error', e);
+      // Force-refresh token then attempt reconnect; the SDK will re-call getOAuthToken
+      this.provideSpotifyToken(true).catch(()=>{});
+    });
     this.player.addListener('account_error', (e: any) => console.error('[Spotify SDK] account error', e));
 
     this.player.connect();
   }
 
-  /** Replace with your real token sourcing; this keeps your localStorage pattern. */
-  private getSpotifyAccessToken(): string {
-    // Preferred: a dedicated Spotify access token in storage
+  /** Legacy sync accessor (avoid for SDK usage). Returns cached token or null. */
+  private getCachedToken(): string | null {
     const sp = localStorage.getItem('spotify_access_token');
-    if (sp) return sp;
+    return sp && sp.length > 10 ? sp : null;
+  }
 
-    // No cached token yet – kick off an async fetch (first call) and return empty so SDK triggers auth listener if needed
-    this.fetchSpotifyAccessToken();
-    console.warn('[SpotifyService] Missing spotify_access_token; initiated backend fetch.');
-    return '';
+  /** Core token provider with de-duplication + optional force refresh. */
+  private async provideSpotifyToken(force: boolean = false): Promise<string> {
+    if (!isPlatformBrowser(this.platformId)) return '';
+
+    // If a fetch is in-flight, await it (unless forcing)
+    if (this.tokenFetchPromise && !force) {
+      try { return await this.tokenFetchPromise; } catch { /* fallthrough */ }
+    }
+
+    // Use cached if still valid
+    if (!force) {
+      const exp = localStorage.getItem('spotify_access_token_expires_at');
+      const token = this.getCachedToken();
+      if (token && exp) {
+        const expMs = parseInt(exp, 10);
+        if (!isNaN(expMs) && expMs > Date.now() + 60_000) {
+          return token;
+        }
+      } else if (token && !exp) {
+        // No known expiry; assume usable and let periodic refresh handle
+        return token;
+      }
+    }
+
+    // Start fresh fetch
+    const jwt = localStorage.getItem('auth_token');
+    if (!jwt) return '';
+
+    this.tokenFetchPromise = firstValueFrom(
+      this.http.get<{ access_token: string; expires_at?: string | number | null }>(`${this.apiBase}/token`, { headers: this.authHeaders() })
+    ).then(res => {
+      if (res?.access_token) {
+        localStorage.setItem('spotify_access_token', res.access_token);
+        let expiresAtMs: number | null = null;
+        const raw = res.expires_at;
+        if (raw) {
+          if (typeof raw === 'string' && /\d{4}-\d{2}-\d{2}T/.test(raw)) {
+            expiresAtMs = Date.parse(raw);
+          } else if (typeof raw === 'number') {
+            expiresAtMs = raw > 10_000_000_000 ? raw : raw * 1000;
+          } else if (typeof raw === 'string') {
+            const parsed = parseInt(raw, 10); if (!isNaN(parsed)) expiresAtMs = parsed > 10_000_000_000 ? parsed : parsed * 1000;
+          }
+        }
+        if (!expiresAtMs) expiresAtMs = Date.now() + 55 * 60 * 1000; // pessimistic
+        localStorage.setItem('spotify_access_token_expires_at', String(expiresAtMs));
+        return res.access_token;
+      }
+      throw new Error('No access_token in response');
+    }).catch(err => {
+      console.error('[SpotifyService] token fetch failed', err);
+      return '';
+    }).finally(() => {
+      // Allow future fetches
+      setTimeout(() => { this.tokenFetchPromise = null; }, 250);
+    });
+
+    return this.tokenFetchPromise;
   }
 
   /** Ensure we have a reasonably fresh Spotify access token cached (idempotent). */
   private ensureAccessTokenPrimed(): void {
-    const exp = localStorage.getItem('spotify_access_token_expires_at');
-    const token = localStorage.getItem('spotify_access_token');
-    const now = Date.now();
-    const soon = now + 60_000; // refresh threshold: 60s
-    if (!exp || !token) {
-      this.fetchSpotifyAccessToken();
-      return;
-    }
-    const expMs = parseInt(exp, 10);
-    if (isNaN(expMs) || expMs < soon) {
-      this.fetchSpotifyAccessToken();
-    }
+    // Fire and forget (will use cached if valid)
+    this.provideSpotifyToken().catch(()=>{});
   }
 
   /** Fetch / refresh the Spotify access token from backend token endpoint. */
+  // Back-compat shim retained (now just calls provideSpotifyToken)
   private fetchSpotifyAccessToken(force: boolean = false): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (this.fetchingToken && !force) return;
-    // Require JWT auth token present
-    const jwt = localStorage.getItem('auth_token');
-    if (!jwt) return; // user not logged in yet
-
-    this.fetchingToken = true;
-    this.http.get<{ access_token: string; expires_at?: string | number | null }>(`${this.apiBase}/token`, { headers: this.authHeaders() })
-      .subscribe({
-        next: (res) => {
-          if (res?.access_token) {
-            localStorage.setItem('spotify_access_token', res.access_token);
-            let expiresAtMs: number | null = null;
-            if (res.expires_at) {
-              if (typeof res.expires_at === 'string' && /\d{4}-\d{2}-\d{2}T/.test(res.expires_at)) {
-                expiresAtMs = Date.parse(res.expires_at);
-              } else if (typeof res.expires_at === 'number') {
-                // assume epoch seconds or ms (heuristic)
-                expiresAtMs = res.expires_at > 10_000_000_000 ? res.expires_at : res.expires_at * 1000;
-              } else if (typeof res.expires_at === 'string') {
-                const parsed = parseInt(res.expires_at, 10);
-                if (!isNaN(parsed)) expiresAtMs = parsed > 10_000_000_000 ? parsed : parsed * 1000;
-              }
-            }
-            if (!expiresAtMs) {
-              // Default 55m from now (tokens are usually 1h) so we refresh earlier
-              expiresAtMs = Date.now() + 55 * 60 * 1000;
-            }
-            localStorage.setItem('spotify_access_token_expires_at', String(expiresAtMs));
-          }
-        },
-        error: (err) => {
-          console.error('[SpotifyService] Failed to fetch Spotify token', err);
-        },
-        complete: () => {
-          this.fetchingToken = false;
-        }
-      });
+    this.provideSpotifyToken(force).catch(()=>{});
   }
 
   // =============== API (unchanged surface) ===============
@@ -261,12 +293,5 @@ export class SpotifyService {
   // Set active platform for unified instance
   try { this.instance.setPlatform('spotify' as any); } catch {}
     this.loadPlaylistTracks(pl.id);
-  }
-
-  selectPlaylistById(id: string): void {
-    const found = this.playlists().find((p) => p.id === id) || null;
-    if (found) this.selectedPlaylist.set(found);
-  try { this.instance.setPlatform('spotify' as any); } catch {}
-    this.loadPlaylistTracks(id);
   }
 }

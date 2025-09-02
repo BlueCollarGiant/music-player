@@ -82,7 +82,7 @@
 }
 
 .username {
-  color: white;
+  color: #E3E3E3;
   font-weight: 500;
   text-align: center;
 }
@@ -93,7 +93,7 @@
   justify-content: center;
   gap: 0.375rem;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  color: #E3E3E3;
   padding: 0.375rem 0.75rem;
   border-radius: 1rem;
   font-size: 0.75rem;
@@ -126,7 +126,7 @@
 }
 
 .auth-section h3 {
-  color: white;
+  color: #E3E3E3;
   margin: 0;
   font-size: 1.25rem;
 }
@@ -153,23 +153,80 @@
   width: 100%;
 }
 
-.btn-icon {
-  font-size: 1rem;
-}
 
 .login-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  display: flex;
+  margin: 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 200px;
+  max-width: 320px;
+  padding: 0.9rem 1.5rem;
+  border: none;
+  outline: none;
+  color: #E3E3E3;
+  background: #111;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  user-select: none;
+  transition: transform 0.2s ease;
 }
 
 .login-btn:hover {
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
+
+/* Glowing animated border */
+.login-btn::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+
+  background: linear-gradient(
+    135deg,
+    #6a5af9,
+    #b76dfd,
+    #00ffd5,
+    #6a5af9
+  );
+  background-size: 300%;
+  border-radius: 12px;
+  filter: blur(6px);
+
+  z-index: -1;
+  animation: glowing-login-btn 8s linear infinite;
+}
+
+@keyframes glowing-login-btn {
+  0% { background-position: 0 0; }
+  50% { background-position: 200% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* Inner dark panel */
+.login-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #1b1b1b;
+  border-radius: 12px;
+  z-index: -1;
+}
+
+/* Optional: tweak your icon */
 
 .oauth-btn {
   background: linear-gradient(135deg, #ea4335 0%, #4285f4 100%);
-  color: white;
+  color: #E3E3E3;
 }
 
 .oauth-btn:hover {
@@ -179,13 +236,28 @@
 
 .oauth-btn.connected {
   background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
-  color: white;
+  color: #E3E3E3;
   cursor: default;
 }
 
 .oauth-btn.connected:hover {
   background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
   transform: none;
+}
+
+/* Google image login button override */
+.google-image-btn {
+  background: transparent !important;
+  padding: 0 !important;
+  border: none;
+  box-shadow: none;
+}
+.google-image-btn:hover { transform: none; }
+.google-login-img {
+  width: 100%;
+  max-width: 200px;
+  display: block;
+  border-radius: 6px;
 }
 
 .btn-icon.success {
@@ -205,7 +277,7 @@
 }
 
 .platform-section h4 {
-  color: white;
+  color: #E3E3E3;
   margin: 0 0 1rem 0;
   font-size: 1rem;
   text-align: center;
@@ -233,62 +305,20 @@
 
 .platform-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  color: #E3E3E3;
 }
 
 .platform-btn.connected {
   background-color: rgba(59, 130, 246, 0.2);
   border-color: #3b82f6;
-  color: #60a5fa;
+  color: #E3E3E3;
 }
 
-.platform-icon {
-  font-size: 1.25rem;
-}
 
-.platform-note {
-  margin-top: 4px;
-  font-size: 0.68rem;
-  line-height: 1.1;
-  color: #aaa;
-  max-width: 220px;
-}
 
-.youtube-section {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #333;
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* space between platform nav buttons */
-}
 
-.youtube-nav-btn {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #ff0000, #cc0000);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
 
-.youtube-nav-btn:hover {
-  background: linear-gradient(135deg, #cc0000, #ff0000);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
-}
 
-.youtube-nav-btn:active {
-  transform: translateY(0);
-}
 
 .logout-section {
   margin-top: 20px;
@@ -300,7 +330,7 @@
   width: 100%;
   padding: 12px;
   background: #dc3545;
-  color: white;
+  color: #E3E3E3;
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -323,7 +353,7 @@
 }
 
 .close-menu:hover {
-  color: white;
+  color: #E3E3E3;
 }
 
 .mobile-menu-tabs {
@@ -346,17 +376,17 @@
 
 .mobile-menu-tabs button:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  color: #E3E3E3;
 }
 
 .mobile-menu-tabs button.active {
   background-color: #3b82f6;
-  color: white;
+  color: #E3E3E3;
 }
 
 .mobile-menu-tabs button.active:hover {
   background-color: #2563eb;
-  color: white;
+  color: #E3E3E3;
 }
 
 .inline-form {
@@ -417,7 +447,7 @@
   border-radius: 0.75rem;
   border: 1px solid rgba(255,255,255,0.15);
 
-  color: #fff;
+  color: #E3E3E3;
   font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: 0.2px;
@@ -465,7 +495,24 @@
     inset 0 1px 0 rgba(255,255,255,0.16),
     0 14px 30px rgba(255, 0, 0, 0.35);
 }
+.glass-platform-btn.omniplay {
+  /* cloudlike purple-blue gradient */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)) padding-box,
+    linear-gradient(135deg, rgba(128,90,213,0.45), rgba(56,189,248,0.25)) border-box;
+  border-color: rgba(128,90,213,0.55); /* indigo base */
+  margin-top: 0.75rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 10px 24px rgba(128,90,213,0.25); /* soft purple glow */
+}
 
+.glass-platform-btn.omniplay:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.16),
+    0 14px 30px rgba(128,90,213,0.4); /* brighter glow on hover */
+}
 .glass-platform-btn:active {
   transform: translateY(0);
 }
@@ -502,5 +549,5 @@
 
 .divider {
   border-top: 1px solid rgba(255, 255, 255, 0.1); /* faint line */
-  margin: 1rem 0; /* space above and below */
+  margin: 1rem 1rem; /* space above and below */
 }

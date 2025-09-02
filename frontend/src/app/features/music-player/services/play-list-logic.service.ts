@@ -91,21 +91,6 @@ export class PlayListLogicService {
     if (!next.length) this.indexSig.set(-1);
     this.save();
   }
-
-  move(from: number, to: number): void {
-    const list = [...this.itemsSig()];
-    const size = list.length;
-    if (from < 0 || to < 0 || from >= size || to >= size) return;
-
-    const [s] = list.splice(from, 1);
-    list.splice(to, 0, s);
-    this.itemsSig.set(list);
-
-    // keep selection on moved item
-    if (this.indexSig() === from) this.indexSig.set(to);
-    this.save();
-  }
-
   // ── Selection & navigation ────────────────────────────────────────────────
   selectIndex(i: number): void {
     this.indexSig.set(this.clampIndex(i));
