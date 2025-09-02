@@ -99,8 +99,8 @@
         </div>
         }
         @if (isOAuthConnected('spotify')) {
-        <button class="glass-platform-btn spotify" (click)="navigatePlatform('spotify')">
-          🎵 Spotify
+        <button class="glass-platform-btn spotify" (click)="navigatePlatform('spotify')" aria-label="Open Spotify Player">
+          <img src="assets/images/Spotify_Full_Logo_RGB_Black.png" alt="Spotify" class="spotify-full-logo" />
         </button>
         }
         @if (isOAuthConnected('spotify') || isOAuthConnected('youtube')) {
