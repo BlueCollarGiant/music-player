@@ -1,70 +1,73 @@
-/* ===== visualizer (RIGHT PANEL) ===== */
-.sound-icon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* =============================================================
+   Visualizer (Right Panel)
+   Responsive + accessible adjustments
+   Base conversion: 1rem = 16px
+   ============================================================= */
+
+/* Custom properties drive scaling across breakpoints */
+.sound-wave {
+  --vis-height: clamp(3.75rem, 12vh, 6.25rem); /* ~60px -> 100px */
+  --bar-width: clamp(0.18rem, 0.4vw, 0.25rem); /* ~3px -> 4px */
+  --bar-gap: clamp(1px, 0.35vw, 4px);
+  --bar-radius: 9999px;
+  --bar-glow: 0 0 .375rem rgba(123,97,255,0.45);
+  --bar-bg: linear-gradient(270deg,
+    #08485c,
+    #001c5c,
+    #1c0835,
+    #481c08,
+    #373a08,
+    #1c3508,
+    #084826,
+    #08485c
+  );
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:var(--vis-height);
+  width:100%;
+  gap:var(--bar-gap);
+  overflow:hidden; /* prevent horizontal jitter on scale */
+  margin-inline:auto;
+  max-width:var(--np-max-width, 100%); /* tie to panel width if available */
 }
 
-.sound-wave {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100px;
-  width: 100%;
-  gap: 1px;
-}
+.sound-icon { display:flex; flex-direction:column; align-items:center; }
 
 .bar {
-  width: 4px;
-  height: 65%;
-  margin: 0 1px;
-   background: linear-gradient(270deg,
-    #08485c,  /* Flipped Coral */
-    #001c5c,  /* Flipped Yellow */
-    #1c0835,  /* Flipped Mint */
-    #481c08,  /* Flipped Sky */
-    #373a08,  /* Flipped Lavender */
-    #1c3508,  /* Flipped Pale Purple */
-    #084826,  /* Flipped Pink Blush */
-    #08485c   /* Loop back */
-  );
-  background-size: 1800% 1800%;
-  border-radius: 9999px;
-  transform-origin: center center; /* 🔥 Grow/shrink from the center */
-  animation: none;
-  box-shadow: 0 0 6px rgba(123, 97, 255, 0.4);
+  width:var(--bar-width);
+  height:65%;
+  margin:0 calc(var(--bar-gap) / 2);
+  background:var(--bar-bg);
+  background-size:1800% 1800%;
+  border-radius:var(--bar-radius);
+  transform-origin:center center; /* grow/shrink from center */
+  animation:none;
+  box-shadow:var(--bar-glow);
+  will-change:transform; /* smoother scaling */
 }
 
+.bar.playing { animation: wave 1.15s ease-in-out infinite alternate, lofi-rainbow-bg 18s linear infinite; }
+.bar.paused { height:.625rem; opacity:.6; }
 
-.bar.playing {
-  animation:
-    wave 1.2s ease-in-out infinite alternate,
-    lofi-rainbow-bg 18s linear infinite;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
+/* Larger desktop refinement (1440px+) */
+@media (min-width:90rem) {
+  .sound-wave { --vis-height: clamp(4.5rem, 10vh, 6.75rem); --bar-width: clamp(.2rem,.35vw,.3rem); }
 }
-.bar.paused {
-  height: 10px; /* 🔥 Set your desired collapsed height here */
-  opacity: 0.6; /* Optional: dim it */
+/* Ultra-wide / 5K */
+@media (min-width:160rem) {
+  .sound-wave { --vis-height: clamp(5rem, 9vh, 7.5rem); }
 }
+
+/* Reduced motion: keep color shift subtle, remove vertical pulsing */
+@media (prefers-reduced-motion: reduce) {
+  .bar.playing { animation: lofi-rainbow-bg 24s linear infinite; }
+}
+
 @keyframes wave {
-  0% {
-    transform: scaleY(0.2);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scaleY(1.6);
-    opacity: 1;
-  }
-  100% {
-    transform: scaleY(0.2);
-    opacity: 0.5;
-  }
-  
+  0% { transform:scaleY(.25); opacity:.55; }
+  50% { transform:scaleY(1.6); opacity:1; }
+  100% { transform:scaleY(.25); opacity:.55; }
 }
-@keyframes lofi-rainbow-bg {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+@keyframes lofi-rainbow-bg { 0% {background-position:0% 50%;} 50% {background-position:100% 50%;} 100% {background-position:0% 50%;} }

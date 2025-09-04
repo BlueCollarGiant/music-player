@@ -314,6 +314,30 @@
   color: #E3E3E3;
 }
 
+/* Small YouTube icon inside connect/disconnect buttons */
+.platform-btn.youtube-btn .yt-small-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: inline-block;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+  margin-right: 0.5rem;
+  pointer-events: none;
+  vertical-align: middle;
+}
+
+/* Small Spotify icon inside connect/disconnect buttons */
+.platform-btn.spotify-btn .spotify-small-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: inline-block;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+  margin-right: 0.5rem;
+  pointer-events: none;
+  vertical-align: middle;
+}
+
 
 
 
@@ -328,18 +352,70 @@
 
 .logout-btn {
   width: 100%;
-  padding: 12px;
-  background: #dc3545;
-  color: #E3E3E3;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  position: relative;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  color: #E6E6E8;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04)) padding-box,
+    linear-gradient(135deg, rgba(160,170,190,0.28), rgba(255,255,255,0.05)) border-box;
+  border: 1px solid rgba(180,190,205,0.35);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 6px 18px rgba(0,0,0,0.28);
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: transform .15s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+}
+
+.logout-btn .logout-icon {
+  /* intrinsic size kept modest so button height stays consistent */
+  --logout-icon-size: 20px;
+  --logout-icon-scale: 1.55; /* adjust this to visually enlarge */
+  width: var(--logout-icon-size);
+  height: var(--logout-icon-size);
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.45));
+  opacity: 0.92;
+  transform: scale(var(--logout-icon-scale));
+  transform-origin: center;
+  /* compensate vertical growth so line-height of button not stretched */
+  margin-top: calc((var(--logout-icon-size) * (1 - var(--logout-icon-scale))) / 2);
+  margin-bottom: calc((var(--logout-icon-size) * (1 - var(--logout-icon-scale))) / 2);
+  transition: transform .25s ease, opacity .25s ease, filter .25s ease;
+}
+
+.logout-btn:hover .logout-icon {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.55));
+  opacity: 1;
+  transform: scale(calc(var(--logout-icon-scale) * 1.06));
 }
 
 .logout-btn:hover {
-  background: #c82333;
+  transform: translateY(-1px);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06)) padding-box,
+    linear-gradient(135deg, rgba(190,200,215,0.38), rgba(255,255,255,0.08)) border-box;
+  border-color: rgba(200,210,225,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.30),
+    0 12px 26px rgba(0,0,0,0.38),
+    0 0 0 1px rgba(200,210,225,0.25);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 6px 18px rgba(0,0,0,0.30);
 }
 
 .close-menu {
@@ -467,14 +543,18 @@
 
 /* YouTube accent */
 .glass-platform-btn.youtube {
-  /* soft red hue overlay */
+  /* brighter red glass */
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)) padding-box,
-    linear-gradient(135deg, rgba(255,102,102,0.45), rgba(255,255,255,0.06)) border-box;
-  border-color: rgba(255,102,102,0.45);
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05)) padding-box,
+    linear-gradient(135deg, rgba(255,90,90,0.70), rgba(255,0,0,0.35)) border-box;
+  border-color: rgba(255,90,90,0.65);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    0 10px 24px rgba(255, 0, 0, 0.25);
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 10px 28px rgba(255,0,0,0.38),
+    0 0 0 1px rgba(255,90,90,0.25);
+  margin-top: 0.75rem; /* match spotify / omniplay vertical rhythm */
+  /* variables if scaling desired later (currently 1:1) */
+  --yt-logo-scale: 1;
 }
 
 .glass-platform-btn .icon {
@@ -491,27 +571,53 @@
 }
 
 .glass-platform-btn.youtube:hover {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07)) padding-box,
+    linear-gradient(135deg, rgba(255,110,110,0.80), rgba(255,0,0,0.45)) border-box;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.16),
-    0 14px 30px rgba(255, 0, 0, 0.35);
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 16px 34px rgba(255,0,0,0.55),
+    0 0 0 1px rgba(255,110,110,0.35);
 }
 .glass-platform-btn.omniplay {
-  /* cloudlike purple-blue gradient */
+  /* brighter cloudlike purple-blue glass */
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)) padding-box,
-    linear-gradient(135deg, rgba(128,90,213,0.45), rgba(56,189,248,0.25)) border-box;
-  border-color: rgba(128,90,213,0.55); /* indigo base */
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05)) padding-box,
+    linear-gradient(135deg, rgba(168,120,255,0.60), rgba(56,189,248,0.35)) border-box;
+  border-color: rgba(168,120,255,0.65); /* brighter indigo-violet */
   margin-top: 0.75rem;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    0 10px 24px rgba(128,90,213,0.25); /* soft purple glow */
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 10px 28px rgba(128,90,213,0.38), /* enhanced purple glow */
+    0 0 0 1px rgba(168,120,255,0.25); /* subtle outline glow */
+  /* Adjustable intrinsic logo size (kept small so button height matches others) */
+  --omniplay-logo-size: 28px;
+  /* Visual scale (increase to enlarge without affecting layout height) */
+  --omniplay-logo-scale: 1.55;
 }
 
 .glass-platform-btn.omniplay:hover {
   transform: translateY(-1px);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07)) padding-box,
+    linear-gradient(135deg, rgba(188,140,255,0.75), rgba(80,210,255,0.45)) border-box;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.16),
-    0 14px 30px rgba(128,90,213,0.4); /* brighter glow on hover */
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 16px 34px rgba(128,90,213,0.55),
+    0 0 0 1px rgba(188,140,255,0.35); /* intensified outline */
+}
+.glass-platform-btn.omniplay .omniplay-logo {
+  width: var(--omniplay-logo-size);
+  height: var(--omniplay-logo-size);
+  object-fit: contain;
+  display: inline-block;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  border-radius: 4px; /* slight rounding if logo has square edges */
+  transform: scale(var(--omniplay-logo-scale));
+  transform-origin: center;
+  /* Slight negative margins to visually center after scaling */
+  margin-top: calc((var(--omniplay-logo-size) * (1 - var(--omniplay-logo-scale))) / 2);
+  margin-bottom: calc((var(--omniplay-logo-size) * (1 - var(--omniplay-logo-scale))) / 2);
 }
 .glass-platform-btn:active {
   transform: translateY(0);
@@ -530,21 +636,45 @@
 }
 
 .glass-platform-btn.spotify {
-  /* green hue overlay */
+  /* brighter spotify green glass */
   background:
-    linear-gradient(180deg, rgba(10, 234, 14, 0.08), rgba(255,255,255,0.03)) padding-box,
-    linear-gradient(135deg, rgba(47, 219, 107, 0.45), rgba(255,255,255,0.06)) border-box;
-  border-color: rgba(29,185,84,0.45);
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05)) padding-box,
+    linear-gradient(135deg, rgba(60, 255, 140, 0.70), rgba(29,185,84,0.35)) border-box;
+  border-color: rgba(60,255,140,0.65);
   margin-top: 0.75rem;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    0 10px 24px rgba(2, 241, 86, 0.25);
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 10px 28px rgba(29,185,84,0.38),
+    0 0 0 1px rgba(60,255,140,0.25); /* subtle outline glow */
 }
 
 .glass-platform-btn.spotify:hover {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07)) padding-box,
+    linear-gradient(135deg, rgba(80, 255, 160, 0.80), rgba(29,185,84,0.45)) border-box;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.16),
-    0 14px 30px rgba(18, 200, 82, 0.35);
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 16px 34px rgba(29,185,84,0.55),
+    0 0 0 1px rgba(80,255,160,0.35);
+}
+.glass-platform-btn.spotify .spotify-full-logo {
+  display: block;
+  max-width: 120px; /* reduced from 140px */
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  pointer-events: none; /* allow button click anywhere */
+}
+
+.glass-platform-btn.youtube .youtube-full-logo {
+  display: block;
+  max-width: 120px; /* same visual width as spotify logo */
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45));
+  pointer-events: none;
+  transform: scale(var(--yt-logo-scale));
+  transform-origin: center;
 }
 
 .divider {

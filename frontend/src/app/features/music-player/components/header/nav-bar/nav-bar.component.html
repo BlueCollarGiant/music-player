@@ -56,14 +56,14 @@
           @if (!isPlatformConnected('youtube')) {
           <form [attr.action]="environment.apiUrl + '/auth/youtube'" method="post" target="_self" class="inline-form">
             <button type="submit" class="platform-btn youtube-btn" aria-label="Connect YouTube">
-              <span class="platform-icon">📺</span>
-              YouTube (Click to connect)
+              <img src="assets/images/yt_icon_red_digital.png" alt="YouTube" class="yt-small-icon" />
+              Connect YouTube
             </button>
           </form>
           } @else {
           <button class="platform-btn youtube-btn connected" type="button" (click)="disconnectPlatform('youtube')"
             aria-label="Disconnect YouTube">
-            <span class="platform-icon">📺</span>
+            <img src="assets/images/yt_icon_red_digital.png" alt="YouTube" class="yt-small-icon" />
             YouTube ✓ (Click to disconnect)
           </button>
           }
@@ -72,14 +72,14 @@
           @if (!isPlatformConnected('spotify')) {
           <form action="http://127.0.0.1:3000/auth/spotify" method="post" target="_self" class="inline-form">
             <button type="submit" class="platform-btn spotify-btn" aria-label="Connect Spotify">
-              <span class="platform-icon">🎵</span>
+              <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify" class="spotify-small-icon" />
               Connect Spotify
             </button>
           </form>
           } @else {
           <button class="platform-btn spotify-btn connected" type="button" (click)="disconnectPlatform('spotify')"
             aria-label="Disconnect Spotify">
-            <span class="platform-icon">🎵</span>
+            <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify" class="spotify-small-icon" />
             Spotify ✓ (Click to disconnect)
           </button>
           }
@@ -92,26 +92,29 @@
         <!-- Platform Navigation (only if logged in & YouTube connected) -->
         @if (isUserLoggedIn() && isPlatformConnected('youtube')) {
         <div class="platform-switch">
-          <button class="glass-platform-btn youtube" (click)="navigatePlatform('youtube')">
-            <span class="icon">📺</span>
-            Open YouTube Player
+          <button class="glass-platform-btn youtube" (click)="navigatePlatform('youtube')" aria-label="Open YouTube Player">
+            <img src="assets/images/yt_logo_almostblack_digital.png" alt="YouTube" class="youtube-full-logo" />
           </button>
         </div>
         }
         @if (isOAuthConnected('spotify')) {
-        <button class="glass-platform-btn spotify" (click)="navigatePlatform('spotify')">
-          🎵 Spotify
+        <button class="glass-platform-btn spotify" (click)="navigatePlatform('spotify')" aria-label="Open Spotify Player">
+          <img src="assets/images/Spotify_Full_Logo_RGB_Black.png" alt="Spotify" class="spotify-full-logo" />
         </button>
         }
         @if (isOAuthConnected('spotify') || isOAuthConnected('youtube')) {
-        <button class="glass-platform-btn omniplay" (click)="navigatePlatform('omniplay')">
-          ☁️ OmniPlay
+        <button class="glass-platform-btn omniplay" (click)="navigatePlatform('omniplay')" aria-label="Open OmniPlay">
+          <img src="assets/images/logo1.png" alt="OmniPlay" class="omniplay-logo" />
+          OmniPlay
         </button>
         }
 
         <!-- Logout -->
         <div class="logout-section">
-          <button class="logout-btn" type="button" (click)="logout()">Logout</button>
+          <button class="logout-btn" type="button" (click)="logout()">
+            <img src="assets/images/power.png" alt="" aria-hidden="true" class="logout-icon" />
+            Logout
+          </button>
         </div>
       </div>
       }

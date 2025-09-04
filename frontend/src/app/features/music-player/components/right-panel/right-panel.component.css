@@ -1,50 +1,41 @@
-/* ===== NOW PLAYING (RIGHT PANEL) ===== */
-.now-playing {
-  flex: 1;
-  width: 100%;
-  min-width: 20rem;
-  max-height: 100%;
-  background-image: linear-gradient(#6c6cff, #04f8f8);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 0.875rem;
-  padding: 1rem;
-  backdrop-filter: blur(2px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-  
-  gap: .75rem; 
-}
+/* =============================================================
+   Right Panel (Now Playing) Styles
+   Base scale: 1rem = 16px. All px => rem conversions.
+   Breakpoint reference (not all used here):
+     --sm: 40rem (640px)
+     --md: 48rem (768px)
+     --lg: 64rem (1024px)
+   ============================================================= */
+
+/* ===== Container ===== */
+/* Reverted from centered layout: stretch, no max-width/margin auto, slight left bias via padding */
+.now-playing { --np-max-width:clamp(20rem,60vw,40rem); flex:1; width:100%; max-height:100%; background-image:linear-gradient(#6c6cff,#04f8f8); border:.0625rem solid rgba(255,255,255,0.15); border-radius:.75rem; padding:1rem .9rem 1rem .6rem; box-sizing:border-box; backdrop-filter:blur(.125rem); box-shadow:0 .125rem .5rem rgba(0,0,0,0.12); display:flex; flex-direction:column; align-items:stretch; overflow:hidden; gap:.75rem; }
+/* (Removed outdated override block) */
 
 /* ===== MEDIA CONTAINER - Takes up most space ===== */
-.media-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;   
-  max-width: 540px;  
-  margin: 20px;     
-  width: 100%;            
-  border-radius: 0.75rem;
-  background: transparent;
-  
-  
-  box-sizing: border-box; 
+.media-container { position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; aspect-ratio:16/9; width:100%; max-width:var(--np-max-width); margin:1.25rem auto 1rem; border-radius:.75rem; background:transparent; box-sizing:border-box; }
+
+/* Tighter layout on small screens: pull media slightly left/right flush inside panel padding */
+@media (max-width:48rem) { /* <= 768px */
+  .media-container { margin:1rem auto .75rem; border-radius:.625rem; max-width:100%; }
+}
+
+/* Large Mac displays (≥1440px width) – slightly increase upper cap but keep contained */
+@media (min-width:90rem) { /* 1440px */
+  .now-playing { --np-max-width:clamp(22rem,50vw,44rem); }
+}
+
+/* Very large (≥1920px) – hold size to avoid overscaling on iMac / external monitors */
+@media (min-width:120rem) { /* 1920px */
+  .now-playing { --np-max-width:46rem; }
+}
+
+/* Ultra wide / 5K – lock so design rhythm stays intact */
+@media (min-width:160rem) { /* 2560px */
+  .now-playing { --np-max-width:48rem; }
 }
 /* ===== Song album or Song Thumbnail (RIGHT PANEL) ===== */
-.album-art {
-  max-height: 100%;
-  max-width: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  display: block;
-  border-radius: 12px;
-}
+.album-art { max-height:100%; max-width:100%; width:auto; height:auto; object-fit:contain; display:block; border-radius:.75rem; }
 
 /* ===== YouTube Video Container (RIGHT PANEL) ===== */
 /* More specific targeting for YouTube iframes */
@@ -56,28 +47,10 @@
   overflow: hidden;
 }
 
-.youtube-player iframe {
-  width: 100% !important;
-  height: 100% !important;
-  border: none !important;
-  border-radius: 0.5rem !important;
-  background: #181826;
-  display: block;
-  object-fit: cover; /* Optional: if you want to crop black bars, but usually not needed for YouTube */
-}
+.youtube-player iframe { width:100% !important; height:100% !important; border:none !important; border-radius:.5rem !important; background:#181826; display:block; object-fit:cover; }
 
 /* Override any YouTube default sizing */
-.video-container {
-  width: 100%;
-  max-width: 37.5rem;
-  aspect-ratio: 16/9;
-  background: #181826;
-
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  overflow: hidden;
-  position: relative;
-}
+.video-container { width:100%; max-width:37.5rem; aspect-ratio:16/9; background:#181826; border:.0625rem solid rgba(255,255,255,0.15); box-shadow:0 .125rem .5rem rgba(0,0,0,0.12); overflow:hidden; position:relative; }
 
 /* Global override for stubborn YouTube iframes */
 iframe[src*="youtube"] {
@@ -93,63 +66,21 @@ iframe[src*="youtube"] {
   border-radius: 12px !important;
 }
 /* Clickable thumbnail styles */
-.thumbnail-container {
-  position: absolute;  /* or relative, depending on stacking needs */
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  z-index: 2;
-}
+.thumbnail-container { position:absolute; top:0; left:0; right:0; bottom:0; width:100%; height:100%; cursor:pointer; transition:transform .2s ease; border-radius:.5rem; overflow:hidden; z-index:2; }
 
-.thumbnail-container:hover {
-  transform: scale(1.02);
-}
+.thumbnail-container:hover { transform:scale(1.02); }
 
-.clickable-thumbnail {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;  /* Add this! */
-  border-radius: 0.5rem;
-  transition: filter 0.2s ease;
-  display: block;
-}
+.clickable-thumbnail { width:100%; height:100%; object-fit:cover; border-radius:.5rem; transition:filter .2s ease; display:block; }
 
-.thumbnail-container:hover .clickable-thumbnail {
-  filter: brightness(0.8);
-}
+.thumbnail-container:hover .clickable-thumbnail { filter:brightness(.8); }
 .thumbnail-container,
 .clickable-thumbnail,
 .play-overlay { border-radius: 12px; }
-.play-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
+.play-overlay { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); opacity:0; transition:opacity .2s ease; pointer-events:none; }
 
-.thumbnail-container:hover .play-overlay {
-  opacity: 1;
-}
+.thumbnail-container:hover .play-overlay { opacity:1; }
 
-.play-button {
-  width: 3.75rem;
-  height: 3.75rem;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: #333;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
+.play-button { width:3.75rem; height:3.75rem; background:rgba(255,255,255,.9); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#333; box-shadow:0 .25rem .75rem rgba(0,0,0,0.3); }
 /* ===== Song and artist container (RIGHT PANEL) ===== */
 .song-info-container {
   flex-shrink: 0;
@@ -166,37 +97,25 @@ iframe[src*="youtube"] {
   line-height: 1.2;
   margin: 0;
 }
-.song-info-container .artist {
-  color: var(--color-text-muted);
-  text-shadow: var(--text-shadow);
-  margin-top: 4px;
-}
+.song-info-container .artist { color:var(--color-text-muted); text-shadow:var(--text-shadow); margin-top:.25rem; }
 .title, .artist { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.title {
-  font-size: clamp(0.9rem, 3vw, 1.2rem); 
-  font-weight: 500;
-  text-align: center;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap; 
-  max-width: 100%;
-  display: block; /* Ensure block display for text-overflow */
-}
+.title { font-size:clamp(.9rem,3vw,1.2rem); font-weight:500; text-align:center; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; display:block; }
 
-.artist {
-  color: #a0a0a0;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
-  text-align: center;
-  font-size: clamp(0.75rem, 2.5vw, 0.9rem); 
-  margin: 0.25rem 0 0 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap; 
-  max-width: 100%;
-  display: block; /* Ensure block display for text-overflow */
-  margin-bottom: .5rem;
+.artist { color:#a0a0a0; text-shadow:.0625rem .0625rem .125rem rgba(0,0,0,0.9); text-align:center; font-size:clamp(.75rem,2.5vw,.9rem); margin:.25rem 0 0 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; display:block; margin-bottom:.5rem; }
+
+/* Responsive typography refinement for large Mac displays */
+@media (min-width:90rem) { /* 1440px */
+  .title { font-size:clamp(1rem,2vw,1.35rem); }
+  .artist { font-size:clamp(.8rem,1.2vw,1rem); }
+}
+@media (min-width:120rem) { /* 1920px */
+  .title { font-size:clamp(1.05rem,1.4vw,1.45rem); }
+  .artist { font-size:clamp(.85rem,1vw,1.05rem); }
+}
+@media (min-width:160rem) { /* 2560px / 5K */
+  .title { font-size:clamp(1.1rem,1.2vw,1.55rem); }
+  .artist { font-size:clamp(.9rem,.9vw,1.1rem); }
 }
 
 /* ===== VISUALIZER CONTAINERS ===== */
@@ -208,16 +127,11 @@ iframe[src*="youtube"] {
   justify-content: center;
 }
 
-.bottom-visualizer {
-  width: 100%;
-  height: 4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-top: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.05);
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
+.bottom-visualizer { width:100%; max-width:var(--np-max-width); margin:0 auto; height:4rem; display:flex; align-items:center; justify-content:center; border-top:.0625rem solid rgba(255,255,255,0.10); background:rgba(0,0,0,0.05); border-bottom-left-radius:.75rem; border-bottom-right-radius:.75rem; }
+
+/* Relax min-width on narrow screens to avoid overflow of inner panel */
+@media (max-width:40rem) { /* <= 640px */
+  .now-playing { min-width:0; }
 }
 
 
