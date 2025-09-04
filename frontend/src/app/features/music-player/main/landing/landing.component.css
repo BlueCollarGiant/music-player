@@ -108,6 +108,18 @@ html:focus-within { scroll-behavior:smooth; }
 .player-title { font-weight:700; margin-bottom:.6rem; }
 .player-bar { height:8px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden; margin-bottom:1rem; }
 .player-bar span { display:block; height:100%; background:linear-gradient(90deg,#60a5fa,#34d399); }
+/* Animated looping progress with shifting multi-color gradient */
+.player-progress {
+  width:0%;
+  background: linear-gradient(90deg,#6a5af9,#b76dfd,#00ffd5,#6a5af9);
+  background-size:300% 100%;
+  /* Faster hue cycling (from 7s to 3s) */
+  animation: player-progress-fill 10s linear infinite, player-progress-hue 3s linear infinite;
+  box-shadow: 0 0 8px -2px rgba(0,255,213,0.55), 0 0 18px -4px rgba(106,90,249,0.55) inset;
+}
+@keyframes player-progress-fill { 0% { width:0%; } 100% { width:100%; } }
+@keyframes player-progress-hue { 0% { background-position:0 0; } 50% { background-position:200% 0; } 100% { background-position:0 0; } }
+@media (prefers-reduced-motion: reduce) { .player-progress { animation: player-progress-fill 10s linear infinite; } }
 .player-controls { display:flex; gap:.5rem; }
 .pill { background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); color:#fff; border-radius:.6rem; padding:.55rem .75rem; cursor:default; }
 .pill-big { padding:.55rem 1rem; }
