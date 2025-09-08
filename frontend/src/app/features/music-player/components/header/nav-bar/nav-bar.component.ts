@@ -1,6 +1,6 @@
 
 import { Component, inject, signal, computed, PLATFORM_ID } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 
 import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store';
@@ -27,6 +27,8 @@ export class NavBarComponent {
 
   // --- UI state ---
   isMobileMenuOpen = signal(false);
+  currentUrl = signal(this.router.url);
+  isOnPlatformRoute = computed(() => this.currentUrl().startsWith('/platform/'));
   
 
   // --- Auth state (signals from AuthService) ---
@@ -51,6 +53,12 @@ export class NavBarComponent {
   constructor() {// open drawer via global event (browser only)
     if (isPlatformBrowser(this.platformId)) {
       window.addEventListener('openHamburgerMenu', () => this.isMobileMenuOpen.set(true));
+      // Track route to show/hide Back to Landing
+      this.router.events.subscribe(event => {
+        if (event instanceof NavigationEnd) {
+          this.currentUrl.set(event.urlAfterRedirects || event.url);
+        }
+      });
     }
   }
 
@@ -74,6 +82,12 @@ export class NavBarComponent {
   /** Navigate to /platform/:platform and set theme/state. */
   navigatePlatform(platform: PlatformKind): void {
     this.router.navigate(['/platform', platform]);
+    this.closeMobileMenu();
+  }
+
+  /** Navigate back to landing page */
+  navigateLanding(): void {
+    this.router.navigate(['/landing']);
     this.closeMobileMenu();
   }
 

@@ -326,6 +326,20 @@
   vertical-align: middle;
 }
 
+/* Make YouTube icon larger/more visible when connected */
+.platform-btn.youtube-btn.connected .yt-small-icon {
+  width: 28px;
+  height: 28px;
+  transform: scale(1.05);
+  transform-origin: center;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.55)) brightness(1.08) saturate(1.1);
+  transition: transform .15s ease, filter .2s ease;
+}
+.platform-btn.youtube-btn.connected:hover .yt-small-icon {
+  transform: scale(1.14);
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6)) brightness(1.12) saturate(1.15);
+}
+
 /* Small Spotify icon inside connect/disconnect buttons */
 .platform-btn.spotify-btn .spotify-small-icon {
   width: 22px;
@@ -681,3 +695,19 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1); /* faint line */
   margin: 1rem 1rem; /* space above and below */
 }
+
+/* Back to Landing button icon (GIF glow effect, matching landing) */
+.glass-platform-btn.back-home-btn {
+  position: relative;
+  isolation: isolate;
+  justify-content: center;
+  gap: .55rem;
+}
+.glass-platform-btn.back-home-btn .start-icon { font-size:1.15rem; line-height:1; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4)); }
+.glass-platform-btn.back-home-btn .start-gif { width:30px; height:30px; object-fit:contain; font-size:0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); border-radius:6px; }
+.glass-platform-btn.back-home-btn .start-icon-wrap { position:relative; display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; }
+.glass-platform-btn.back-home-btn .start-icon-wrap::before { content:''; position:absolute; inset:-3px; border-radius:10px; background:linear-gradient(135deg,#6a5af9,#b76dfd,#00ffd5,#6a5af9); background-size:300%; filter:blur(6px); opacity:.85; animation: start-glow 8s linear infinite; z-index:0; }
+.glass-platform-btn.back-home-btn .start-icon-wrap::after { content:''; position:absolute; inset:0; border-radius:8px; background: rgba(15,23,42,0.55); z-index:1; }
+.glass-platform-btn.back-home-btn .start-icon-wrap img { position:relative; z-index:2; }
+
+@keyframes start-glow { 0% { background-position:0 0; } 50% { background-position:200% 0; } 100% { background-position:0 0; } }
