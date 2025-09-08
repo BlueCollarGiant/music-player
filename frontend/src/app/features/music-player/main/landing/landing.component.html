@@ -51,9 +51,9 @@
         <div class="player-title" aria-hidden="true">Now Playing — Max Vibes</div>
   <div class="player-bar" aria-hidden="true"><span class="player-progress"></span></div>
         <div class="player-controls" aria-hidden="true">
-          <button class="pill" tabindex="-1" aria-hidden="true"><span>⏮</span></button>
-          <button class="pill pill-big" tabindex="-1" aria-hidden="true"><span>▶</span></button>
-          <button class="pill" tabindex="-1" aria-hidden="true"><span>⏭</span></button>
+          <button class="pill" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>⏮</span></button>
+          <button class="pill pill-big" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>▶</span></button>
+          <button class="pill" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>⏭</span></button>
         </div>
       </div>
     </div>

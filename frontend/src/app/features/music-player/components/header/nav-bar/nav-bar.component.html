@@ -109,6 +109,17 @@
         </button>
         }
 
+        <!-- Back to Landing (visible when logged in and on /platform/*) -->
+        @if (isUserLoggedIn() && isOnPlatformRoute()) {
+        <div class="divider"></div>
+        <button class="glass-platform-btn back-home-btn" (click)="navigateLanding()" aria-label="Back to Landing">
+          <span class="start-icon-wrap" aria-hidden="true">
+            <img src="assets/images/music.gif" alt="" class="start-icon start-gif" draggable="false" />
+          </span>
+          <span class="start-text">Back to Home</span>
+        </button>
+        }
+
         <!-- Logout -->
         <div class="logout-section">
           <button class="logout-btn" type="button" (click)="logout()">
