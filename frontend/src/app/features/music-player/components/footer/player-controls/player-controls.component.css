@@ -131,6 +131,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none; /* allow smooth touch dragging without page scroll */
 }
 .volume .volbar:hover { height: 0.5rem; }
 .volume .volbar .fill {

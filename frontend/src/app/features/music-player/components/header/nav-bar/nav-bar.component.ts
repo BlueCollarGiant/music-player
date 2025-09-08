@@ -3,7 +3,7 @@ import { Component, inject, signal, computed, PLATFORM_ID } from '@angular/core'
 import { Router, NavigationEnd } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 
-import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store';
+// import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store'; // unused
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { environment } from '../../../../../../environments/environment';
 
@@ -22,7 +22,7 @@ export class NavBarComponent {
   private platformId = inject(PLATFORM_ID);
 
   environment = environment;
-  musicService = inject(PlaybackStateStore);
+  
   authService = inject(AuthService);
 
   // --- UI state ---
@@ -34,7 +34,7 @@ export class NavBarComponent {
   // --- Auth state (signals from AuthService) ---
   isUserLoggedIn = this.authService.isAuthenticated;
   username = this.authService.username;
-  connectedPlatforms = this.authService.connectedPlatformNames;
+  
 
   displayUsername = computed(() => {
     const uname = this.username();

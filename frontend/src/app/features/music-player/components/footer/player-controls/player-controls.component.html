@@ -56,7 +56,16 @@
           </svg>
         }
       </button>
-      <div class="volbar" (click)="onVolumeBarClick($event)" aria-label="Volume" role="slider" [attr.aria-valuemin]="0" [attr.aria-valuemax]="100" [attr.aria-valuenow]="Math.round(c.volume()*100)">
+      <div
+        class="volbar"
+        (click)="onVolumeBarClick($event)"
+        (mousedown)="onVolPointerDown($event)"
+        (touchstart)="onVolTouchStart($event)"
+        aria-label="Volume" role="slider"
+        [attr.aria-valuemin]="0"
+        [attr.aria-valuemax]="100"
+        [attr.aria-valuenow]="Math.round(c.volume()*100)"
+      >
         <div class="fill" [style.width.%]="c.volume() * 100"></div>
       </div>
     </div>
