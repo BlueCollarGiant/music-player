@@ -1,4 +1,4 @@
-import { Injectable, inject, computed, effect } from '@angular/core';
+import { Injectable, inject, computed, effect, signal } from '@angular/core';
 import { formatTime } from '../../shared/utils/time-format.util';
 import { PlaybackStateStore } from './playback-state.store';
 import { PlayListLogicService } from '../../features/music-player/services/play-list-logic.service';
@@ -12,6 +12,9 @@ export class PlaylistInstanceService {
   private readonly logic = inject(PlayListLogicService);
   private readonly registry = inject(AdapterRegistryService);
   private isTransitioning = false; // reentrancy guard for next/prev atomic transitions
+  // Simple local volume state (0..1), shared to UI
+  private volumeSig = signal(1.0);
+  private lastNonZeroVolSig = signal(1.0);
   constructor() {
     console.log('[Instance] PlaylistInstanceService CREATED', new Date().toISOString());
   }
@@ -82,6 +85,7 @@ export class PlaylistInstanceService {
   readonly isPlaying     = () => this.state.isPlaying();
   readonly duration      = () => this.state.duration();
   readonly current       = () => this.state.currentTime();
+  readonly volume        = () => this.volumeSig();
   // Formatted (non-breaking: new getters)
   readonly durationFmt   = () => formatTime(this.state.duration());
   readonly currentTimeFmt= () => formatTime(this.state.currentTime());
@@ -128,6 +132,36 @@ export class PlaylistInstanceService {
       this.state.setPlaying(true);
     } else {
       this.play();
+    }
+  }
+
+  // ---- Volume controls ----
+  setVolume(value: number): void {
+    const v = Math.max(0, Math.min(1, value ?? 0));
+    try { this.activeAdapter()?.setVolume?.(v); } catch {}
+    this.volumeSig.set(v);
+    if (v > 0) this.lastNonZeroVolSig.set(v);
+  }
+
+  toggleMute(): void {
+    const adapter: any = this.activeAdapter?.();
+    const currentVol = this.volumeSig();
+    let isMuted: boolean | null = null;
+    try { isMuted = adapter?.isMuted?.() ?? null; } catch { isMuted = null; }
+
+    // Determine muted state (prefer adapter's, fallback to volumeSig)
+    const muted = isMuted === null ? currentVol === 0 : isMuted;
+
+    if (muted) {
+      // Unmute: call adapter-specific unmute if available, then restore volume
+      const target = this.lastNonZeroVolSig() || 1.0;
+      try { adapter?.unmute?.(); } catch {}
+      try { adapter?.setVolume?.(target); } catch {}
+      this.volumeSig.set(target);
+    } else {
+      // Mute
+      try { adapter?.mute?.(); } catch {}
+      this.volumeSig.set(0);
     }
   }
 

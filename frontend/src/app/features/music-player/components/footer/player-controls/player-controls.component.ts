@@ -14,6 +14,8 @@ import { PlaylistInstanceService } from '../../../../../core/playback/playlist-i
 export class PlayerControlsComponent {
   // Single source for state + commands (no direct coordinator/store usage here)
   readonly c = inject(PlaylistInstanceService);;
+  // Expose Math for template bindings (e.g., Math.round)
+  readonly Math = Math;
 
   // UI actions (thin wrappers so template stays clean)
   toggle(): void {
@@ -36,5 +38,18 @@ export class PlayerControlsComponent {
     const clamped = Math.max(0, Math.min(1, ratio));
     const seconds = Math.floor((this.c.duration() || 0) * clamped);
     this.c.seek(seconds);
+  }
+
+  // Volume controls
+  toggleMute(): void {
+    this.c.toggleMute();
+  }
+
+  onVolumeBarClick(event: MouseEvent): void {
+    const el = event.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    const ratio = (event.clientX - rect.left) / rect.width;
+    const clamped = Math.max(0, Math.min(1, ratio));
+    this.c.setVolume(clamped);
   }
 }
