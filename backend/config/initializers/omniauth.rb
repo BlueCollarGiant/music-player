@@ -67,7 +67,14 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       callback_path: '/auth/spotify/callback',
       provider_ignores_state: false,
       pkce: true,
-      redirect_uri: (Rails.env.development? ? 'http://127.0.0.1:3000/auth/spotify/callback' : 'https://your-api-host/auth/spotify/callback')
+      # Derive redirect_uri from BACKEND_BASE_URL in production to avoid mismatches
+      redirect_uri: (
+        if Rails.env.development?
+          'http://127.0.0.1:3000/auth/spotify/callback'
+        else
+          File.join(ENV.fetch('BACKEND_BASE_URL', 'https://your-api-host'), 'auth/spotify/callback')
+        end
+      )
     }
 end
 
