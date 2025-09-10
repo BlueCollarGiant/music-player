@@ -42,11 +42,14 @@ class ApplicationController < ActionController::Base
 
   # Frontend base URL for redirects (public helper)
   def frontend_base_url
-    if Rails.env.development?
+    base = if Rails.env.development?
       'http://localhost:4200'
     else
       ENV.fetch('FRONTEND_URL')
     end
+    # Ensure absolute URL with scheme and no trailing slash
+    base = "https://#{base}" unless base.to_s.start_with?('http://', 'https://')
+    base.to_s.sub(%r{/+$}, '')
   end
 
   private

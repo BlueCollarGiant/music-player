@@ -74,7 +74,7 @@ class SessionsController < ApplicationController
           connected_at: Time.current,
           scopes: auth.credentials.scope
         )
-        redirect_to "#{frontend_base_url}/landing?token=#{token}&youtube_connected=true"
+        redirect_to "#{frontend_base_url}/landing?token=#{token}&youtube_connected=true", allow_other_host: true
       when 'spotify'
         conn = user.platform_connections.find_or_initialize_by(platform: 'spotify')
         conn.update!(
@@ -85,10 +85,10 @@ class SessionsController < ApplicationController
           connected_at: conn.connected_at || Time.current,
           scopes: scopes
         )
-        redirect_to "#{frontend_base_url}/landing?token=#{token}&platform=spotify&status=success"
+        redirect_to "#{frontend_base_url}/landing?token=#{token}&platform=spotify&status=success", allow_other_host: true
       else
         Rails.logger.warn "Unhandled OAuth provider: #{provider.inspect}"
-        redirect_to "#{frontend_base_url}/landing?token=#{token}"
+        redirect_to "#{frontend_base_url}/landing?token=#{token}", allow_other_host: true
       end
     else
       Rails.logger.error "OAuth authentication failed for provider: #{auth&.provider}"
@@ -96,7 +96,7 @@ class SessionsController < ApplicationController
     end
   rescue => e
     Rails.logger.error "OAuth callback error: #{e.message}"
-    redirect_to "#{frontend_base_url}/landing?error=server_error"
+    redirect_to "#{frontend_base_url}/landing?error=server_error", allow_other_host: true
   end
 
   # Handles OAuth failures
