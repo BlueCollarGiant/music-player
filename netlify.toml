@@ -1,0 +1,17 @@
+[build]
+  base = "frontend"
+  command = "npm ci && npm run build -- --configuration=render"
+  publish = "dist/class-project/browser"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Only rebuild when frontend changes
+ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- frontend/"
+
+# SPA fallback for Angular routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
