@@ -79,12 +79,23 @@ export class YouTubeAdapter implements PlayerPort {
   // Note: On YouTube, playVideo() resumes from current time; if you want strict
   // "start from 0", call seek(0) first (coordinator can choose policy).
   async start(): Promise<void> {
-  try { this.playerSig()?.playVideo?.(); this.playingSig.set(true); this.state.setPlaying(true);} catch {}
+    try {
+      // Attempt autoplay; do not flip UI state until confirmed
+      this.playerSig()?.playVideo?.();
+      const ok = await this.waitForPlaying(2000);
+      this.playingSig.set(!!ok);
+      this.state.setPlaying(!!ok);
+    } catch {}
   }
 
   async resume(): Promise<void> {
     // On YT this is effectively playVideo() from current position
-  try { this.playerSig()?.playVideo?.(); this.playingSig.set(true); this.state.setPlaying(true);} catch {}
+    try {
+      this.playerSig()?.playVideo?.();
+      const ok = await this.waitForPlaying(2000);
+      this.playingSig.set(!!ok);
+      this.state.setPlaying(!!ok);
+    } catch {}
   }
 
   async pause(): Promise<void> {
@@ -169,5 +180,25 @@ export class YouTubeAdapter implements PlayerPort {
 
   private stopTimer(): void {
     if (this.timer) { clearInterval(this.timer); this.timer = null; }
+  }
+
+  /** Wait until adapter observes PLAYING, or timeout. */
+  private waitForPlaying(timeoutMs: number): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      const start = Date.now();
+      const check = () => {
+        try {
+          if (this.playingSig()) return resolve(true);
+          // Extra check via raw player state if available
+          const player: any = this.playerSig();
+          const YT: any = (typeof window !== 'undefined' ? (window as any).YT : undefined);
+          const state = player?.getPlayerState?.();
+          if (YT?.PlayerState && state === YT.PlayerState.PLAYING) return resolve(true);
+        } catch {}
+        if (Date.now() - start >= timeoutMs) return resolve(false);
+        setTimeout(check, 100);
+      };
+      check();
+    });
   }
 }

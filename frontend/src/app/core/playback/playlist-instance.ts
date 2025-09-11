@@ -111,7 +111,7 @@ export class PlaylistInstanceService {
   play(): void {
     if (this.state.isPlaying()) return;
     this.activeAdapter()?.start?.();
-    this.state.setPlaying(true);
+    // Adapter will flip playing true once confirmed
   }
 
   pause(): void {
@@ -127,9 +127,8 @@ export class PlaylistInstanceService {
     if (isPlaying) {
       this.pause();
     } else if (duration > 0 && position > 0) {
-      // treat as resume
+      // treat as resume; adapter will confirm playing state
       this.activeAdapter()?.resume?.();
-      this.state.setPlaying(true);
     } else {
       this.play();
     }
@@ -196,9 +195,9 @@ export class PlaylistInstanceService {
         this.state.setPlatformKind(platform);
       }
 
-      // Commit selection & intent
+      // Commit selection & intent (do not mark playing yet; wait for adapter confirm)
       this.state.setCurrentTrack(next);
-      this.state.setPlaying(autoplay);
+      if (!autoplay) this.state.setPlaying(false);
 
       // Resolve adapter AFTER potential platformKind switch
       const targetAdapter: any = (this.registry as any).getAdapterFor?.(platform) || this.activeAdapter?.();

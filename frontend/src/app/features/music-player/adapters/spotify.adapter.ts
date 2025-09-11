@@ -117,6 +117,9 @@ export class SpotifyAdapter implements PlayerPort {
     try {
       if (!this.trackUri) return; // nothing selected
       await this.ensureWebApiPlay(this.trackUri, false);
+      const ok = await this.waitForPlaying(2000);
+      this.playingSig.set(!!ok);
+      this.state.setPlaying(!!ok);
     } catch (e) { console.warn('[SpotifyAdapter] start() failed', e); }
   }
 
@@ -133,7 +136,8 @@ export class SpotifyAdapter implements PlayerPort {
       } else {
         await this.playerSig()?.resume?.();
       }
-      this.playingSig.set(true); this.state.setPlaying(true);
+      const ok = await this.waitForPlaying(2000);
+      this.playingSig.set(!!ok); this.state.setPlaying(!!ok);
     } catch (e) { console.warn('[SpotifyAdapter] resume() failed', e); }
   }
 
@@ -199,6 +203,21 @@ export class SpotifyAdapter implements PlayerPort {
     this.trackUri = null;
   if (this.positionTimer) { try { clearInterval(this.positionTimer); } catch {}; this.positionTimer = null; }
   }
+
+  /** Wait until SDK reports playing (not paused) or timeout. */
+  private waitForPlaying(timeoutMs: number): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      const start = nowTs();
+      const tick = () => {
+        try {
+          if (this.playingSig()) return resolve(true);
+        } catch {}
+        if (nowTs() - start >= timeoutMs) return resolve(false);
+        setTimeout(tick, 100);
+      };
+      tick();
+    });
+  }
 }
 
 // ── helpers ─────────────────────────────────────────────────────────────────
@@ -207,3 +226,6 @@ function nowTs(): number {
 }
 function msToSec(ms: number): number { return Math.floor((ms || 0) / 1000); }
 function clamp(n: number, min: number, max: number): number { return Math.min(Math.max(n, min), max); }
+
+// Extend prototype with a tiny utility via declaration merging style inside module
+// but keep implementation private to adapter: add a method on the class instead.
