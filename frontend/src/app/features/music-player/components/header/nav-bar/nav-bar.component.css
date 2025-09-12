@@ -131,12 +131,45 @@
   font-size: 1.25rem;
 }
 
+/* Early access pill */
+.tester-badge {
+  margin-top: .35rem;
+  margin-bottom: .35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .3rem .6rem;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: #ffe4b5;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 6px 16px rgba(0,0,0,.25);
+}
+
 .auth-buttons {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   width: 100%;
 }
+
+/* Brief disclaimer under auth buttons */
+.auth-disclaimer {
+  margin-top: .75rem;
+  color: #b9c2ff;
+  font-size: .85rem;
+  line-height: 1.35;
+  text-align: center;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: .75rem;
+  padding: .65rem .75rem;
+}
+.auth-disclaimer a { color: #93c5fd; text-decoration: underline; text-underline-offset: 2px; }
+.auth-disclaimer a:hover { color: #bfdbfe; }
 
 .auth-btn {
   display: flex;
