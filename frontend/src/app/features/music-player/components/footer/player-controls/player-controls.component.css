@@ -196,6 +196,7 @@
   .playback {
     gap: 1.5rem; /* Good button spacing */
     justify-content: center;
+    flex-wrap: wrap; /* allow volume group to wrap beneath */
   }
   
   .playback .thumbnail {
@@ -223,13 +224,16 @@
     text-align: center;
   }
   
-  .volume .volbar {
-    width: 120px;
-  }
-
-  .volume {
+  /* Move volume group below transport controls and keep it centered */
+  .playback > .volume {
+    flex: 1 1 100%;
+    order: 2;
+    display: flex;
+    justify-content: center;
     gap: 0.6rem;
+    margin-top: .5rem;
   }
+  .volume .volbar { width: min(320px, 70vw); }
 
   /* Disable hover effects on mobile */
   .btn-control:hover {
