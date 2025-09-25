@@ -27,7 +27,7 @@ export class OmniplayService {
   private pendingSync = false;
 
   // Logging / tracking
-  private prevPlatformCount = 0;
+  // private prevPlatformCount = 0; // unused
   private firstPlatformLogged = false;
   private secondPlatformLogged = false;
   private lastYtPlaylistIdCommitted: string | null = null;
@@ -90,7 +90,7 @@ export class OmniplayService {
       });
       this.secondPlatformLogged = true;
     }
-    this.prevPlatformCount = countNow; // retained for potential future logic
+    // this.prevPlatformCount = countNow; // retained for potential future logic (unused)
     // --------------------------------------------------------------------------
   // Always schedule; internal logic determines if commit is needed.
   this.scheduleSync();
@@ -109,7 +109,7 @@ export class OmniplayService {
  
   // ── Internal helpers ─────────────────────────────────────────────────────
   // (Legacy buildSignature unused now) retained only if debugging is needed
-  private buildSignature(list: Song[]): string { return list.map(s => `${s.platform}:${s.id}`).join('|'); }
+  // private buildSignature(list: Song[]): string { return list.map(s => `${s.platform}:${s.id}`).join('|'); } // unused
 
   private preserveCurrentTrackId(next: Song[]): string | undefined {
     try {
@@ -284,10 +284,10 @@ export class OmniplayService {
     return arr;
   }
 
-  private clearTimers(): void {
-    if (this.debounceHandle) { clearTimeout(this.debounceHandle); this.debounceHandle = null; }
-    this.pendingSync = false;
-  }
+  // private clearTimers(): void { // unused
+  //   if (this.debounceHandle) { clearTimeout(this.debounceHandle); this.debounceHandle = null; }
+  //   this.pendingSync = false;
+  // }
 
   // Helper to enumerate currently selected platforms (used for logging transitions)
   private currentPlatforms(): ('youtube' | 'spotify')[] {
