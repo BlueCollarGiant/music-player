@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { PlayerPort, PlatformKind } from './player-port';
-import { YouTubeAdapter } from '../../features/music-player/adapters/youtube.adapter';
-import { SpotifyAdapter } from '../../features/music-player/adapters/spotify.adapter';
+import { YouTubePlayerAdapter } from '../../features/music-player/adapters/youtube';
+import { SpotifyPlayerAdapter } from '../../features/music-player/adapters/spotify';
 
 @Injectable({ providedIn: 'root' })
 export class AdapterRegistryService {
   constructor(
-    private readonly youtube: YouTubeAdapter,
-    private readonly spotify: SpotifyAdapter
+    private readonly youtube: YouTubePlayerAdapter,
+    private readonly spotify: SpotifyPlayerAdapter
   ) {}
 
   get(kind: PlatformKind): PlayerPort | null {
@@ -19,11 +19,11 @@ export class AdapterRegistryService {
   }
 
   // Optional convenience getters
-  getYouTubeAdapter(): YouTubeAdapter {
+  getYouTubeAdapter(): YouTubePlayerAdapter {
     return this.youtube;
   }
 
-  getSpotifyAdapter(): SpotifyAdapter {
+  getSpotifyAdapter(): SpotifyPlayerAdapter {
     return this.spotify;
   }
 }

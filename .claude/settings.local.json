@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --version:*)",
+      "Bash(npm --version:*)",
+      "Bash(ng generate:*)",
+      "Bash(move hero-section \"landing\\landing-content\\hero-section\")",
+      "Bash(move features-section \"landing\\landing-content\\features-section\")",
+      "Bash(move notice-section \"landing\\landing-content\\notice-section\")",
+      "Bash(move back-to-top \"landing\\landing-content\\back-to-top\")",
+      "Bash(move build-credit \"landing\\landing-content\\build-credit\")",
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(npm run build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
