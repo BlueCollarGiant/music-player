@@ -96,8 +96,13 @@ export class SpotifyAdapter implements PlayerPort {
   // ── PlayerPort snapshots ───────────────────────────────────────────────────
   isReady(): boolean { return this.readySig(); }
   isPlaying(): boolean { return this.playingSig(); }
+
+  /** UNUSED in practice - state store accessed directly. Required by PlayerPort interface. */
   durationSeconds(): number { return msToSec(this.durationMsSig()); }
+
+  /** Used internally for position timer. Required by PlayerPort interface. */
   currentTimeSeconds(): number { return msToSec(this.computePositionMs()); }
+
   currentIdOrUri(): string | null { return this.trackUri; }
 
   // ── PlayerPort controls ────────────────────────────────────────────────────
@@ -151,11 +156,33 @@ export class SpotifyAdapter implements PlayerPort {
     } catch {}
   }
 
+  /**
+   * ⚠️ UNUSED IN PRACTICE - DO NOT CALL DIRECTLY ⚠️
+   *
+   * PlaylistInstanceService handles track navigation via logic.next() + transitionToSong().
+   * UI next/prev buttons call PlaylistInstanceService.next() which uses adapter.load() + adapter.start() instead.
+   *
+   * This method exists only to satisfy the PlayerPort interface contract but is never invoked.
+   *
+   * @deprecated Use PlaylistInstanceService.next() for track navigation
+   */
   async next(): Promise<void> {
+    console.warn('[SpotifyAdapter.next()] This method is unused. Use PlaylistInstanceService.next() instead.');
     try { await this.playerSig()?.nextTrack?.(); } catch {}
   }
 
+  /**
+   * ⚠️ UNUSED IN PRACTICE - DO NOT CALL DIRECTLY ⚠️
+   *
+   * PlaylistInstanceService handles track navigation via logic.previous() + transitionToSong().
+   * UI next/prev buttons call PlaylistInstanceService.prev() which uses adapter.load() + adapter.start() instead.
+   *
+   * This method exists only to satisfy the PlayerPort interface contract but is never invoked.
+   *
+   * @deprecated Use PlaylistInstanceService.prev() for track navigation
+   */
   async previous(): Promise<void> {
+    console.warn('[SpotifyAdapter.previous()] This method is unused. Use PlaylistInstanceService.prev() instead.');
     try { await this.playerSig()?.previousTrack?.(); } catch {}
   }
 
@@ -193,6 +220,7 @@ export class SpotifyAdapter implements PlayerPort {
     return this.mutedSig();
   }
 
+  /** UNUSED - Player lifecycle managed by SpotifyService. Optional in PlayerPort interface. */
   async teardown(): Promise<void> {
     try { await this.playerSig()?.disconnect?.(); } catch {}
     this.playerSig.set(null);
