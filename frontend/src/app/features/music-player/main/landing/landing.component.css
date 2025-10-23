@@ -140,16 +140,6 @@ html:focus-within { scroll-behavior:smooth; }
 .feature-card h3 { font-size:1.2rem; margin-bottom:.4rem; }
 .feature-card p { opacity:.9; line-height:1.55; }
 
-/* ===== Notice (Early Access) ===== */
-.notice-section { position:relative; z-index:1; padding: clamp(2rem, 5vw, 3rem) 0; }
-.notice-card { background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18); border-radius:1rem; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 26px rgba(0,0,0,.25); padding: clamp(1rem, 2.5vw, 1.75rem) clamp(1rem, 3vw, 2rem); }
-.notice-card p { margin:.5rem 0; opacity:.92; }
-.requirements-list { list-style:none; margin:.75rem 0 0; padding:0; display:flex; flex-wrap:wrap; gap:.6rem .9rem; }
-.requirements-list li { display:inline-flex; align-items:center; gap:.45rem; padding:.4rem .65rem; border-radius:.7rem; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); font-weight:600; font-size:.95rem; }
-.requirements-list li::before { content:'✓'; color:#34d399; font-weight:900; }
-.notice-card a { color:#93c5fd; text-decoration:underline; text-underline-offset:2px; }
-.notice-card a:hover { color:#bfdbfe; }
-
 /* Back To Top */
 .back-to-top { position:fixed; right:1.25rem; bottom:1.25rem; z-index:20; border:none; cursor:pointer; background:linear-gradient(135deg,#6366f1,#0ea5e9); color:#fff; width:44px; height:44px; border-radius:12px; font-size:1.2rem; font-weight:700; box-shadow:0 8px 26px -6px rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; opacity:.95; backdrop-filter:blur(6px); transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease; }
 .back-to-top:hover { transform:translateY(-4px); box-shadow:0 14px 36px -4px rgba(0,0,0,.55); }

@@ -1,10 +1,11 @@
 import { Component, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { NoticeSectionComponent } from '../notice-section/notice-section.component';
 
 @Component({
   selector: 'app-landing',
-  imports: [],
+  imports: [NoticeSectionComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.css'
 })

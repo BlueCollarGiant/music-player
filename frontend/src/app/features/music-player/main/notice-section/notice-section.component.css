@@ -1,0 +1,71 @@
+/* ===== Notice Section (Early Access/Development) ===== */
+.notice-section {
+  position: relative;
+  z-index: 1;
+  padding: clamp(2rem, 5vw, 3rem) 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(1.2rem, 4vw, 2rem);
+}
+
+.notice-card {
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .25);
+  padding: clamp(1rem, 2.5vw, 1.75rem) clamp(1rem, 3vw, 2rem);
+}
+
+.notice-card p {
+  margin: .5rem 0;
+  opacity: .92;
+}
+
+.gradient-text-sm {
+  background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.requirements-list {
+  list-style: none;
+  margin: .75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem .9rem;
+}
+
+.requirements-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .4rem .65rem;
+  border-radius: .7rem;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .18);
+  font-weight: 600;
+  font-size: .95rem;
+}
+
+.requirements-list li::before {
+  content: '';
+  color: #34d399;
+  font-weight: 900;
+}
+
+.notice-card a {
+  color: #93c5fd;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.notice-card a:hover {
+  color: #bfdbfe;
+}
