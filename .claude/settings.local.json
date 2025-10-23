@@ -11,7 +11,11 @@
       "Bash(move build-credit \"landing\\landing-content\\build-credit\")",
       "Bash(mkdir:*)",
       "Bash(find:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(npm init:*)",
+      "Bash(tree:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
