@@ -1,11 +1,11 @@
 import { Component, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { NoticeSectionComponent } from '../notice-section/notice-section.component';
-import { HeroSectionComponent } from '../hero-section/hero-section.component';
-import { FeaturesSectionComponent } from '../features-section/features-section.component';
-import { BackToTopComponent } from '../back-to-top/back-to-top.component';
-import { BuildCreditComponent } from '../build-credit/build-credit.component';
+import { NoticeSectionComponent } from './landing-content/notice-section/notice-section.component';
+import { HeroSectionComponent } from './landing-content/hero-section/hero-section.component';
+import { FeaturesSectionComponent } from './landing-content/features-section/features-section.component';
+import { BackToTopComponent } from './landing-content/back-to-top/back-to-top.component';
+import { BuildCreditComponent } from './landing-content/build-credit/build-credit.component';
 
 @Component({
   selector: 'app-landing',
