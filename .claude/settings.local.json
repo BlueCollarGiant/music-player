@@ -8,7 +8,8 @@
       "Bash(move features-section \"landing\\landing-content\\features-section\")",
       "Bash(move notice-section \"landing\\landing-content\\notice-section\")",
       "Bash(move back-to-top \"landing\\landing-content\\back-to-top\")",
-      "Bash(move build-credit \"landing\\landing-content\\build-credit\")"
+      "Bash(move build-credit \"landing\\landing-content\\build-credit\")",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
