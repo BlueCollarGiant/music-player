@@ -7,7 +7,8 @@ This folder contains technical documentation for the OmniPlay frontend applicati
 ```
 docs/
 ├── architecture/           # Architecture decisions and patterns
-│   └── spotify-adapter-refactoring.md
+│   ├── spotify-adapter-refactoring.md
+│   └── youtube-adapter-refactoring.md
 ├── guides/                 # Developer guides (create as needed)
 └── README.md              # This file
 ```
@@ -16,6 +17,7 @@ docs/
 
 ### Architecture
 - **[Spotify Adapter Refactoring](./architecture/spotify-adapter-refactoring.md)** - Details on the SOLID refactoring of the Spotify adapter, including folder structure, principles applied, and migration guide.
+- **[YouTube Adapter Refactoring](./architecture/youtube-adapter-refactoring.md)** - Details on the SOLID refactoring of the YouTube adapter, including dead code analysis, event handling patterns, and differences from Spotify.
 
 ## 🎯 Documentation Best Practices
 
