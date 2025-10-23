@@ -3,99 +3,12 @@
   <!-- gradient aura + particles -->
   <div class="landing-bg" aria-hidden="true"></div>
 
-  <section class="hero-section hero-grid" aria-labelledby="landing-hero-title">
-    <div class="hero-copy">
-      <p class="eyebrow">All your music. One place.</p>
-      <h1 id="landing-hero-title" class="hero-title gradient-text">Welcome to OmniPlay</h1>
-      <p class="hero-subtitle">
-        Connect YouTube and Spotify, build one playlist, and play it anywhere.
-      </p>
-
-      <div class="hero-actions" role="group" aria-label="Primary actions">
-        <button class="glass-start-btn" (click)="startListening()" aria-label="Start listening with connected platforms">
-          <span class="start-icon-wrap" aria-hidden="true">
-            <img src="assets/images/headphones.gif" alt="" class="start-icon start-gif" draggable="false" />
-          </span>
-          <span class="start-text">Start Listening</span>
-        </button>
-      </div>
-
-      <ul class="platform-badges" aria-label="Supported platforms list">
-        <li><span class="badge yt" aria-label="YouTube supported">YouTube</span></li>
-        <li><span class="badge sp" aria-label="Spotify supported">Spotify</span></li>
-        <li><span class="badge omni" aria-label="OmniPlay unified queue">OmniPlay</span></li>
-      </ul>
-
-      <div class="hero-stats" aria-label="Key value props">
-        <div class="stat"><strong>Fast</strong><span>No heavy SDKs until play</span></div>
-        <div class="stat"><strong>Unified</strong><span>One queue, Multiple platforms</span></div>
-        <div class="stat"><strong>Secure</strong><span>OAuth sign-in</span></div>
-      </div>
-    </div>
-
-    <!-- right “device” preview card (pure CSS) -->
-    <div class="hero-preview" aria-hidden="true">
-      <div class="player-card" role="presentation">
-        <div class="player-visual" aria-hidden="true">
-          @for (img of carouselImages; track img.src; let i = $index) {
-            <img
-              class="carousel-img"
-              [class.active]="i === currentIndex"
-              [src]="img.src"
-              [alt]="img.alt"
-              [attr.aria-hidden]="i === currentIndex ? 'false' : 'true'"
-              draggable="false"
-            />
-          }
-        </div>
-        <div class="player-title" aria-hidden="true">Now Playing — Max Vibes</div>
-  <div class="player-bar" aria-hidden="true"><span class="player-progress"></span></div>
-        <div class="player-controls" aria-hidden="true">
-          <button class="pill" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>⏮</span></button>
-          <button class="pill pill-big" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>▶</span></button>
-          <button class="pill" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>⏭</span></button>
-        </div>
-      </div>
-    </div>
-  </section>
+  <app-hero-section></app-hero-section>
 
   <app-notice-section></app-notice-section>
 
-  <section class="features-section" id="features" aria-labelledby="features-heading">
-    <div class="container">
-      <h2 id="features-heading" class="gradient-text-sm">Features</h2>
-      <p id="features-desc" class="visually-hidden">Feature list describing OmniPlay capabilities</p>
+  <app-features-section></app-features-section>
 
-      <div class="features-grid">
-        <article class="feature-card" aria-labelledby="f-multi">
-          <div class="feature-icon" aria-hidden="true">🎶</div>
-          <h3 id="f-multi">Multi-Platform Support</h3>
-          <p>Connect your YouTube and Spotify accounts into one flow.</p>
-        </article>
-
-        <article class="feature-card" aria-labelledby="f-mobile">
-          <div class="feature-icon" aria-hidden="true">📱</div>
-          <h3 id="f-mobile">Mobile First</h3>
-          <p>Responsive layout with smooth, GPU-friendly animations.</p>
-        </article>
-
-        <article class="feature-card" aria-labelledby="f-playlists">
-          <div class="feature-icon" aria-hidden="true">🎵</div>
-          <h3 id="f-playlists">Custom Playlists</h3>
-          <p>Build, reorder, and shuffle across platforms seamlessly.</p>
-        </article>
-
-        <article class="feature-card" aria-labelledby="f-secure">
-          <div class="feature-icon" aria-hidden="true">🔐</div>
-          <h3 id="f-secure">Secure Login</h3>
-          <p>OAuth integration with Google and platform providers.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  @if (showBackToTop) {
-    <button (click)="scrollToTop()" class="back-to-top" aria-label="Back to top">↑</button>
-  }
-  <div class="build-credit" aria-label="Site author">Built by <strong>BlueCollarGiant</strong></div>
+  <app-back-to-top></app-back-to-top>
+  <app-build-credit></app-build-credit>
 </div>

@@ -1,0 +1,8 @@
+/* Build credit */
+.build-credit {
+  position:fixed; right:1rem; bottom:.5rem; z-index:15; font-size:.7rem; letter-spacing:.05em;
+  background:rgba(15,23,42,.55); padding:.4rem .6rem .45rem; border:1px solid rgba(255,255,255,.15);
+  border-radius:.55rem; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  color:#d1d5db; font-weight:500; pointer-events:none; user-select:none;
+}
+.build-credit strong { background:linear-gradient(90deg,#60a5fa,#34d399); -webkit-background-clip:text; background-clip:text; color:transparent; font-weight:700; }

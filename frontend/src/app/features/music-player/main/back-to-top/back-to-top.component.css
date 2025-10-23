@@ -1,0 +1,9 @@
+/* Back To Top */
+.back-to-top { position:fixed; right:1.25rem; bottom:1.25rem; z-index:20; border:none; cursor:pointer; background:linear-gradient(135deg,#6366f1,#0ea5e9); color:#fff; width:44px; height:44px; border-radius:12px; font-size:1.2rem; font-weight:700; box-shadow:0 8px 26px -6px rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; opacity:.95; backdrop-filter:blur(6px); transition:transform .25s ease, box-shadow .25s ease, opacity .25s ease; }
+.back-to-top:hover { transform:translateY(-4px); box-shadow:0 14px 36px -4px rgba(0,0,0,.55); }
+.back-to-top:active { transform:translateY(-1px); }
+.back-to-top[aria-hidden='true'] { visibility:hidden; opacity:0; pointer-events:none; }
+.back-to-top:focus-visible { outline:2px solid #34d399; outline-offset:2px; }
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) { .back-to-top { transition:none !important; } .back-to-top:hover { transform:none !important; } }

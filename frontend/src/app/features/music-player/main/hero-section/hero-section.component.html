@@ -1,0 +1,55 @@
+<section class="hero-section hero-grid" aria-labelledby="landing-hero-title">
+  <div class="hero-copy">
+    <p class="eyebrow">All your music. One place.</p>
+    <h1 id="landing-hero-title" class="hero-title gradient-text">Welcome to OmniPlay</h1>
+    <p class="hero-subtitle">
+      Connect YouTube and Spotify, build one playlist, and play it anywhere.
+    </p>
+
+    <div class="hero-actions" role="group" aria-label="Primary actions">
+      <button class="glass-start-btn" (click)="startListening()" aria-label="Start listening with connected platforms">
+        <span class="start-icon-wrap" aria-hidden="true">
+          <img src="assets/images/headphones.gif" alt="" class="start-icon start-gif" draggable="false" />
+        </span>
+        <span class="start-text">Start Listening</span>
+      </button>
+    </div>
+
+    <ul class="platform-badges" aria-label="Supported platforms list">
+      <li><span class="badge yt" aria-label="YouTube supported">YouTube</span></li>
+      <li><span class="badge sp" aria-label="Spotify supported">Spotify</span></li>
+      <li><span class="badge omni" aria-label="OmniPlay unified queue">OmniPlay</span></li>
+    </ul>
+
+    <div class="hero-stats" aria-label="Key value props">
+      <div class="stat"><strong>Fast</strong><span>No heavy SDKs until play</span></div>
+      <div class="stat"><strong>Unified</strong><span>One queue, Multiple platforms</span></div>
+      <div class="stat"><strong>Secure</strong><span>OAuth sign-in</span></div>
+    </div>
+  </div>
+
+  <!-- right "device" preview card (pure CSS) -->
+  <div class="hero-preview" aria-hidden="true">
+    <div class="player-card" role="presentation">
+      <div class="player-visual" aria-hidden="true">
+        @for (img of carouselImages; track img.src; let i = $index) {
+          <img
+            class="carousel-img"
+            [class.active]="i === currentIndex"
+            [src]="img.src"
+            [alt]="img.alt"
+            [attr.aria-hidden]="i === currentIndex ? 'false' : 'true'"
+            draggable="false"
+          />
+        }
+      </div>
+      <div class="player-title" aria-hidden="true">Now Playing — Max Vibes</div>
+<div class="player-bar" aria-hidden="true"><span class="player-progress"></span></div>
+      <div class="player-controls" aria-hidden="true">
+        <button class="pill" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>⏮</span></button>
+        <button class="pill pill-big" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>▶</span></button>
+        <button class="pill" (click)="startListening()" tabindex="-1" aria-hidden="true"><span>⏭</span></button>
+      </div>
+    </div>
+  </div>
+</section>
