@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 // Switched from ControlsFacade to PlaylistInstanceService (single UI surface)
 import { PlaylistInstanceService } from '../../../../core/playback/playlist-instance';
 import { AdapterRegistryService } from '../../../../core/playback/adapter-registry.service';
-import { YouTubeAdapter } from '../../adapters/youtube.adapter';
+import { YouTubePlayerAdapter } from '../../adapters/youtube';
 import { getYouTubeId } from '../../../../shared/utils/youtube.util';
 import { Song } from '../../../../shared/models/song.model';
 import { VisualizerComponent } from './visualizer-container/visualizer/visualizer.component';
@@ -32,7 +32,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   // Single source of truth (instance service)
   readonly c = inject(PlaylistInstanceService); // public for template bindings
   private readonly registry = inject(AdapterRegistryService);
-  private readonly ytAdapter = this.registry.get('youtube') as YouTubeAdapter | null;
+  private readonly ytAdapter = this.registry.get('youtube') as YouTubePlayerAdapter | null;
 
   // ── Canonical model usage (no legacy fields) ───────────────────────────────
   readonly track = computed<Song | null>(() => this.c.track());

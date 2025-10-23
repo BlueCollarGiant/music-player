@@ -1,6 +1,6 @@
 import { Component, inject, PLATFORM_ID, OnInit, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { AuthService } from '../../../../core/auth/auth.service';
+import { AuthService } from '../../../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-hero-section',

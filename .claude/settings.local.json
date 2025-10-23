@@ -10,7 +10,8 @@
       "Bash(move back-to-top \"landing\\landing-content\\back-to-top\")",
       "Bash(move build-credit \"landing\\landing-content\\build-credit\")",
       "Bash(mkdir:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { PlaybackStateStore } from '../../../../../core/playback/playback-state-store';
+import { PlaybackStateStore } from '../../../../../core/playback/playback-state.store';
 import { YouTubeStateManager } from '../state/youtube-state-manager';
 
 /**
@@ -18,7 +18,7 @@ export class YouTubeStateBridge {
    * Update the global store's position
    */
   updatePosition(seconds: number): void {
-    this.globalStore.setPosition(seconds);
+    this.globalStore.setCurrentTime(seconds);
   }
 
   /**
