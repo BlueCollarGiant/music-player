@@ -1,0 +1,12 @@
+/* ===== TIME DISPLAY ===== */
+.time {
+  color: white;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .time {
+    font-size: 1rem; /* Clear readable time */
+    text-align: center;
+  }
+}
