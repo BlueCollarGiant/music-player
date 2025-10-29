@@ -91,6 +91,16 @@ export class NavBarComponent {
     this.closeMobileMenu();
   }
 
+  /** Remember current route before leaving for an external auth flow */
+  captureReturnUrl(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const targetUrl = this.currentUrl();
+    const fallback = window.location.pathname + window.location.search + window.location.hash;
+    localStorage.setItem('pre_auth_url', targetUrl || fallback || '/landing');
+  }
+
   // Keep for disconnect buttons 
   async disconnectPlatform(p: PlatformKind) {
     if (!confirm(`Disconnect ${p}?`)) return;

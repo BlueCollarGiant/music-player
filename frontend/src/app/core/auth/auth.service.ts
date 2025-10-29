@@ -176,17 +176,27 @@ export class AuthService {
   // Load platform connections
   private async loadPlatformConnections(token?: string): Promise<void> {
     const authToken = token || this.getStoredToken();
-    if (!authToken) return;
+    if (!authToken) {
+      console.warn('[AuthService] loadPlatformConnections: No auth token available');
+      return;
+    }
 
     try {
+      console.log('[AuthService] Loading platform connections from:', `${environment.apiUrl}/user_profiles/platform_connections`);
       const response = await fetch(`${environment.apiUrl}/user_profiles/platform_connections`, {
         headers: this.getAuthHeaders(authToken),
-        
+
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log('[AuthService] Platform connections loaded:', data.platform_connections);
         this.platformConnections.set(data.platform_connections || []);
+        console.log('[AuthService] Connected platforms:', this.connectedPlatformNames());
+      } else {
+        console.error('[AuthService] Failed to load platform connections. Status:', response.status);
+        const errorText = await response.text();
+        console.error('[AuthService] Error response:', errorText);
       }
     } catch (error) {
       console.error('Failed to load platform connections:', error);
@@ -197,9 +207,10 @@ export class AuthService {
   public loginWithGoogle(): void {
     // Save current URL for redirect after authentication
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('pre_auth_url', '/landing');
+      const currentPath = window.location.pathname + window.location.search + window.location.hash;
+      localStorage.setItem('pre_auth_url', currentPath || '/landing');
     }
-  window.location.href = `${environment.apiUrl}/auth/google_oauth2`;
+    window.location.href = `${environment.apiUrl}/auth/google_oauth2`;
   }
 
   // Manual Authentication Methods (for users without Gmail)

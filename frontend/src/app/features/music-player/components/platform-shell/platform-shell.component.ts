@@ -77,25 +77,45 @@ export class PlatformShellComponent implements OnInit, OnDestroy {
   }
 
   private loadPlaylistsFor(p: PlatformName): void {
+    console.log('[PlatformShell] Loading playlists for platform:', p);
+    console.log('[PlatformShell] Connected platforms:', this.auth.connectedPlatformNames());
+
     if (p === 'youtube') {
-      if (this.auth.isPlatformConnected('youtube')) {
+      const isConnected = this.auth.isPlatformConnected('youtube');
+      console.log('[PlatformShell] YouTube connected:', isConnected);
+      if (isConnected) {
+        console.log('[PlatformShell] Calling yt.loadPlaylists()');
         this.yt.loadPlaylists();
+      } else {
+        console.warn('[PlatformShell] YouTube not connected - skipping playlist load');
       }
       return;
     }
     if (p === 'spotify') {
-      if (this.auth.isPlatformConnected('spotify')) {
-  try { (this.sp as any).ensureSdkLoaded?.(); } catch {}
+      const isConnected = this.auth.isPlatformConnected('spotify');
+      console.log('[PlatformShell] Spotify connected:', isConnected);
+      if (isConnected) {
+        console.log('[PlatformShell] Calling sp.ensureSdkLoaded() and sp.loadPlaylists()');
+        try { (this.sp as any).ensureSdkLoaded?.(); } catch {}
         this.sp.loadPlaylists?.();
+      } else {
+        console.warn('[PlatformShell] Spotify not connected - skipping playlist load');
       }
       return;
     }
     if (p === 'omniplay') {
+      console.log('[PlatformShell] Omniplay mode - loading both platforms');
       // Load both platforms (if connected) for mixed view
-      if (this.auth.isPlatformConnected('youtube')) {
+      const ytConnected = this.auth.isPlatformConnected('youtube');
+      const spConnected = this.auth.isPlatformConnected('spotify');
+      console.log('[PlatformShell] YouTube connected:', ytConnected, '| Spotify connected:', spConnected);
+
+      if (ytConnected) {
+        console.log('[PlatformShell] Loading YouTube playlists for Omniplay');
         this.yt.loadPlaylists();
       }
-      if (this.auth.isPlatformConnected('spotify')) {
+      if (spConnected) {
+        console.log('[PlatformShell] Loading Spotify playlists for Omniplay');
         try { (this.sp as any).ensureSdkLoaded?.(); } catch {}
         this.sp.loadPlaylists?.();
       }
