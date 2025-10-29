@@ -61,11 +61,12 @@ export class OmniplayService {
   /** Ordered list signal (persistent order after first multi-platform shuffle). */
   private readonly orderedListSig = signal<Song[]>([]);
 
-  /** Public merged songs (keeps old name for UI). Provides persistent ordered list once multi-platform established. */
+  /** Public merged songs (keeps old name for UI). Provides persistent ordered list for single or multi-platform. */
   readonly mergedSongs = computed(() => {
-    const multi = this.currentPlatforms().length > 1;
     const ordered = this.orderedListSig();
-    if (multi && ordered.length) return ordered;
+    // If we have an ordered list (from shuffle), use it regardless of platform count
+    if (ordered.length > 0) return ordered;
+    // Otherwise fall back to raw merged (initial load before any shuffle)
     return this.rawMergedSongs();
   });
 
@@ -141,7 +142,8 @@ export class OmniplayService {
   const merged = this.rawMergedSongs();
       if (!merged.length) return;
       const platforms = Array.from(new Set(merged.map(s => s.platform)));
-      if (platforms.length < 2) return; // wait for multi-platform
+      // Allow single-platform mode (for testing and unified behavior)
+      if (platforms.length < 1) return; // need at least one platform
 
       const ytPlId = this.yt.selectedPlaylist()?.id || null;
       const spPlId = this.sp.selectedPlaylist()?.id || null;
@@ -173,6 +175,9 @@ export class OmniplayService {
       const needInitial = !this.initialMultiCommitDone;
       const needFullReshuffle = needInitial || this.reshuffleRequested;
 
+      // Variable to hold the final ordered list
+      let ordered: Song[];
+
       if (needFullReshuffle) {
         console.log('[OmniPlay] full reshuffle start', {
           reason: {
@@ -183,9 +188,8 @@ export class OmniplayService {
           },
           previousOrderSig: this.lastOrderedSignature || '(none)'
         });
-        // Reset map and assign indices in a NEW shuffled order that differs from last order signature (best effort)
-        this.orderMap.clear();
-        this.nextOrderIndex = 0;
+
+        // Shuffle the merged array
         let attempts = 0;
         let shuffled: Song[] = [];
         let newOrderSig = '';
@@ -195,14 +199,31 @@ export class OmniplayService {
           attempts++;
           if (newOrderSig !== this.lastOrderedSignature || attempts >= 5) break;
         } while (true);
-        shuffled.forEach(song => {
+
+        // Assign sequential indices 0→N to the shuffled array
+        this.orderMap.clear();
+        this.nextOrderIndex = 0;
+        shuffled.forEach((song, idx) => {
           const k = `${(song as any).platform}:${song.id}`;
-          this.orderMap.set(k, this.nextOrderIndex++);
+          this.orderMap.set(k, idx);  // Use idx directly (0, 1, 2, 3...)
         });
+        this.nextOrderIndex = shuffled.length; // Track next available index
+
+        // Use shuffled array directly - it's already in order 0→N!
+        ordered = shuffled;
+
         this.initialMultiCommitDone = true;
         this.reshuffleRequested = false;
         this.membershipSignature = currentMembershipSig;
-        console.log('[OmniPlay] full reshuffle applied', { attempts, newOrderSig });
+        // Don't set lastOrderedSignature yet - let the commit phase handle it
+        const orderPreview = ordered.map((s, idx) => `[${idx}] ${(s as any).platform}:${s.id}`).slice(0, 5);
+        console.log('[OmniPlay] full reshuffle applied', {
+          attempts,
+          size: ordered.length,
+          orderPreview,
+          fullOrder: ordered.map(s => s.name || s.id),
+          newOrderSig
+        });
       } else if (membershipChanged) {
         const withinGrace = (Date.now() - this.lastPlaylistChangeAt) < this.playlistChangeGraceMs;
         if (withinGrace && !this.postChangeReshuffleDone) {
@@ -211,43 +232,72 @@ export class OmniplayService {
             msSinceChange: Date.now() - this.lastPlaylistChangeAt,
             previousOrderSig: this.lastOrderedSignature || '(none)'
           });
+
+          const shuffled = this.shuffle(merged.slice());
           this.orderMap.clear();
           this.nextOrderIndex = 0;
-          const shuffled = this.shuffle(merged.slice());
-          shuffled.forEach(song => {
+          shuffled.forEach((song, idx) => {
             const k = `${(song as any).platform}:${song.id}`;
-            this.orderMap.set(k, this.nextOrderIndex++);
+            this.orderMap.set(k, idx);
           });
+          this.nextOrderIndex = shuffled.length;
+
+          // Use shuffled array directly
+          ordered = shuffled;
+          // Don't set lastOrderedSignature yet - let the commit phase handle it
+
           this.membershipSignature = currentMembershipSig;
           this.postChangeReshuffleDone = true;
-          console.log('[OmniPlay] second-phase reshuffle applied', { size: merged.length });
+          console.log('[OmniPlay] second-phase reshuffle applied', { size: ordered.length });
         } else {
-          // Incremental diff: prune removed, append new
+          // Incremental diff: prune removed, append new (no reshuffle)
           const currentSet = new Set(sortedKeys);
           for (const existing of Array.from(this.orderMap.keys())) {
             if (!currentSet.has(existing)) this.orderMap.delete(existing);
           }
-            for (const k of sortedKeys) {
+          for (const k of sortedKeys) {
             if (!this.orderMap.has(k)) this.orderMap.set(k, this.nextOrderIndex++);
           }
           this.membershipSignature = currentMembershipSig;
-          console.log('[OmniPlay] membership-only update (no reshuffle)', { size: merged.length, withinGrace, postChangeReshuffleDone: this.postChangeReshuffleDone });
+
+          // Sort by orderMap to maintain existing order with new songs appended
+          ordered = merged.slice().sort((a, b) => {
+            const ka = `${(a as any).platform}:${a.id}`;
+            const kb = `${(b as any).platform}:${b.id}`;
+            return (this.orderMap.get(ka)! - this.orderMap.get(kb)!);
+          });
+          // Don't set lastOrderedSignature yet - let the commit phase handle it
+
+          console.log('[OmniPlay] membership-only update (no reshuffle)', {
+            size: merged.length,
+            withinGrace,
+            postChangeReshuffleDone: this.postChangeReshuffleDone
+          });
         }
+      } else {
+        // No changes needed, but we still need to produce ordered list from orderMap
+        ordered = merged.slice().sort((a, b) => {
+          const ka = `${(a as any).platform}:${a.id}`;
+          const kb = `${(b as any).platform}:${b.id}`;
+          return (this.orderMap.get(ka)! - this.orderMap.get(kb)!);
+        });
       }
 
-      // Produce ordered list
-      const ordered = merged.slice().sort((a, b) => {
-        const ka = `${(a as any).platform}:${a.id}`;
-        const kb = `${(b as any).platform}:${b.id}`;
-        return (this.orderMap.get(ka)! - this.orderMap.get(kb)!);
-      });
+      // Check if the order actually changed
       const orderSig = ordered.map(s => `${(s as any).platform}:${s.id}`).join('>');
-      if (orderSig === this.lastOrderedSignature) return; // no visible change
+      if (orderSig === this.lastOrderedSignature) {
+        console.log('[OmniPlay] no change in order - skipping update');
+        return; // no visible change
+      }
+
+      // Update the signature BEFORE publishing to UI
       this.lastOrderedSignature = orderSig;
 
-  // Publish ordered list for UI (before commit so UI reflect same order)
-  this.orderedListSig.set(ordered);
-  const preservedId = this.preserveCurrentTrackId(ordered);
+      // Publish ordered list for UI (before commit so UI reflect same order)
+      this.orderedListSig.set(ordered);
+      console.log('[OmniPlay] UI signal updated with', ordered.length, 'songs');
+
+      const preservedId = this.preserveCurrentTrackId(ordered);
       this.commit(ordered, preservedId, { ytPlId, spPlId, shuffled: needFullReshuffle });
       this.prevCommittedPlatformCount = platforms.length;
     } finally {

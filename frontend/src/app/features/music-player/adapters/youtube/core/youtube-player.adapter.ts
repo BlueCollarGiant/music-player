@@ -54,8 +54,9 @@ export class YouTubePlayerAdapter implements PlayerPort {
     this.playerSig.set(player);
 
     // Start position timer that updates global store
-    this.positionTracker.startTimer(player, (seconds) => {
-      this.stateBridge.updatePosition(seconds);
+    this.positionTracker.startTimer(player, (currentTime, duration) => {
+      this.stateBridge.updatePosition(currentTime);
+      this.stateBridge.updateDuration(duration);
     });
   }
 

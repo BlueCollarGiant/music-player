@@ -3,6 +3,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0; /* Prevent shrinking - maintain fixed width */
 }
 
 .btn-control {

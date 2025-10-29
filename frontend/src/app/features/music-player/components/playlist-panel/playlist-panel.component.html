@@ -39,7 +39,7 @@
               </select>
             </div>
           </div>
-          <button type="button" class="omniplay-reshuffle-btn" (click)="triggerOmniReshuffle()" title="Reshuffle combined order"><span class="text">Shuffle</span></button>
+          <button type="button" class="shuffle-btn" (click)="triggerReshuffle()" title="Reshuffle combined order"><span class="text">Shuffle</span></button>
         } @else {
         <select
           class="playlist-dropdown"
@@ -78,6 +78,8 @@
             <option value="favorites">Favorites</option>
           }
         </select>
+        <!-- Add shuffle button for single-platform views too -->
+        <button type="button" class="shuffle-btn" (click)="triggerReshuffle()" title="Reshuffle playlist"><span class="text">Shuffle</span></button>
         }
       </div>
     </div>

@@ -22,6 +22,13 @@ export class YouTubeStateBridge {
   }
 
   /**
+   * Update the global store's duration
+   */
+  updateDuration(seconds: number): void {
+    this.globalStore.setDuration(seconds);
+  }
+
+  /**
    * Mirror playing state to global store
    */
   mirrorPlayingState(): void {
@@ -48,6 +55,6 @@ export class YouTubeStateBridge {
   syncAll(): void {
     this.mirrorPlayingState();
     this.updatePosition(this.stateManager.getCurrentTime());
-    // Duration is handled by playlist service, not needed here
+    this.updateDuration(this.stateManager.getDuration());
   }
 }

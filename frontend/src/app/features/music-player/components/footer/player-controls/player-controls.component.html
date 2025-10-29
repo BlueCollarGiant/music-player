@@ -15,16 +15,17 @@
     (toggleMute)="onToggleMute()"
   />
 
-  <!-- Progress Bar: Seek functionality -->
+  <!-- Progress Bar: Seek functionality and time display -->
   <app-progress-bar
     [currentTime]="c.current()"
     [duration]="c.duration()"
     (seek)="onSeek($event)"
-  />
-
-  <!-- Time Display: Current time and duration -->
-  <app-time-display
-    [currentTime]="c.currentTimeFmt()"
-    [duration]="c.durationFmt()"
-  />
+  >
+    <!-- Time Display: Current time and duration -->
+    <app-time-display
+      class="time-readout"
+      [currentTime]="c.currentTimeFmt()"
+      [duration]="c.durationFmt()"
+    />
+  </app-progress-bar>
 </div>
