@@ -1,0 +1,70 @@
+@if (platform === 'omniplay') {
+  <div class="omniplay-dropdowns">
+    <div class="dropdown-block">
+      <select class="playlist-dropdown" (change)="onPlaylistChange($event, 'youtube')" [disabled]="youtubeLoading">
+        @if (youtubeLoading) {
+          <option value="">Loading YouTube Playlists...</option>
+        } @else if (youtubePlaylists.length === 0) {
+          <option value="">No YouTube Playlists Found</option>
+        } @else {
+          <option value="">YouTube: Select Playlist</option>
+          @for (playlist of youtubePlaylists; track playlist.id) {
+            <option [value]="playlist.id">{{ playlist.title }}</option>
+          }
+        }
+      </select>
+    </div>
+    <div class="dropdown-block">
+      <select class="playlist-dropdown" (change)="onPlaylistChange($event, 'spotify')" [disabled]="spotifyLoading">
+        @if (spotifyLoading) {
+          <option value="">Loading Spotify Playlists...</option>
+        } @else if (spotifyPlaylists.length === 0) {
+          <option value="">No Spotify Playlists Found</option>
+        } @else {
+          <option value="">Spotify: Select Playlist</option>
+          @for (playlist of spotifyPlaylists; track playlist.id) {
+            <option [value]="playlist.id">{{ playlist.title }}</option>
+          }
+        }
+      </select>
+    </div>
+  </div>
+} @else {
+  <select
+    class="playlist-dropdown"
+    (change)="onPlaylistChange($event)"
+    [disabled]="(platform==='youtube' && youtubeLoading) || (platform==='spotify' && spotifyLoading)">
+    @if (platform === 'youtube') {
+      @if (youtubeLoading) {
+        <option value="">Loading YouTube Playlists...</option>
+      } @else if (youtubePlaylists.length === 0) {
+        <option value="">No YouTube Playlists Found</option>
+      } @else {
+        <option value="">Select YouTube Playlist</option>
+        @for (playlist of youtubePlaylists; track playlist.id) {
+          <option [value]="playlist.id">
+            {{ playlist.title }} ({{ playlist.video_count }} tracks)
+          </option>
+        }
+      }
+    } @else if (platform === 'spotify') {
+      @if (spotifyLoading) {
+        <option value="">Loading Spotify Playlists...</option>
+      } @else if (spotifyPlaylists.length === 0) {
+        <option value="">No Spotify Playlists Found</option>
+      } @else {
+        <option value="">Select Spotify Playlist</option>
+        @for (playlist of spotifyPlaylists; track playlist.id) {
+          <option [value]="playlist.id">
+            {{ playlist.title }} ({{ playlist.video_count }} tracks)
+          </option>
+        }
+      }
+    } @else {
+      <option value="default">Your Sound Starts Here</option>
+      <option value="youtube">YouTube Playlist</option>
+      <option value="spotify">Spotify Playlist</option>
+      <option value="favorites">Favorites</option>
+    }
+  </select>
+}

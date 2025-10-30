@@ -1,0 +1,10 @@
+<div class="items" [attr.data-count]="songCount">
+  @for (song of songs; track song.id) {
+    <app-song-item
+      [song]="song"
+      [isActive]="isActive(song)"
+      [platform]="platform"
+      (songClicked)="onSongClicked($event)">
+    </app-song-item>
+  }
+</div>

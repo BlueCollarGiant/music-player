@@ -1,0 +1,43 @@
+/* === Host Element (transparent wrapper that participates in flex) === */
+app-song-list {
+  display:flex;
+  flex-direction:column;
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+}
+
+/* === Items Container === */
+.items {
+  margin-top:1rem;
+  display:flex;
+  min-height:0;
+  flex:1 1 auto;
+  flex-direction:column;
+  gap:.75rem;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:.5rem;
+  padding-left:.25rem;
+  transition:.2s ease-in-out;
+  scroll-behavior:smooth;
+  scrollbar-width:none;          /* Firefox */
+  -ms-overflow-style:none;       /* IE/Edge (legacy) */
+}
+
+/* === Scrollbar === */
+.items::-webkit-scrollbar {
+  width:0;
+  height:0;
+}
+
+/* === Mobile Adjustments === */
+@media (max-width:48rem) {
+  .items {
+    margin-top:1rem;
+    gap:.75rem;
+    padding-right:.5rem;
+    padding-left:.25rem;
+    max-height:60vh;
+  }
+}

@@ -1,0 +1,98 @@
+/* === Host Element (ensures proper flex layout) === */
+:host {
+  display:block;
+  flex-shrink:0;
+}
+
+/* === Header Layout === */
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:1rem;
+  flex-shrink:0;
+}
+
+/* === Playlist Selector Container === */
+.playlist-selector {
+  min-width: 12.5rem;
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:stretch;
+  gap:.75rem;
+}
+.playlist-selector > app-playlist-selector { flex:1 1 auto; display: contents; }
+.playlist-selector > .shuffle-btn { margin-left:.25rem; margin-top:0; flex:0 0 auto; align-self:flex-start; }
+
+/* === Shuffle Button === */
+.shuffle-btn {
+  position:relative;
+  display:inline-flex;
+  align-items:stretch;
+  justify-content:center;
+  padding:.1875rem;
+  border:none;
+  background:linear-gradient(144deg,#AF40FF,#5B42F3 50%,#00DDEB);
+  border-radius:.5rem;
+  box-shadow:rgba(151,65,252,.3) 0 .375rem 1.125rem -.25rem, rgba(0,0,0,.55) 0 .25rem .75rem;
+  cursor:pointer;
+  -webkit-user-select:none;
+  user-select:none;
+  text-decoration:none;
+  line-height:1;
+  min-width:12.5rem;
+  flex:0 0 12.5rem;
+  height:auto;
+  transition:transform .18s ease, box-shadow .24s ease, filter .3s ease;
+}
+.shuffle-btn .text {
+  background:rgba(5,6,45,.92);
+  backdrop-filter:blur(.125rem) saturate(140%);
+  padding:.25rem .875rem;
+  border-radius:.375rem;
+  font-size:.875rem;
+  font-weight:600;
+  font-family:inherit;
+  letter-spacing:.03125rem;
+  text-transform:uppercase;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  position:relative;
+  overflow:hidden;
+  width:100%;
+  transition:background .32s ease, letter-spacing .26s ease;
+  min-height:1.875rem;
+  box-sizing:border-box;
+  text-align:center;
+}
+.shuffle-btn .text::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 25% 25%, rgba(255,255,255,.12), transparent 60%);
+  opacity:0;
+  transition:opacity .4s ease;
+  pointer-events:none;
+}
+.shuffle-btn:hover { transform:translateY(-.1875rem); }
+.shuffle-btn:hover .text { background:rgba(5,6,60,.4); letter-spacing:.09375rem; }
+.shuffle-btn:hover .text::before { opacity:1; }
+.shuffle-btn:active { transform:translateY(-.0625rem) scale(.985); }
+.shuffle-btn:focus-visible { outline:.125rem solid rgba(255,255,255,.6); outline-offset:.125rem; }
+.shuffle-btn:active .text { letter-spacing:.06875rem; }
+.shuffle-btn:disabled { filter:grayscale(.5) brightness(.8); cursor:not-allowed; transform:none; }
+
+/* === Responsive === */
+@media (max-width:43.75rem) { /* 700px */
+  .playlist-selector { flex-direction:column; align-items:stretch; }
+  .playlist-selector > app-playlist-selector { width:100%; }
+  .playlist-selector > .shuffle-btn { width:100%; margin-left:0; margin-top:.625rem; align-self:stretch; min-width:0; }
+  .shuffle-btn .text { justify-content:center; }
+}
+
+@media (min-width:48rem) {
+  .shuffle-btn .text { font-size:.9375rem; }
+}

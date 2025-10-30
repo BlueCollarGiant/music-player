@@ -1,0 +1,21 @@
+<div class="header">
+  <div class="info">
+    <div class="playlist-selector">
+      <app-playlist-selector
+        [platform]="platform"
+        [youtubePlaylists]="youtubePlaylists"
+        [spotifyPlaylists]="spotifyPlaylists"
+        [youtubeLoading]="youtubeLoading"
+        [spotifyLoading]="spotifyLoading"
+        (playlistChanged)="onPlaylistChanged($event)">
+      </app-playlist-selector>
+      <button
+        type="button"
+        class="shuffle-btn"
+        (click)="onShuffleClick()"
+        [title]="platform === 'omniplay' ? 'Reshuffle combined order' : 'Reshuffle playlist'">
+        <span class="text">Shuffle</span>
+      </button>
+    </div>
+  </div>
+</div>

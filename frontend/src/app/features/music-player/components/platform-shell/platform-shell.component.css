@@ -7,6 +7,7 @@
 .content {
   display: flex;
   flex: 1;
+  min-height: 0; /* Critical for flex scrolling */
   gap: 1.5rem;
   padding: 1rem;
   background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(20,20,20,0.6) 100%);
@@ -15,18 +16,20 @@
   border: 1px solid rgba(255,255,255,0.1);
   height: calc(100vh - 200px); /* Account for header and footer */
   position: relative;
+  overflow: hidden; /* Prevent content from overflowing */
 }
 
 app-playlist-panel {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0; /* Critical for flex scrolling */
   background: rgba(255,255,255,0.05);
   border-radius: 0.75rem;
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.1);
-  /* Allow internal scrolling inside nested flex children */
-  overflow: visible;
+  /* Changed from visible to hidden to prevent overflow */
+  overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease, flex 0.3s ease;
   min-width: 300px;
   max-width: none;

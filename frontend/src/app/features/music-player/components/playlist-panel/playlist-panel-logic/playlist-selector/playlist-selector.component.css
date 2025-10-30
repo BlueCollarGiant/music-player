@@ -1,0 +1,27 @@
+/* === Dropdown Styles === */
+.playlist-dropdown {
+  background:#121225;
+  border:.0625rem solid #6c6cff;
+  border-radius:.375rem;
+  padding:.5rem 1rem;
+  color:#fff;
+  font-size:.875rem;
+  cursor:pointer;
+  width:100%;
+  outline:0;
+  transition:.2s ease-in-out;
+  box-shadow:0 .125rem .25rem rgba(0,0,0,.4);
+}
+.playlist-dropdown:hover { background:#1c1c35; }
+.playlist-dropdown:focus { border-color:#60a5fa; box-shadow:0 0 0 .125rem rgba(96,165,250,.2); }
+.playlist-dropdown option { background:#121225; color:#fff; padding:.5rem; }
+.playlist-dropdown:disabled { cursor:not-allowed; opacity:.6; filter:grayscale(.15); }
+
+/* === Omniplay Dropdowns Layout === */
+.omniplay-dropdowns { display:flex; gap:.75rem; align-items:stretch; width:100%; }
+.omniplay-dropdowns .dropdown-block { flex:1 1 0; }
+.omniplay-dropdowns .playlist-dropdown { width:100%; }
+
+@media (max-width:40rem) { /* 640px */
+  .omniplay-dropdowns { flex-direction:column; gap:.5rem; }
+}
