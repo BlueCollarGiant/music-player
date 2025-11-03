@@ -1,244 +1,25 @@
-/* ===== PLAYER CONTROLS (BOTTOM) ===== */
+/* ===== PLAYER CONTROLS CONTAINER (LAYOUT ONLY) ===== */
 .controls {
-  margin: 0;
+  margin: 0 auto;
   background-image: linear-gradient(#6c6cff, #04f8f8);
   opacity: 0.75;
   border-radius: 0.5rem;
   padding: 1rem;
   display: flex;
   align-items: center;
-  transition: all 0.3s ease;
-}
-
-.playback {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.playback .thumbnail {
-  position: relative;
-  width: 3.5rem;
-  height: 3.5rem;
-  background: linear-gradient(270deg,
-    #f7b7a3,  /* Soft Coral */
-    #ffe3a3,  /* Pastel Yellow */
-    #e3f7ca,  /* Mint */
-    #b7e3f7,  /* Sky Blue */
-    #c8c5f7,  /* Lavender */
-    #e3caf7,  /* Pale Purple */
-    #f7b7d9,  /* Pink Blush */
-    #f7b7a3   /* Loop back */
-  );
-  background-size: 1800% 1800%;
-  animation: rainbow-bg 18s ease infinite;
-  border-radius: 0.375rem;
-  border: 2px solid rgba(10, 16, 41, 0.25);
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.btn-control {
-  background: rgba(255, 255, 255, 0.1); /* Glass morphism background */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Glass border */
-  border-radius: 0.375rem; /* Rounded corners */
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px); /* Glass effect */
-}
-
-.btn-control:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(59, 130, 246, 0.5);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.playback .play-pause {
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-.progress {
-  flex: 1 1 50%; /* expand to fill available space */
-  margin: 0 1rem;
+  width: calc(100% - 1rem);
   max-width: none;
+  box-sizing: border-box;
+  gap: 1.5rem;
+  transition: all 0.3s ease;
 }
 
-.progress .bar {
-  width: 100%;
-  height: 0.375rem;
-  background-image: linear-gradient(#0d0d46, #27023c);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 9999px;
-  overflow: hidden;
-  backdrop-filter: blur(5px);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.progress .bar:hover {
-  height: 0.5rem;
-  background-color: rgba(255,255,255,0.25);
-}
-
-.progress .fill {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(270deg,
-    #f7b7a3,  /* Soft Coral */
-    #ffe3a3,  /* Pastel Yellow */
-    #e3f7ca,  /* Mint */
-    #b7e3f7,  /* Sky Blue */
-    #c8c5f7,  /* Lavender */
-    #e3caf7,  /* Pale Purple */
-    #f7b7d9,  /* Pink Blush */
-    #f7b7a3   /* Loop back */
-  );
-  background-size: 1800% 1800%;
-  animation: rainbow-bg 18s ease infinite;
-  border-radius: 9999px;
-  transition: width 0.3s ease;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
-}
-
-.time {
-  color: white;
-}
-
-/* ===== VOLUME ===== */
-.volume {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.volume .volbar {
-  width: 140px;
-  height: 0.375rem;
-  background-image: linear-gradient(#0d0d46, #27023c);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 9999px;
-  overflow: hidden;
-  backdrop-filter: blur(5px);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: none; /* allow smooth touch dragging without page scroll */
-}
-.volume .volbar:hover { height: 0.5rem; }
-.volume .volbar .fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(135deg,#60a5fa,#34d399);
-  border-radius: 9999px;
-  transition: width 0.2s ease;
-  box-shadow: 0 0 6px rgba(59,130,246,0.35);
-}
-
-/* Floating Music Notes dont touch i finally got this to work */
-.playback .thumbnail::before,
-.playback .thumbnail::after {
-  content: '🎵';
-  position: absolute;
-  bottom: -1rem;
-  opacity: 0;
-  font-size: 1rem;
-  animation: floatNote 3s infinite ease-in-out;
-  pointer-events: none;
-}
-
-.playback .thumbnail::before {
-  left: 5px;
-  animation-delay: 0s;
-}
-
-.playback .thumbnail::after {
-  right: 5px;
-  animation-delay: 1.5s;
-}
-
-@keyframes floatNote {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-3rem);
-    opacity: 0;
-  }
-}
-
-/* ===== MOBILE RESPONSIVE CONTROLS ===== */
+/* ===== MOBILE RESPONSIVE LAYOUT ===== */
 @media (max-width: 768px) {
   .controls {
     flex-direction: column; /* Stack elements vertically */
     gap: 1rem; /* Restored spacing */
     padding: 1rem; /* Restored padding */
     align-items: center;
-  }
-  
-  .playback {
-    gap: 1.5rem; /* Good button spacing */
-    justify-content: center;
-    flex-wrap: wrap; /* allow volume group to wrap beneath */
-  }
-  
-  .playback .thumbnail {
-    width: 3rem; /* Medium size thumbnail */
-    height: 3rem;
-  }
-  
-  .btn-control {
-    padding: 0.75rem; /* Comfortable button padding */
-  }
-  
-  .playback .play-pause {
-    width: 3rem; /* Larger play button for mobile */
-    height: 3rem;
-  }
-  
-  .progress {
-    margin: 0; /* No margins */
-    width: 100%; /* Full width */
-    max-width: none; /* Allow full width on mobile */
-  }
-  
-  .time {
-    font-size: 1rem; /* Clear readable time */
-    text-align: center;
-  }
-  
-  /* Move volume group below transport controls and keep it centered */
-  .playback > .volume {
-    flex: 1 1 100%;
-    order: 2;
-    display: flex;
-    justify-content: center;
-    gap: 0.6rem;
-    margin-top: .5rem;
-  }
-  .volume .volbar { width: min(320px, 70vw); }
-
-  /* Disable hover effects on mobile */
-  .btn-control:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    transform: none !important;
-    box-shadow: none !important;
   }
 }

@@ -1,139 +1,152 @@
 /* =============================================================
-   Playlist Panel Styles (REM + Responsive Breakpoints)
-   Base scale: 1rem = 16px. All former px units converted.
-   Breakpoints (mobile-first):
-     --xs: 30rem (480px)
-     --sm: 40rem (640px)
-     --md: 48rem (768px)
-     --lg: 64rem (1024px)
-     --xl: 80rem (1280px)
-     --xxl: 90rem (1440px)
+   Playlist Panel Styles - Parent Container Only
+   Child component styles are distributed to:
+   - playlist-selector: Dropdown UI styles
+   - playlist-panel-header: Header layout + shuffle button styles
+   - song-item: Individual song item styles + animations
+   - song-list: Items container + scrollbar styles
    ============================================================= */
 
-/* === Layout: selector + dropdown cluster === */
-.playlist-selector { min-width: 12.5rem; }
-
-.omniplay-dropdowns { display:flex; gap:.75rem; align-items:stretch; width:100%; }
-.omniplay-dropdowns .dropdown-block { flex:1 1 0; }
-.omniplay-dropdowns .playlist-dropdown { width:100%; }
-
-.playlist-selector { display:flex; flex-wrap:nowrap; align-items:stretch; gap:.75rem; }
-.playlist-selector > .omniplay-dropdowns { flex:1 1 auto; width:auto; }
-.playlist-selector > .omniplay-reshuffle-btn { margin-left:.25rem; margin-top:0; flex:0 0 auto; align-self:flex-start; }
-
-@media (max-width:43.75rem) { /* 700px */
-  .playlist-selector { flex-direction:column; align-items:stretch; }
-  .playlist-selector > .omniplay-dropdowns { width:100%; }
-  .playlist-selector > .omniplay-reshuffle-btn { width:100%; margin-left:0; margin-top:.625rem; align-self:stretch; min-width:0; }
-  .omniplay-reshuffle-btn .text { justify-content:center; }
-}
-@media (max-width:40rem) { /* 640px */
-  .omniplay-dropdowns { flex-direction:column; gap:.5rem; }
+/* === Song List Container (Parent Container) === */
+.song-list {
+  flex:1;
+  height:100%;
+  min-height:0;
+  box-sizing:border-box;
+  background:linear-gradient(180deg,#6c6cff 0%, #04f8f8 95%);
+  border:.0625rem solid rgba(255,255,255,.15);
+  opacity:.9;
+  border-radius:.875rem;
+  padding:1rem;
+  display:flex;
+  flex-direction:column;
+  transition:.2s ease-in-out;
+  backdrop-filter:blur(.125rem);
 }
 
-/* === Dropdown === */
-.playlist-dropdown { background:#121225; border:.0625rem solid #6c6cff; border-radius:.375rem; padding:.5rem 1rem; color:#fff; font-size:.875rem; cursor:pointer; width:100%; outline:0; transition:.2s ease-in-out; box-shadow:0 .125rem .25rem rgba(0,0,0,.4); }
-.playlist-dropdown:hover { background:#1c1c35; }
-.playlist-dropdown:focus { border-color:#60a5fa; box-shadow:0 0 0 .125rem rgba(96,165,250,.2); }
-.playlist-dropdown option { background:#121225; color:#fff; padding:.5rem; }
-.playlist-dropdown:disabled { cursor:not-allowed; opacity:.6; filter:grayscale(.15); }
+/* === Empty State === */
+.song-list.empty {
+  flex:1;
+  height:100%;
+  min-height:0;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
 
-/* === Reshuffle Button === */
-.omniplay-reshuffle-btn { position:relative; display:inline-flex; align-items:stretch; justify-content:center; padding:.1875rem; border:none; background:linear-gradient(144deg,#AF40FF,#5B42F3 50%,#00DDEB); border-radius:.5rem; box-shadow:rgba(151,65,252,.3) 0 .375rem 1.125rem -.25rem, rgba(0,0,0,.55) 0 .25rem .75rem; cursor:pointer; -webkit-user-select:none; user-select:none; text-decoration:none; line-height:1; min-width:12.5rem; flex:0 0 12.5rem; height:auto; transition:transform .18s ease, box-shadow .24s ease, filter .3s ease; }
-.omniplay-reshuffle-btn .text { background:rgba(5,6,45,.92); backdrop-filter:blur(.125rem) saturate(140%); padding:.25rem .875rem; border-radius:.375rem; font-size:.875rem; font-weight:600; font-family:inherit; letter-spacing:.03125rem; text-transform:uppercase; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; position:relative; overflow:hidden; width:100%; transition:background .32s ease, letter-spacing .26s ease; min-height:1.875rem; box-sizing:border-box; text-align:center; }
-.omniplay-reshuffle-btn .text::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 25% 25%, rgba(255,255,255,.12), transparent 60%); opacity:0; transition:opacity .4s ease; pointer-events:none; }
-.omniplay-reshuffle-btn:hover { transform:translateY(-.1875rem); }
-.omniplay-reshuffle-btn:hover .text { background:rgba(5,6,60,.4); letter-spacing:.09375rem; }
-.omniplay-reshuffle-btn:hover .text::before { opacity:1; }
-.omniplay-reshuffle-btn:active { transform:translateY(-.0625rem) scale(.985); }
-.omniplay-reshuffle-btn:focus-visible { outline:.125rem solid rgba(255,255,255,.6); outline-offset:.125rem; }
-.omniplay-reshuffle-btn:active .text { letter-spacing:.06875rem; }
-.omniplay-reshuffle-btn:disabled { filter:grayscale(.5) brightness(.8); cursor:not-allowed; transform:none; }
-@media (min-width:48rem) { .omniplay-reshuffle-btn .text { font-size:.9375rem; } }
+.song-list.empty .items {
+  flex:1;
+  width:100%;
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
 
-/* === Song List Container === */
-.song-list { flex:1; height:100%; min-height:0; box-sizing:border-box; background:linear-gradient(180deg,#6c6cff 0%, #04f8f8 95%); border:.0625rem solid rgba(255,255,255,.15); opacity:.9; border-radius:.875rem; padding:1rem; display:flex; flex-direction:column; transition:.2s ease-in-out; backdrop-filter:blur(.125rem); }
-.song-list.empty { flex:1; height:100%; min-height:0; justify-content:center; align-items:center; text-align:center; }
-.song-list.small { min-height:15.625rem; }
-.song-list.medium { min-height:25rem; }
-.song-list.large { min-height:31.25rem; height:100%; }
+.song-list.empty .items::before {
+  content:"🎵 Choose your playlist to get started!";
+  color:#94a3b8;
+  font-size:1.125rem;
+  text-align:center;
+  padding:2rem;
+  border:.125rem dashed rgba(255,255,255,.3);
+  border-radius:.875rem;
+  background:rgba(255,255,255,.05);
+}
 
-/* Header */
-.song-list .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-shrink:0; }
+/* === Size Variants === */
+/* Removed min-height to allow proper flex scrolling - parent container controls size */
+.song-list.small { }
+.song-list.medium { }
+.song-list.large { height:100%; }
 
-/* Items container */
-.items { margin-top:1rem; display:flex; min-height:0; flex-direction:column; gap:.75rem; overflow-y:auto; padding-right:.5rem; padding-left:.25rem; flex:1 1 auto; transition:.2s ease-in-out; scroll-behavior:smooth; }
+.song-list.small .items,
+.song-list.medium .items,
+.song-list.large .items {
+  gap:.75rem;
+  max-height:none;
+  overflow-y:auto;
+}
 
-/* Empty state */
-.song-list.empty .items { flex:1; width:100%; height:100%; display:flex; justify-content:center; align-items:center; overflow:hidden; }
-.song-list.empty .items::before { content:"🎵 Choose your playlist to get started!"; color:#94a3b8; font-size:1.125rem; text-align:center; padding:2rem; border:.125rem dashed rgba(255,255,255,.3); border-radius:.875rem; background:rgba(255,255,255,.05); }
+.song-list.large .items {
+  padding-right:1.5rem;
+  padding-left:.5rem;
+}
 
-/* Size variants */
-.song-list.small .items, .song-list.medium .items, .song-list.large .items { gap:.75rem; max-height:none; overflow-y:auto; }
-.song-list.large .items { padding-right:1.5rem; padding-left:.5rem; }
+.song-list.empty .items {
+  overflow-y:auto !important;
+}
 
-/* Item base */
-.item { display:flex; width:100%; justify-content:space-between; border:.0625rem solid rgba(255,255,255,.12); align-items:center; border-radius:.375rem; padding:.625rem .9375rem; min-height:4rem; box-sizing:border-box; transition:.2s ease-in-out; margin:0; background:linear-gradient(90deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 120%); color:#fff; }
-.item.clickable { cursor:pointer; }
-.item.clickable:hover { border-color:rgba(255,255,255,.28); background:linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(0,0,0,0) 120%); transform:translateY(-.0625rem); }
-.item.placeholder { opacity:.7; border-style:dashed; border-color:rgba(255,255,255,.3); background:rgba(255,255,255,.05); cursor:default; }
-.item.active { background:linear-gradient(90deg,rgba(255,255,255,.18) 0%, rgba(0,0,0,0) 120%); border:.125rem solid #fff; box-shadow:0 0 0 .0625rem #fff, 0 0 .75rem rgba(96,165,250,.5); transform:translateY(-.0625rem); color:#fff; }
+/* === Item Size Adjustments (affects child components) === */
+.song-list.small .item {
+  padding:.625rem .9375rem;
+  min-height:4.5rem;
+  border-width:.125rem;
+}
 
-/* Thumbnail */
-.thumbnail { position:relative; width:2.5rem; height:2.5rem; background:#181826; border-radius:.75rem; overflow:hidden; display:flex; align-items:center; justify-content:center; box-shadow:inset 0 0 0 .0625rem rgba(255,255,255,.15); }
-.youtube-icon, .spotify-icon { width:100%; height:100%; object-fit:cover; pointer-events:none; filter:drop-shadow(0 .0625rem .125rem rgba(0,0,0,.4)); }
-.spotify-icon { object-fit:contain; width:78%; height:78%; padding:.125rem; margin:0 auto; display:block; background:transparent; }
+.song-list.medium .item {
+  padding:.625rem .9375rem;
+  min-height:4rem;
+}
 
-/* Active thumbnail animated gradient */
-.item.active .thumbnail { background:linear-gradient(270deg,#f7b7a3,#ffe3a3,#e3f7ca,#b7e3f7,#c8c5f7,#e3caf7,#f7b7d9,#f7b7a3); background-size:1800% 1800%; animation:rainbow-bg 18s ease infinite; }
-@keyframes rainbow-bg { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+.song-list.large .item {
+  padding:.625rem .9375rem;
+  min-height:3.5rem;
+  font-size:.9rem;
+}
 
-/* Floating music notes */
-.item.active .thumbnail::before, .item.active .thumbnail::after { content:'🎵'; position:absolute; bottom:-1rem; opacity:0; font-size:1rem; animation:floatNote 3s infinite ease-in-out; pointer-events:none; }
-.item.active .thumbnail::before { left:.3125rem; animation-delay:0s; }
-.item.active .thumbnail::after { right:.3125rem; animation-delay:1.5s; }
-@keyframes floatNote { 0% { transform:translateY(0); opacity:0; } 20% { opacity:1; } 80% { opacity:1; } 100% { transform:translateY(-3rem); opacity:0; } }
+/* === Item Hover Effects (affects child components) === */
+.song-list.small .item:hover {
+  transform:translateY(-.125rem);
+  box-shadow:0 .25rem .75rem rgba(0,0,0,.5);
+}
 
-/* Item info */
-.item .info { display:flex; align-items:center; gap:.75rem; flex:1; min-width:0; }
-.item .info span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0; }
+.song-list.medium .item:hover {
+  transform:translateY(-.0625rem);
+  box-shadow:0 .125rem .25rem rgba(0,0,0,.4);
+}
 
-/* Size adjustments */
-.song-list.small .item { padding:.625rem .9375rem; min-height:4.5rem; border-width:.125rem; }
-.song-list.medium .item { padding:.625rem .9375rem; min-height:4rem; }
-.song-list.large .item { padding:.625rem .9375rem; min-height:3.5rem; font-size:.9rem; }
+.song-list.large .item:hover {
+  background:linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(0,0,0,0) 120%);
+}
 
-/* Hover effects */
-.song-list.small .item:hover { transform:translateY(-.125rem); box-shadow:0 .25rem .75rem rgba(0,0,0,.5); }
-.song-list.medium .item:hover { transform:translateY(-.0625rem); box-shadow:0 .125rem .25rem rgba(0,0,0,.4); }
-.song-list.large .item:hover { background:linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(0,0,0,0) 120%); }
-
-/* Scrollbar */
-.items::-webkit-scrollbar { width:.75rem; }
-.items::-webkit-scrollbar-track { background:rgba(255,255,255,.08); border-radius:.375rem; }
-.items::-webkit-scrollbar-thumb { background:rgba(255,255,255,.30); border-radius:.375rem; }
-.items::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,.45); }
-
-/* Mobile adjustments (<= 48rem) */
+/* === Mobile Responsive === */
 @media (max-width:48rem) {
-  .song-list { padding:1rem; min-height:auto !important; }
-  .song-list.empty { min-height:13.75rem; height:100%; }
+  .song-list {
+    padding:1rem;
+    min-height:auto !important;
+  }
+
+  .song-list.empty {
+    min-height:13.75rem;
+    height:100%;
+  }
+
   .song-list.small { min-height:17.5rem; }
   .song-list.medium { min-height:21.875rem; }
-  .song-list.large { min-height:25rem; max-height:65vh; }
-  .items { margin-top:1rem; gap:.75rem; padding-right:.5rem; padding-left:.25rem; max-height:60vh; }
-  .song-list.empty .items::before { content:"🎵 Choose your playlist to get started!"; font-size:1rem; padding:2rem 1rem; margin:.5rem 0; }
-  .item { padding:.625rem .9375rem; min-height:4rem; font-size:1rem; color:#fff; width:100%; margin:0; }
-  .song-list.small .item { padding:.625rem .9375rem; min-height:4.5rem; }
-  .item:hover { transform:none !important; box-shadow:none !important; background-color:initial !important; }
-  .item.active { padding:.625rem .9375rem; border-width:.125rem; background:linear-gradient(90deg,rgba(255,255,255,.18) 0%, rgba(0,0,0,0) 120%) !important; box-shadow:0 0 0 .0625rem #fff, 0 0 .75rem rgba(96,165,250,.5) !important; color:#fff !important; margin:0 !important; }
-  .item.active:hover { background-color:rgba(255,255,255,.05) !important; box-shadow:0 0 .75rem rgba(96,165,250,.5) !important; margin:0 !important; }
-  .thumbnail { width:2.5rem; height:2.5rem; }
+  .song-list.large {
+    min-height:25rem;
+    max-height:65vh;
+  }
+
+  .song-list.empty .items::before {
+    content:"🎵 Choose your playlist to get started!";
+    font-size:1rem;
+    padding:2rem 1rem;
+    margin:.5rem 0;
+  }
+
+  .song-list.small .item {
+    padding:.625rem .9375rem;
+    min-height:4.5rem;
+  }
 }
 
-/* Layout overrides (inner scroll) */
-:host { display:block; height:100%; min-height:0; overflow:visible; }
-.song-list { display:flex; flex-direction:column; height:100%; min-height:0; }
-.items { flex:1 1 auto; min-height:0; overflow-y:auto; }
-.song-list.small .items, .song-list.medium .items, .song-list.large .items { overflow-y:auto; max-height:none; }
-.song-list.empty .items { overflow-y:auto !important; }
+/* === Layout Overrides (inner scroll) === */
+:host {
+  display:block;
+  height:100%;
+  min-height:0;
+  overflow:visible;
+}

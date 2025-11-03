@@ -1,0 +1,10 @@
+<div class="progress">
+  <div class="bar" (click)="onProgressBarClick($event)" style="cursor: pointer;">
+    <div
+      class="fill"
+      [style.width.%]="getProgressPercentage()">
+    </div>
+  </div>
+</div>
+
+<ng-content />

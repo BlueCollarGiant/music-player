@@ -19,9 +19,9 @@ export class YouTubePositionTracker {
   /**
    * Start polling the YouTube player for position updates
    * @param player The YouTube IFrame Player instance
-   * @param onUpdate Callback invoked with updated position in seconds
+   * @param onUpdate Callback invoked with updated position and duration in seconds
    */
-  startTimer(player: YouTubePlayer | null, onUpdate: (seconds: number) => void): void {
+  startTimer(player: YouTubePlayer | null, onUpdate: (currentTime: number, duration: number) => void): void {
     this.stopTimer();
 
     if (!player) return;
@@ -36,7 +36,7 @@ export class YouTubePositionTracker {
         this.stateManager.setCurrentTime(currentTime);
         this.stateManager.setDuration(duration);
 
-        onUpdate(currentTime);
+        onUpdate(currentTime, duration);
       } catch (e) {
         console.warn('[YouTubePositionTracker] Failed to get current time', e);
       }

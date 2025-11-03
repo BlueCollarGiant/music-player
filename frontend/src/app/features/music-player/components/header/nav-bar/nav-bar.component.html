@@ -37,7 +37,7 @@
 
             <!-- Google OAuth (native POST) -->
             <form [attr.action]="environment.apiUrl + '/auth/google_oauth2'" method="post" target="_self" class="inline-form">
-              <button type="submit" class="auth-btn oauth-btn google-image-btn" aria-label="Login with Google">
+              <button type="submit" class="auth-btn oauth-btn google-image-btn" aria-label="Login with Google" (click)="captureReturnUrl()">
                 <img src="assets/images/web_dark_sq_SU@4x.png" alt="Sign in with Google" class="google-login-img" />
               </button>
             </form>
@@ -60,7 +60,7 @@
           <!-- YouTube connect/disconnect -->
           @if (!isPlatformConnected('youtube')) {
           <form [attr.action]="environment.apiUrl + '/auth/youtube'" method="post" target="_self" class="inline-form">
-            <button type="submit" class="platform-btn youtube-btn" aria-label="Connect YouTube">
+            <button type="submit" class="platform-btn youtube-btn" aria-label="Connect YouTube" (click)="captureReturnUrl()">
               <img src="assets/images/yt_icon_red_digital.png" alt="YouTube" class="yt-small-icon" />
               Connect YouTube
             </button>
@@ -76,7 +76,7 @@
           <!-- Spotify connect/disconnect -->
           @if (!isPlatformConnected('spotify')) {
           <form [attr.action]="environment.apiUrl + '/auth/spotify'" method="post" target="_self" class="inline-form">
-            <button type="submit" class="platform-btn spotify-btn" aria-label="Connect Spotify">
+            <button type="submit" class="platform-btn spotify-btn" aria-label="Connect Spotify" (click)="captureReturnUrl()">
               <img src="assets/images/Spotify_Primary_Logo_RGB_Green.png" alt="Spotify" class="spotify-small-icon" />
               Connect Spotify
             </button>

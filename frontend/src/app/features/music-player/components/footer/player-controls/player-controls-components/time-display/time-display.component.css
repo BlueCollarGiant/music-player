@@ -1,0 +1,30 @@
+/* ===== TIME DISPLAY ===== */
+:host {
+  display: flex;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.time {
+  color: white;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  white-space: nowrap; /* Prevent wrapping */
+  min-width: 90px;
+  text-align: right;
+  user-select: none; /* Prevent text selection */
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .time {
+    font-size: 1rem; /* Clear readable time */
+    text-align: center;
+    min-width: auto;
+  }
+
+  :host {
+    margin-left: 0;
+    justify-content: center;
+  }
+}
