@@ -12,7 +12,17 @@
       "Bash(mkdir:*)",
       "Bash(find:*)",
       "Bash(npm run build:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Read(//mnt/c/Documents and Settings/boop boop/Documents/GitHub/music-player/backend/config/**)",
+      "Bash(npm install:*)",
+      "Bash(node -e:*)",
+      "Bash(npx ng serve:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(mongod:*)",
+      "Bash(mongosh:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
