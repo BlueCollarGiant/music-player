@@ -16,6 +16,17 @@
         [title]="platform === 'omniplay' ? 'Reshuffle combined order' : 'Reshuffle playlist'">
         <span class="text">Shuffle</span>
       </button>
+      @if (platform === 'local') {
+        <label class="shuffle-btn" title="Import audio files" style="cursor:pointer">
+          <span class="text">+ Import</span>
+          <input
+            type="file"
+            accept="audio/*"
+            multiple
+            style="display:none"
+            (change)="onImportChange($event)">
+        </label>
+      }
     </div>
   </div>
 </div>

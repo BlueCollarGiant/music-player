@@ -12,7 +12,7 @@ import { PlaylistSelectorComponent, PlaylistOption, PlaylistChangeEvent } from '
 })
 export class PlaylistPanelHeaderComponent {
   // Inputs - following ISP (only what this component needs)
-  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' = 'youtube';
+  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local' = 'youtube';
   @Input() youtubePlaylists: PlaylistOption[] = [];
   @Input() spotifyPlaylists: PlaylistOption[] = [];
   @Input() youtubeLoading: boolean = false;
@@ -21,6 +21,7 @@ export class PlaylistPanelHeaderComponent {
   // Outputs - following DIP (depend on abstraction, not implementation)
   @Output() playlistChanged = new EventEmitter<PlaylistChangeEvent>();
   @Output() shuffleTriggered = new EventEmitter<void>();
+  @Output() importTriggered = new EventEmitter<FileList>();
 
   // Event delegation - pure passthrough (SRP: composition only)
   onPlaylistChanged(event: PlaylistChangeEvent): void {
@@ -29,5 +30,14 @@ export class PlaylistPanelHeaderComponent {
 
   onShuffleClick(): void {
     this.shuffleTriggered.emit();
+  }
+
+  onImportChange(event: Event): void {
+    const files = (event.target as HTMLInputElement).files;
+    if (files && files.length > 0) {
+      this.importTriggered.emit(files);
+      // Reset input so the same files can be re-imported if needed
+      (event.target as HTMLInputElement).value = '';
+    }
   }
 }

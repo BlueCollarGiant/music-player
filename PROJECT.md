@@ -110,16 +110,20 @@ OmniPlay is a self-custody music player that puts the user's local library first
 ```
 core/
 ├── auth/                  # Firebase Auth, OAuth, guards, interceptor
-├── playback/              # PlaybackStateStore, PlayerPort, PlaylistInstance, AdapterRegistry
-└── library/ (planned)     # LocalLibraryService, MetadataExtractor, StorageProvider
+└── playback/              # PlaybackStateStore, PlayerPort, PlaylistInstance, AdapterRegistry
 
 features/music-player/
 ├── adapters/
 │   ├── youtube/           # YouTubePlayerAdapter (PlayerPort impl)
-│   ├── spotify/           # SpotifyPlayerAdapter (PlayerPort impl)
-│   └── local/ (planned)   # LocalPlayerAdapter (PlayerPort impl)
+│   └── spotify/           # SpotifyPlayerAdapter (PlayerPort impl)
 ├── components/            # Platform shell, playlist panel, right panel, player controls
 └── services/              # YouTube, Spotify, Omniplay, PlaylistLogic
+
+features/local/            # Owns all local playback and library state
+├── adapters/              # LocalPlayerAdapter (PlayerPort impl) — wraps HTML5 <audio>
+└── services/              # LocalLibraryService (IndexedDB CRUD + tracks signal)
+                           # MetadataExtractorService (ID3/Vorbis tag parsing)
+                           # Depends only on core/playback and shared/models
 
 shared/models/             # Song interface (unified track model)
 ```
@@ -426,16 +430,16 @@ These are acknowledged, scoped out, and deferred:
 
 | File | Purpose |
 |------|---------|
-| `frontend/src/app/features/music-player/adapters/local/index.ts` | Barrel export |
-| `frontend/src/app/features/music-player/adapters/local/core/local-player.adapter.ts` | `PlayerPort` impl wrapping `<audio>` |
-| `frontend/src/app/features/music-player/adapters/local/state/local-state-manager.ts` | Ready/playing/duration/position signals |
-| `frontend/src/app/features/music-player/adapters/local/state/local-position-tracker.ts` | `timeupdate` listener → position signal |
-| `frontend/src/app/features/music-player/adapters/local/playback/local-playback-controller.ts` | load/start/pause/resume/seek |
-| `frontend/src/app/features/music-player/adapters/local/playback/local-volume-controller.ts` | setVolume/mute |
-| `frontend/src/app/features/music-player/adapters/local/bridges/local-state-bridge.ts` | Sync adapter state → `PlaybackStateStore` |
-| `frontend/src/app/core/library/local-library.service.ts` | IndexedDB CRUD, `tracks` signal, `getTrackBlob()` |
-| `frontend/src/app/core/library/local-db.ts` | Dexie schema definition (tracks + audioFiles stores) |
-| `frontend/src/app/core/library/metadata-extractor.service.ts` | Parse ID3/Vorbis tags from audio files |
+| `frontend/src/app/features/local/adapters/index.ts` | Barrel export |
+| `frontend/src/app/features/local/adapters/local-player.adapter.ts` | `PlayerPort` impl wrapping `<audio>` |
+| `frontend/src/app/features/local/adapters/local-state-manager.ts` | Ready/playing/duration/position signals |
+| `frontend/src/app/features/local/adapters/local-position-tracker.ts` | `timeupdate` listener → position signal |
+| `frontend/src/app/features/local/adapters/local-playback-controller.ts` | load/start/pause/resume/seek |
+| `frontend/src/app/features/local/adapters/local-volume-controller.ts` | setVolume/mute |
+| `frontend/src/app/features/local/adapters/local-state-bridge.ts` | Sync adapter state → `PlaybackStateStore` |
+| `frontend/src/app/features/local/services/local-library.service.ts` | IndexedDB CRUD, `tracks` signal, `getTrackBlob()` |
+| `frontend/src/app/features/local/services/local-db.ts` | Dexie schema definition (tracks + audioFiles stores) |
+| `frontend/src/app/features/local/services/metadata-extractor.service.ts` | Parse ID3/Vorbis tags from audio files |
 | `frontend/src/app/features/music-player/components/file-import/file-import.component.ts` | Drag-drop + file picker UI |
 | `frontend/src/app/features/music-player/components/file-import/file-import.component.html` | Template |
 | `frontend/src/app/features/music-player/components/file-import/file-import.component.css` | Styles |
@@ -452,8 +456,8 @@ These are acknowledged, scoped out, and deferred:
 
 **Files:**
 - `frontend/src/app/core/playback/player-port.ts` — add `'local'` to union
-- `frontend/src/app/features/music-player/adapters/local/index.ts` — barrel with stub export
-- `frontend/src/app/features/music-player/adapters/local/core/local-player.adapter.ts` — skeleton class, `kind: 'local'`, all methods no-op
+- `frontend/src/app/features/local/adapters/index.ts` — barrel with stub export
+- `frontend/src/app/features/local/adapters/local-player.adapter.ts` — skeleton class, `kind: 'local'`, all methods no-op
 - `frontend/src/app/core/playback/adapter-registry.service.ts` — import + add `case 'local'`
 - `frontend/src/app/app.config.ts` — spread `provideLocalAdapter()`
 - `frontend/src/app/features/music-player/components/platform-shell/platform-shell.component.ts` — add `'local'` to `PlatformName`, add case in `resolvePlatformFromUrl()` and `loadPlaylistsFor()`
@@ -469,12 +473,12 @@ These are acknowledged, scoped out, and deferred:
 **Why:** Proves the adapter → state bridge → UI controls pipeline works end-to-end before adding persistence or import.
 
 **Files:**
-- `frontend/src/app/features/music-player/adapters/local/core/local-player.adapter.ts` — full implementation
-- `frontend/src/app/features/music-player/adapters/local/state/local-state-manager.ts`
-- `frontend/src/app/features/music-player/adapters/local/state/local-position-tracker.ts`
-- `frontend/src/app/features/music-player/adapters/local/playback/local-playback-controller.ts`
-- `frontend/src/app/features/music-player/adapters/local/playback/local-volume-controller.ts`
-- `frontend/src/app/features/music-player/adapters/local/bridges/local-state-bridge.ts`
+- `frontend/src/app/features/local/adapters/local-player.adapter.ts` — full implementation
+- `frontend/src/app/features/local/adapters/local-state-manager.ts`
+- `frontend/src/app/features/local/adapters/local-position-tracker.ts`
+- `frontend/src/app/features/local/adapters/local-playback-controller.ts`
+- `frontend/src/app/features/local/adapters/local-volume-controller.ts`
+- `frontend/src/app/features/local/adapters/local-state-bridge.ts`
 
 **What changes:**
 - Create `<audio>` element in adapter constructor (not in DOM — headless)
@@ -500,9 +504,9 @@ These are acknowledged, scoped out, and deferred:
 **Why:** Without persistence, users lose their library on every refresh.
 
 **Files:**
-- `frontend/src/app/core/library/local-db.ts` — Dexie DB definition
-- `frontend/src/app/core/library/local-library.service.ts` — CRUD service with signals
-- `frontend/src/app/core/library/metadata-extractor.service.ts` — tag parsing
+- `frontend/src/app/features/local/services/local-db.ts` — Dexie DB definition
+- `frontend/src/app/features/local/services/local-library.service.ts` — CRUD service with signals
+- `frontend/src/app/features/local/services/metadata-extractor.service.ts` — tag parsing
 
 **What changes:**
 - Dexie schema: `tracks` table (id, name, artist, durationMs, mimeType, filename, addedAt), `audioFiles` table (id, blob)
@@ -632,8 +636,8 @@ These are acknowledged, scoped out, and deferred:
    ```
 
 7. **New files (scaffold):**
-   - `adapters/local/index.ts` — barrel export
-   - `adapters/local/core/local-player.adapter.ts` — stub class, `kind: 'local'`, all methods no-op/throw
+   - `features/local/adapters/index.ts` — barrel export
+   - `features/local/adapters/local-player.adapter.ts` — stub class, `kind: 'local'`, all methods no-op/throw
 
 **Files touched:**
 - `frontend/src/app/core/playback/player-port.ts`
@@ -642,8 +646,8 @@ These are acknowledged, scoped out, and deferred:
 - `frontend/src/app/core/playback/adapter-registry.service.ts`
 - `frontend/src/app/features/music-player/components/platform-shell/platform-shell.component.ts`
 - `frontend/src/app/app.config.ts`
-- `frontend/src/app/features/music-player/adapters/local/index.ts` (new)
-- `frontend/src/app/features/music-player/adapters/local/core/local-player.adapter.ts` (new, stub)
+- `frontend/src/app/features/local/adapters/index.ts` (new)
+- `frontend/src/app/features/local/adapters/local-player.adapter.ts` (new, stub)
 
 **Test checklist:**
 - [ ] `ng build` succeeds with zero errors
@@ -660,12 +664,12 @@ These are acknowledged, scoped out, and deferred:
 **Branch:** `feat/local-audio-adapter`
 **Scope:** Full `LocalPlayerAdapter` implementation. Plays audio from object URL.
 **Files:**
-- `frontend/src/app/features/music-player/adapters/local/core/local-player.adapter.ts`
-- `frontend/src/app/features/music-player/adapters/local/state/local-state-manager.ts` (new)
-- `frontend/src/app/features/music-player/adapters/local/state/local-position-tracker.ts` (new)
-- `frontend/src/app/features/music-player/adapters/local/playback/local-playback-controller.ts` (new)
-- `frontend/src/app/features/music-player/adapters/local/playback/local-volume-controller.ts` (new)
-- `frontend/src/app/features/music-player/adapters/local/bridges/local-state-bridge.ts` (new)
+- `frontend/src/app/features/local/adapters/local-player.adapter.ts`
+- `frontend/src/app/features/local/adapters/local-state-manager.ts` (new)
+- `frontend/src/app/features/local/adapters/local-position-tracker.ts` (new)
+- `frontend/src/app/features/local/adapters/local-playback-controller.ts` (new)
+- `frontend/src/app/features/local/adapters/local-volume-controller.ts` (new)
+- `frontend/src/app/features/local/adapters/local-state-bridge.ts` (new)
 
 **Test checklist:**
 - [ ] Hardcoded test song plays audio
@@ -684,9 +688,9 @@ These are acknowledged, scoped out, and deferred:
 **Scope:** IndexedDB storage + metadata extraction. Library persists.
 **Files:**
 - `frontend/package.json` (add `dexie`, `music-metadata-browser`)
-- `frontend/src/app/core/library/local-db.ts` (new)
-- `frontend/src/app/core/library/local-library.service.ts` (new)
-- `frontend/src/app/core/library/metadata-extractor.service.ts` (new)
+- `frontend/src/app/features/local/services/local-db.ts` (new)
+- `frontend/src/app/features/local/services/local-library.service.ts` (new)
+- `frontend/src/app/features/local/services/metadata-extractor.service.ts` (new)
 
 **Test checklist:**
 - [ ] `addFiles()` writes metadata + blob to IndexedDB
@@ -781,7 +785,7 @@ These are acknowledged, scoped out, and deferred:
 - [ ] Add `'local'` to `PlatformKind` in `player-port.ts`
 - [ ] Consolidate `Song.platform` to `PlatformKind` (remove redundant `| 'soundcloud' | 'local'`)
 - [ ] Update `setPlatform()` in `playlist-instance.ts` to accept `PlatformKind` (remove hardcoded union + `as any` cast)
-- [ ] Create adapter stub + barrel export (`adapters/local/`)
+- [ ] Create adapter stub + barrel export (`features/local/adapters/`)
 - [ ] Register `LocalPlayerAdapter` in `AdapterRegistry`
 - [ ] Add `provideLocalAdapter()` in `app.config.ts`
 - [ ] Replace `PlatformName` with `PlatformKind` in `PlatformShellComponent`
@@ -818,9 +822,97 @@ These are acknowledged, scoped out, and deferred:
 
 ---
 
+---
+
+## Rules Going Forward
+
+These rules apply to all new code written in this repo. They are not retroactively enforced on existing code, but existing violations should be resolved passively (when a file is next touched) or in a dedicated cleanup PR.
+
+**1. No empty stub files.**
+A file that exists in the repo must contain real, working code. If a planned file has no implementation yet, do not create the file. An empty placeholder does more harm than no file — it misleads developers about what is implemented. The three stubs (`playback-coordinator.service.ts`, `music-player.service.ts`, `platform-state.service.ts`) were deleted in PR0.
+
+**2. New code must be feature-owned.**
+All new domain logic lives inside its feature folder (`features/<domain>/`). It does not go into `features/music-player/` unless it directly extends that existing feature. Local playback code lives in `features/local/`. Future features get their own folders.
+
+**3. Features depend only on `core/` and `shared/` — never on each other.**
+`features/local/` must not import from `features/music-player/`. `features/music-player/` must not import from `features/local/`. Cross-feature coordination routes through `core/playback/`. If Feature A needs something from Feature B, the shared concern belongs in `core/` or `shared/`, not copied across.
+
+**4. State is private-writable, public-readonly.**
+In all new service and state files: signals are declared `private readonly _x = signal(...)` and exposed as `readonly x = this._x.asReadonly()`. No public writable signals. Components and external consumers must call named methods to trigger mutations — they must not `.set()` or `.update()` signals directly. (Existing `YouTubeService` and `SpotifyService` are grandfathered; fix passively when next touched.)
+
+**5. No magic numbers.**
+Every numeric threshold, timeout, delay, retry count, or limit is a named constant declared at the top of its file, above the class declaration. `const DEBOUNCE_MS = 25` — not `setTimeout(..., 25)`. Names must describe the purpose, not the value.
+
+**6. No new endpoints without the standard API envelope.**
+All new backend route handlers return one of:
+- `{ success: true, data: { ... } }` for success
+- `{ success: false, error: 'message', statusCode: N }` for errors
+
+Do not add a fourth response shape. Existing endpoints are grandfathered; apply the envelope when next touched.
+
+**7. No god-services for new work.**
+A service that owns more than one domain concern must be split before it ships. If a new service starts accumulating shuffle logic, debounce coordination, platform tracking, AND logging, that is a signal to extract. `OmniplayService` is the cautionary example — do not repeat its pattern in new code.
+
+**8. Backend route handlers contain no business logic.**
+New route handlers translate HTTP ↔ service calls only. Validation, DB queries, and domain logic belong in a service. Inline platform-switching `if/else` chains in route files (as exist in `routes/platforms.js`) are a pattern to avoid in new routes.
+
+**9. No cross-feature state imports in components.**
+A component must never inject another feature's state container directly. If a component inside `features/local/` needs playback state, it reads from `core/playback/playback-state.store.ts` — not from any service inside `features/music-player/`.
+
+**10. Local playback requires zero authentication.**
+`/platform/local` must load and function without any login, Firebase token, or backend call. Any guard, interceptor, or service that blocks the local route on missing auth is a bug. Local-first is not a second-class feature.
+
+**11. New files follow naming conventions.**
+Folders: `kebab-case`. File suffixes: `.service.ts`, `.component.ts`, `.adapter.ts`, `.state.ts`, `.mapper.ts`, `.model.ts`. No PascalCase folders. The existing `features/Spotify/` folder is grandfathered — it will be renamed in the Cleanup PR (see below).
+
+**12. No `window.location.href` for navigation.**
+All routing uses Angular `router.navigate()` or `routerLink`. Never `window.location.href` for in-app navigation.
+
+---
+
+## Cleanup PR Plan
+
+These are housekeeping items that are correct to fix but too disruptive to mix into feature PRs. Each is a standalone PR with a single concern.
+
+### PR0 — Structure Cleanup (complete)
+**Branch:** `chore/pr0-structure-cleanup`
+**Scope:** Landmine removal and structural scaffolding. Zero behavior changes.
+- [x] Delete three empty 1-line stub files: `playback-coordinator.service.ts`, `music-player.service.ts`, `platform-state.service.ts`
+- [x] Create `features/local/` folder scaffold with `adapters/`, `services/`, `README.md`
+- [x] Extract magic number constants in `OmniplayService` (`DEBOUNCE_MS`, `PLAYLIST_CHANGE_GRACE_MS`, `MAX_SHUFFLE_ATTEMPTS`)
+- [x] Add "Rules Going Forward" and "Cleanup PR Plan" to `PROJECT.md`
+
+### PR0.5 — Casing Fix: `features/Spotify/` → `features/spotify/`
+**Branch:** `chore/fix-spotify-folder-casing`
+**Scope:** Rename only. Zero logic changes.
+**Why deferred:** Renaming a folder on a case-insensitive file system (Windows/macOS) requires a two-step git move to force the rename. Mixing this into a feature PR creates merge conflict risk. It must be its own PR, merged before any PR that adds files to the Spotify feature.
+**Steps:**
+```bash
+git mv frontend/src/app/features/Spotify frontend/src/app/features/spotify-tmp
+git mv frontend/src/app/features/spotify-tmp frontend/src/app/features/spotify
+# Update import in features/music-player/services/spotify.service.ts and spotify.mapper.ts
+```
+**Risk:** Low. Only the mapper import path changes. Verify `ng build` passes.
+**When:** Before Phase 2 work touches Spotify. Not blocking Phase 1 local-first.
+
+### PR-Backend-Controllers — Split Fat Routes into Controller Layer
+**Branch:** `refactor/backend-controller-layer`
+**Scope:** Backend only. Move business logic out of route handlers into dedicated controller files. One domain at a time: `platforms` first, then `users`, then `youtube`.
+**Why deferred:** Existing routes are working and tested. Splitting them mid-Phase 1 risks breaking platform OAuth flows. Safe to do after Phase 1 local-first is shipped and stable.
+**When:** Phase 2, before adding any new platform.
+
+### PR-Lazy-Routes — Convert Eager Routes to `loadComponent()`
+**Branch:** `refactor/lazy-routes`
+**Scope:** `app.routes.ts` only. Convert each `component:` reference to `loadComponent(() => import(...))`. Verify SSR behavior is unaffected.
+**Why deferred:** Eager loading is not causing any current problem. Converting incorrectly can break SSR or produce circular import errors. Low urgency for a single-user local-first app.
+**When:** Phase 2, once all Phase 1 routes are stable.
+
+---
+
 ## Reference
 
 - **Detailed architecture analysis:** `omniplay-repo-audit.md`
+- **Gap report + migration plan:** `findings.md`
 - **Environment config:** `.env` (root, gitignored)
 - **Frontend proxy:** `frontend/proxy.conf.json` → backend on port 3000
 - **Tech stack:** Angular 20 / Node.js / Express / MongoDB / Firebase Auth (planned) / Dexie.js (planned)

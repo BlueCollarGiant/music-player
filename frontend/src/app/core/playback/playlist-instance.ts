@@ -4,6 +4,7 @@ import { PlaybackStateStore } from './playback-state.store';
 import { PlayListLogicService } from '../../features/music-player/services/play-list-logic.service';
 import { AdapterRegistryService } from './adapter-registry.service';
 import { Song } from '../../shared/models/song.model';
+import { PlatformKind } from './player-port';
 
 
 @Injectable({ providedIn: 'root' })
@@ -103,9 +104,9 @@ export class PlaylistInstanceService {
     if (this.isTransitioning) { this.state.setCurrentTrack(song); return; }
     await this.transitionToSong(song, true);
   }
-  setPlatform(kind: 'youtube' | 'spotify' | 'soundcloud') {
-  this.state.setPlatformKind(kind as any);
-}
+  setPlatform(kind: PlatformKind): void {
+    this.state.setPlatformKind(kind);
+  }
 
   // Transport controls implemented locally
   play(): void {

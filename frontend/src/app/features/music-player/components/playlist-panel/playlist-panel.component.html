@@ -13,7 +13,8 @@
     [youtubeLoading]="youtubeService.isLoading()"
     [spotifyLoading]="spotifyService.isLoading()"
     (playlistChanged)="onPlaylistChanged($event)"
-    (shuffleTriggered)="onShuffleTriggered()">
+    (shuffleTriggered)="onShuffleTriggered()"
+    (importTriggered)="onImportFiles($event)">
   </app-playlist-panel-header>
 
   <!-- Song Items - Responsive to playlist size -->

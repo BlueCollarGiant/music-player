@@ -5,7 +5,7 @@ export interface Song {
   id: string;
   name: string;
   artist?: string;
-  platform: PlatformKind | 'soundcloud' | 'local';
+  platform: PlatformKind;
 
   /** Canonical duration in milliseconds (UI can format to M:SS). */
   durationMs?: number | null;

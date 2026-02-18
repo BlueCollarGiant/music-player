@@ -15,7 +15,7 @@ export class SongListComponent {
   // Inputs - following ISP (only what this component needs)
   @Input() songs: Song[] = [];
   @Input() currentTrackId: string | undefined;
-  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' = 'youtube';
+  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local' = 'youtube';
   @Input() songCount: number = 0;
 
   // Output - following DIP (depend on abstraction, not implementation)

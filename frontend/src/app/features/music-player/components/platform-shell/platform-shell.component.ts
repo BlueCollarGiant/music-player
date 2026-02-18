@@ -8,7 +8,7 @@ import { YouTubeService } from '../../../music-player/services/youtube.service';
 import { SpotifyService } from '../../../music-player/services/spotify.service';
 import { SharedModule } from '../../../../shared/shared.module';
 
-type PlatformName = 'youtube' | 'spotify' | 'soundcloud' | 'omniplay';
+type PlatformName = 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local';
 
 @Component({
   standalone: true,
@@ -69,6 +69,8 @@ export class PlatformShellComponent implements OnInit, OnDestroy {
       detected = 'youtube';
     } else if (url.includes('/platform/omniplay')) {
       detected = 'omniplay';
+    } else if (url.includes('/platform/local')) {
+      detected = 'local';
     } else {
       detected = 'youtube';
     }
@@ -77,6 +79,12 @@ export class PlatformShellComponent implements OnInit, OnDestroy {
   }
 
   private loadPlaylistsFor(p: PlatformName): void {
+    if (p === 'local') {
+      // Local platform: no auth required, no remote playlist loading.
+      // Library is managed by LocalLibraryService (IndexedDB) — loaded in PR3.
+      return;
+    }
+
     console.log('[PlatformShell] Loading playlists for platform:', p);
     console.log('[PlatformShell] Connected platforms:', this.auth.connectedPlatformNames());
 

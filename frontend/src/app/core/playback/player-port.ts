@@ -1,4 +1,4 @@
-export type PlatformKind = 'youtube' | 'spotify' | 'soundcloud' | 'omniplay';
+export type PlatformKind = 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local';
 
 export interface PlayerPort {
   /** Preferred identifier used across the app */

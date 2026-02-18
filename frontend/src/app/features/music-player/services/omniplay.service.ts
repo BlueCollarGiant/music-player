@@ -4,6 +4,13 @@ import { SpotifyService } from './spotify.service';
 import { Song } from '../../../shared/models/song.model';
 import { PlaylistInstanceService } from '../../../core/playback/playlist-instance';
 
+// ── Constants ────────────────────────────────────────────────────────────────
+/** Debounce window (ms) to coalesce rapid platform/playlist updates before syncing. */
+const DEBOUNCE_MS = 25;
+/** Grace window (ms) after a playlist ID change during which a second-phase reshuffle is allowed. */
+const PLAYLIST_CHANGE_GRACE_MS = 1500;
+/** Maximum shuffle attempts before accepting the current order to avoid infinite loops. */
+const MAX_SHUFFLE_ATTEMPTS = 5;
 
 @Injectable({ providedIn: 'root' })
 export class OmniplayService {
@@ -36,7 +43,7 @@ export class OmniplayService {
   private reshuffleRequested = false; // external triggers (playlist change / platform growth)
   private initialMultiCommitDone = false;
   private lastPlaylistChangeAt = 0; // timestamp of last playlist id change
-  private readonly playlistChangeGraceMs = 1500; // window to allow second-phase reshuffle after tracks load
+  private readonly playlistChangeGraceMs = PLAYLIST_CHANGE_GRACE_MS; // window to allow second-phase reshuffle after tracks load
   private postChangeReshuffleDone = false; // ensure only one second-phase reshuffle per change
 
   /** Raw merged & de-duped (order not yet persisted). */
@@ -129,7 +136,7 @@ export class OmniplayService {
     this.debounceHandle = setTimeout(() => {
       this.debounceHandle = null;
   this.runSync();
-    }, 25); // small debounce to coalesce platform updates
+    }, DEBOUNCE_MS); // small debounce to coalesce platform updates
   }
 
   // scheduleImmediate no longer needed (removed)
@@ -197,7 +204,7 @@ export class OmniplayService {
           shuffled = this.shuffle(merged.slice());
           newOrderSig = shuffled.map(s => `${(s as any).platform}:${s.id}`).join('>');
           attempts++;
-          if (newOrderSig !== this.lastOrderedSignature || attempts >= 5) break;
+          if (newOrderSig !== this.lastOrderedSignature || attempts >= MAX_SHUFFLE_ATTEMPTS) break;
         } while (true);
 
         // Assign sequential indices 0→N to the shuffled array

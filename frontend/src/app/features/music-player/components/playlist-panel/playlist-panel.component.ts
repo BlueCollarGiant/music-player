@@ -7,6 +7,7 @@ import { SpotifyService } from '../../services/spotify.service';
 import { Song } from '../../../../shared/models/song.model';
 import { PlaylistInstanceService } from '../../../../core/playback/playlist-instance';
 import { OmniplayService } from '../../services/omniplay.service';
+import { LocalLibraryService } from '../../../../features/local/services/local-library.service';
 
 // Import child components
 import { PlaylistPanelHeaderComponent } from './playlist-panel-logic/playlist-panel-header/playlist-panel-header.component';
@@ -31,7 +32,7 @@ import { PlaylistOption, PlaylistChangeEvent } from './playlist-panel-logic/play
 })
 export class PlaylistPanelComponent {
   // ---- Inputs -------------------------------------------------------------------
-  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' = 'youtube';
+  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local' = 'youtube';
 
 
   // ---- DI -----------------------------------------------------------------------
@@ -40,6 +41,7 @@ export class PlaylistPanelComponent {
   readonly spotifyService = inject(SpotifyService);
   readonly c = inject(PlaylistInstanceService);
   private readonly omniplay = inject(OmniplayService);
+  readonly localLibrary = inject(LocalLibraryService);
 
   // ---- State helpers for template (following SRP - parent manages state) --------
   isEmpty(): boolean { return this.playlistLogic.isEmpty(); }
@@ -50,7 +52,10 @@ export class PlaylistPanelComponent {
 
   // ---- Data providers for child components (following DIP) ----------------------
   getDisplaySongs(): Song[] {
-    // Always use omniplay.mergedSongs() for consistent shuffle/order behavior across all modes
+    if (this.platform === 'local') {
+      return this.localLibrary.tracks();
+    }
+    // All other platforms: use omniplay for consistent shuffle/order behavior
     return this.omniplay.mergedSongs();
   }
 
@@ -74,10 +79,31 @@ export class PlaylistPanelComponent {
 
   onSongSelected(song: Song): void {
     console.log('[Instance] selectSong()', { id: song?.id, platform: song?.platform, name: song?.name });
+    if (song.platform === 'local') {
+      this.selectLocalTrack(song);
+      return;
+    }
     const songs = this.getDisplaySongs();
     this.c.syncPlaylist(songs, song.id);
     this.c.selectTrack(song);
     this.c.setPlatform(song.platform as any);
+  }
+
+  onImportFiles(files: FileList | null): void {
+    if (!files || files.length === 0) return;
+    this.localLibrary.importFiles(files).catch(err =>
+      console.error('[PlaylistPanel] importFiles failed', err)
+    );
+  }
+
+  private selectLocalTrack(song: Song): void {
+    this.localLibrary.getPlayableUrl(song.id).then(url => {
+      const playableSong: Song = { ...song, uri: url };
+      const songs = this.localLibrary.tracks();
+      this.c.syncPlaylist(songs, song.id);
+      this.c.selectTrack(playableSong);
+      this.c.setPlatform('local');
+    }).catch(err => console.error('[PlaylistPanel] getPlayableUrl failed', err));
   }
 
   onPlaylistChanged(event: PlaylistChangeEvent): void {

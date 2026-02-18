@@ -7,7 +7,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { environment } from '../../../../../../environments/environment';
 
-type PlatformKind = 'youtube' | 'spotify' | 'soundcloud' | 'omniplay';
+type PlatformKind = 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local';
 
 @Component({
   selector: 'app-nav-bar',

@@ -14,7 +14,7 @@ export class SongItemComponent {
   // Inputs - following ISP (only what this component needs)
   @Input() song!: Song;
   @Input() isActive: boolean = false;
-  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' = 'youtube';
+  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local' = 'youtube';
 
   // Output - following DIP (depend on abstraction, not implementation)
   @Output() songClicked = new EventEmitter<Song>();

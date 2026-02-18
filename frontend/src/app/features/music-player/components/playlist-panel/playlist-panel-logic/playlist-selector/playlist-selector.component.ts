@@ -22,7 +22,7 @@ export interface PlaylistChangeEvent {
 })
 export class PlaylistSelectorComponent {
   // Inputs - following ISP (only what this component needs)
-  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' = 'youtube';
+  @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local' = 'youtube';
   @Input() youtubePlaylists: PlaylistOption[] = [];
   @Input() spotifyPlaylists: PlaylistOption[] = [];
   @Input() youtubeLoading: boolean = false;
