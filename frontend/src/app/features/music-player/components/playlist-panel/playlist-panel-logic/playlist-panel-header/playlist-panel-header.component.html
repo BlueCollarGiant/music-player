@@ -1,14 +1,16 @@
 <div class="header">
   <div class="info">
     <div class="playlist-selector">
-      <app-playlist-selector
-        [platform]="platform"
-        [youtubePlaylists]="youtubePlaylists"
-        [spotifyPlaylists]="spotifyPlaylists"
-        [youtubeLoading]="youtubeLoading"
-        [spotifyLoading]="spotifyLoading"
-        (playlistChanged)="onPlaylistChanged($event)">
-      </app-playlist-selector>
+      @if (platform !== 'local') {
+        <app-playlist-selector
+          [platform]="platform"
+          [youtubePlaylists]="youtubePlaylists"
+          [spotifyPlaylists]="spotifyPlaylists"
+          [youtubeLoading]="youtubeLoading"
+          [spotifyLoading]="spotifyLoading"
+          (playlistChanged)="onPlaylistChanged($event)">
+        </app-playlist-selector>
+      }
       <button
         type="button"
         class="shuffle-btn"
@@ -17,15 +19,24 @@
         <span class="text">Shuffle</span>
       </button>
       @if (platform === 'local') {
-        <label class="shuffle-btn" title="Import audio files" style="cursor:pointer">
-          <span class="text">+ Import</span>
-          <input
-            type="file"
-            accept="audio/*"
-            multiple
-            style="display:none"
-            (change)="onImportChange($event)">
-        </label>
+        <select
+          class="playlist-dropdown local-playlist-dropdown"
+          [value]="activeLocalPlaylistId"
+          (change)="onLocalPlaylistChange($event)"
+          aria-label="Select local playlist">
+          <option [value]="LIBRARY_VIEW">All Tracks</option>
+          @for (pl of localPlaylists; track pl.id) {
+            <option [value]="pl.id">{{ pl.name }}</option>
+          }
+        </select>
+        <button
+          type="button"
+          class="shuffle-btn manage-library-btn"
+          title="Manage your local library"
+          (click)="navigateToLibrary()">
+          <span class="text">Manage</span>
+        </button>
+        <span class="queue-label" aria-live="polite">{{ activeQueueLabel }}</span>
       }
     </div>
   </div>

@@ -30,10 +30,12 @@ export class AppComponent {
 
   // Only show player controls on music platform pages
   showPlayerControls(): boolean {
-  const route = this.currentRoute();
-  if (route === '/player' || route === '/youtube') return true;
-  // Show on any platform route (e.g., /platform/spotify, /platform/youtube)
-  return route.startsWith('/platform/');
+    const route = this.currentRoute();
+    if (route === '/player' || route === '/youtube') return true;
+    // Hide on management screens that are not the player itself
+    if (route.startsWith('/platform/local/library')) return false;
+    // Show on any platform route (e.g., /platform/spotify, /platform/youtube)
+    return route.startsWith('/platform/');
   }
 }
 

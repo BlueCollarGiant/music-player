@@ -11,6 +11,7 @@ export interface TrackRecord {
   mimeType: string;
   fileKey: string;     // FK → FileRecord.key
   createdAt: number;   // Date.now()
+  coverBlob?: Blob;    // optional user-supplied cover art
 }
 
 export interface FileRecord {
@@ -18,17 +19,43 @@ export interface FileRecord {
   blob: Blob;
 }
 
+export interface PlaylistRecord {
+  id: string;          // crypto.randomUUID()
+  name: string;
+  createdAt: number;   // Date.now()
+}
+
+export interface PlaylistTrackRecord {
+  playlistId: string;
+  trackId: string;
+  order: number;       // append index for ordering
+}
+
 // ── Database class ─────────────────────────────────────────────────────────────
 
 export class LocalMusicDb extends Dexie {
   tracks!: Table<TrackRecord, string>;
   files!: Table<FileRecord, string>;
+  playlists!: Table<PlaylistRecord, string>;
+  playlistTracks!: Table<PlaylistTrackRecord, [string, string]>;
 
   constructor() {
     super('omniplay-local-music');
     this.version(1).stores({
       tracks: 'id, title, artist, album, createdAt',
       files:  'key',
+    });
+    // Version 2: added optional coverBlob field to TrackRecord (no index needed)
+    this.version(2).stores({
+      tracks: 'id, title, artist, album, createdAt',
+      files:  'key',
+    });
+    // Version 3: added playlists and playlistTracks tables
+    this.version(3).stores({
+      tracks:         'id, title, artist, album, createdAt',
+      files:          'key',
+      playlists:      'id, name, createdAt',
+      playlistTracks: '[playlistId+trackId], playlistId, trackId',
     });
   }
 }

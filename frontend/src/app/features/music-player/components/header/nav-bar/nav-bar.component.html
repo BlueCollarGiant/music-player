@@ -113,6 +113,9 @@
           OmniPlay
         </button>
         }
+        <button class="glass-platform-btn local" (click)="navigatePlatform('local')" aria-label="Open Local Library">
+          Local
+        </button>
 
         <!-- Back to Landing (visible when logged in and on /platform/*) -->
         @if (isUserLoggedIn() && isOnPlatformRoute()) {

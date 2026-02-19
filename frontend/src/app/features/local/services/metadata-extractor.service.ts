@@ -48,18 +48,25 @@ export class MetadataExtractorService {
     return new Promise(resolve => {
       const url = URL.createObjectURL(file);
       const audio = new Audio();
+      let settled = false;
+      let timeoutId: ReturnType<typeof setTimeout>;
+
       const cleanup = (ms: number) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
         URL.revokeObjectURL(url);
         audio.src = '';
         resolve(ms);
       };
+
       audio.addEventListener('durationchange', () => {
         const d = audio.duration;
         cleanup(isFinite(d) ? Math.round(d * 1000) : 0);
       }, { once: true });
       audio.addEventListener('error', () => cleanup(0), { once: true });
       // Timeout fallback — don't block import if browser is slow
-      setTimeout(() => cleanup(0), 3000);
+      timeoutId = setTimeout(() => cleanup(0), 3000);
       audio.src = url;
       audio.load();
     });

@@ -15,4 +15,31 @@
 
     <span>{{ song.name }}</span>
   </div>
+
+  @if (platform === 'local') {
+    @if (localPlaylists.length > 0) {
+      <select
+        class="quick-add-select"
+        (change)="onAddToPlaylist($event)"
+        (click)="$event.stopPropagation()"
+        title="Add to playlist"
+        aria-label="Add to playlist">
+        <option value="">+</option>
+        @for (pl of localPlaylists; track pl.id) {
+          <option [value]="pl.id">{{ pl.name }}</option>
+        }
+      </select>
+      @if (justAdded()) {
+        <span class="quick-add-confirm" aria-hidden="true">✓</span>
+      }
+    }
+    <button
+      type="button"
+      class="remove-btn"
+      title="Remove from library"
+      aria-label="Remove from library"
+      (click)="onRemoveClick($event)">
+      ✕
+    </button>
+  }
 </div>

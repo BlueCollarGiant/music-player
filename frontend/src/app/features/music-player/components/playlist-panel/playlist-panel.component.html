@@ -12,9 +12,12 @@
     [spotifyPlaylists]="getSpotifyPlaylists()"
     [youtubeLoading]="youtubeService.isLoading()"
     [spotifyLoading]="spotifyService.isLoading()"
+    [localPlaylists]="localPlaylists.playlists()"
+    [activeLocalPlaylistId]="localPlaylists.activePlaylistId()"
     (playlistChanged)="onPlaylistChanged($event)"
     (shuffleTriggered)="onShuffleTriggered()"
-    (importTriggered)="onImportFiles($event)">
+    (importTriggered)="onImportFiles($event)"
+    (localPlaylistChanged)="onLocalPlaylistChanged($event)">
   </app-playlist-panel-header>
 
   <!-- Song Items - Responsive to playlist size -->
@@ -23,6 +26,9 @@
     [currentTrackId]="getCurrentTrackId()"
     [platform]="platform"
     [songCount]="realSongCount()"
-    (songSelected)="onSongSelected($event)">
+    [localPlaylists]="localPlaylists.playlists()"
+    (songSelected)="onSongSelected($event)"
+    (songRemoved)="onSongRemoved($event)"
+    (addToPlaylist)="onAddToPlaylist($event)">
   </app-song-list>
 </div>

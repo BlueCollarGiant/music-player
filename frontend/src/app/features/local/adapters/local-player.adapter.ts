@@ -42,6 +42,7 @@ export class LocalPlayerAdapter implements PlayerPort {
     });
     this.audio.addEventListener('ended', () => {
       this.store.setPlaying(false);
+      this.stopTick();
     });
     this.audio.addEventListener('durationchange', () => {
       const d = this.audio.duration;
@@ -95,8 +96,10 @@ export class LocalPlayerAdapter implements PlayerPort {
       throw new Error('LocalPlayerAdapter.load: no playable URL on Song');
     }
 
-    // Revoke previous blob URL before taking the new src
-    if (this.lastBlobUrl) {
+    // Only revoke the previous blob URL if the new URL is different.
+    // The retry loop in transitionToSong() can call load() twice with the same
+    // Song — revoking on a same-URL reload would invalidate the src mid-load.
+    if (this.lastBlobUrl && this.lastBlobUrl !== url) {
       URL.revokeObjectURL(this.lastBlobUrl);
       this.lastBlobUrl = null;
     }

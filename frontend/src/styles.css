@@ -38,6 +38,15 @@ html {
 /* Layout chain root (no visual change) */
 app-root { display:block; height:100%; min-height:0; }
 
+/* ── Shared UI animation: quick-add confirmation checkmark ── */
+@keyframes quick-add-pop {
+  0%   { opacity: 0; transform: scale(0.6); }
+  30%  { opacity: 1; transform: scale(1.2); }
+  55%  { transform: scale(1); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(0.9); }
+}
+
 /*/* Default (app/youtube base) 
 :root, .platform--youtube {
   --accent-color: #ff0000;

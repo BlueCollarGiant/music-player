@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, ViewEncapsulation } from '@angu
 import { CommonModule } from '@angular/common';
 import { Song } from '../../../../../../shared/models/song.model';
 import { SongItemComponent } from '../song-item/song-item.component';
+import type { PlaylistRecord } from '../../../../../../features/local/services/local-playlists.service';
 
 @Component({
   selector: 'app-song-list',
@@ -17,13 +18,25 @@ export class SongListComponent {
   @Input() currentTrackId: string | undefined;
   @Input() platform: 'youtube' | 'spotify' | 'soundcloud' | 'omniplay' | 'local' = 'youtube';
   @Input() songCount: number = 0;
+  /** Passed through to song-item for local platform quick-add dropdown. */
+  @Input() localPlaylists: PlaylistRecord[] = [];
 
   // Output - following DIP (depend on abstraction, not implementation)
   @Output() songSelected = new EventEmitter<Song>();
+  @Output() songRemoved = new EventEmitter<Song>();
+  @Output() addToPlaylist = new EventEmitter<{ song: Song; playlistId: string }>();
 
   // Event delegation - pure passthrough (SRP: list management only)
   onSongClicked(song: Song): void {
     this.songSelected.emit(song);
+  }
+
+  onSongRemoved(song: Song): void {
+    this.songRemoved.emit(song);
+  }
+
+  onAddToPlaylist(event: { song: Song; playlistId: string }): void {
+    this.addToPlaylist.emit(event);
   }
 
   // Helper method to determine if a song is active

@@ -8,6 +8,8 @@ import { Song } from '../../../../shared/models/song.model';
 import { PlaylistInstanceService } from '../../../../core/playback/playlist-instance';
 import { OmniplayService } from '../../services/omniplay.service';
 import { LocalLibraryService } from '../../../../features/local/services/local-library.service';
+import { LocalPlaylistsService } from '../../../../features/local/services/local-playlists.service';
+import { PlaybackStateStore } from '../../../../core/playback/playback-state.store';
 
 // Import child components
 import { PlaylistPanelHeaderComponent } from './playlist-panel-logic/playlist-panel-header/playlist-panel-header.component';
@@ -42,6 +44,8 @@ export class PlaylistPanelComponent {
   readonly c = inject(PlaylistInstanceService);
   private readonly omniplay = inject(OmniplayService);
   readonly localLibrary = inject(LocalLibraryService);
+  readonly localPlaylists = inject(LocalPlaylistsService);
+  private readonly playbackState = inject(PlaybackStateStore);
 
   // ---- State helpers for template (following SRP - parent manages state) --------
   isEmpty(): boolean { return this.playlistLogic.isEmpty(); }
@@ -53,7 +57,8 @@ export class PlaylistPanelComponent {
   // ---- Data providers for child components (following DIP) ----------------------
   getDisplaySongs(): Song[] {
     if (this.platform === 'local') {
-      return this.localLibrary.tracks();
+      // Respect the active local playlist (or all-tracks library view)
+      return this.localPlaylists.activePlaylistTracks();
     }
     // All other platforms: use omniplay for consistent shuffle/order behavior
     return this.omniplay.mergedSongs();
@@ -96,14 +101,37 @@ export class PlaylistPanelComponent {
     );
   }
 
+  onSongRemoved(song: Song): void {
+    if (!confirm(`Remove "${song.name}" from your local library?`)) return;
+    // If this track is currently playing, stop and clear state first
+    if (this.c.track()?.id === song.id) {
+      this.c.pause();
+      this.playbackState.setCurrentTrack(null);
+    }
+    this.localLibrary.removeTrack(song.id).catch(err =>
+      console.error('[PlaylistPanel] removeTrack failed', err)
+    );
+  }
+
   private selectLocalTrack(song: Song): void {
     this.localLibrary.getPlayableUrl(song.id).then(url => {
       const playableSong: Song = { ...song, uri: url };
-      const songs = this.localLibrary.tracks();
+      // Sync the queue from the currently active local view (playlist or library)
+      const songs = this.localPlaylists.activePlaylistTracks();
       this.c.syncPlaylist(songs, song.id);
       this.c.selectTrack(playableSong);
       this.c.setPlatform('local');
     }).catch(err => console.error('[PlaylistPanel] getPlayableUrl failed', err));
+  }
+
+  onLocalPlaylistChanged(playlistId: string): void {
+    this.localPlaylists.setActivePlaylist(playlistId as any);
+  }
+
+  onAddToPlaylist(event: { song: Song; playlistId: string }): void {
+    this.localPlaylists.addTrackToPlaylist(event.playlistId, event.song.id).catch(err =>
+      console.error('[PlaylistPanel] addTrackToPlaylist failed', err)
+    );
   }
 
   onPlaylistChanged(event: PlaylistChangeEvent): void {

@@ -44,12 +44,48 @@ export class LocalLibraryService {
   }
 
   /**
-   * Remove a track and its associated blob from IndexedDB.
+   * Import a single track with user-supplied metadata.
+   * All fields except `file` are optional; defaults are extracted from the file.
+   */
+  async importWithMetadata(opts: {
+    file: File;
+    title?: string;
+    artist?: string;
+    album?: string;
+    cover?: File | null;
+  }): Promise<void> {
+    if (!this.isAudioFile(opts.file)) return;
+
+    const id = crypto.randomUUID();
+    const meta = await this.extractor.extract(opts.file);
+
+    const trackRecord: TrackRecord = {
+      id,
+      title:      opts.title?.trim() || meta.title,
+      artist:     opts.artist?.trim() || meta.artist,
+      album:      opts.album?.trim()  || meta.album,
+      durationMs: meta.durationMs,
+      mimeType:   meta.mimeType,
+      fileKey:    id,
+      createdAt:  Date.now(),
+      coverBlob:  opts.cover ?? undefined,
+    };
+
+    await localDb.transaction('rw', localDb.tracks, localDb.files, async () => {
+      await localDb.tracks.add(trackRecord);
+      await localDb.files.add({ key: id, blob: opts.file });
+    });
+    await this.loadFromDb();
+  }
+
+  /**
+   * Remove a track, its blob, and any playlist membership rows from IndexedDB.
    */
   async removeTrack(trackId: string): Promise<void> {
-    await localDb.transaction('rw', localDb.tracks, localDb.files, async () => {
+    await localDb.transaction('rw', localDb.tracks, localDb.files, localDb.playlistTracks, async () => {
       await localDb.tracks.delete(trackId);
       await localDb.files.delete(trackId);
+      await localDb.playlistTracks.where('trackId').equals(trackId).delete();
     });
     await this.loadFromDb();
   }
@@ -96,12 +132,13 @@ export class LocalLibraryService {
 
   private toSong(r: TrackRecord): Song {
     return {
-      id:         r.id,
-      name:       r.title,
-      artist:     r.artist,
-      platform:   'local',
-      durationMs: r.durationMs || null,
-      // url intentionally absent; resolved on-demand via getPlayableUrl()
+      id:           r.id,
+      name:         r.title,
+      artist:       r.artist,
+      platform:     'local',
+      durationMs:   r.durationMs || null,
+      thumbnailUrl: r.coverBlob ? URL.createObjectURL(r.coverBlob) : undefined,
+      // uri intentionally absent; resolved on-demand via getPlayableUrl()
     };
   }
 

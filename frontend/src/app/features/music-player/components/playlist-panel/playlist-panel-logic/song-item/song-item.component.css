@@ -151,3 +151,54 @@
     height:2.5rem;
   }
 }
+
+/* === Local: Remove Button (Task D) === */
+.remove-btn {
+  flex-shrink:0;
+  background:transparent;
+  border:none;
+  color:rgba(255,255,255,.35);
+  font-size:.875rem;
+  cursor:pointer;
+  padding:.25rem .5rem;
+  border-radius:.375rem;
+  transition:color .15s ease, background .15s ease;
+  line-height:1;
+}
+.remove-btn:hover {
+  color:#ff6b6b;
+  background:rgba(255,107,107,.12);
+}
+
+/* === Local: Quick Add-to-Playlist Dropdown (Task E) === */
+.quick-add-select {
+  flex-shrink:0;
+  background:rgba(107,76,255,.15);
+  border:1px solid rgba(107,76,255,.4);
+  border-radius:.375rem;
+  color:rgba(255,255,255,.7);
+  font-size:.75rem;
+  font-family:inherit;
+  padding:.2rem .3rem;
+  cursor:pointer;
+  outline:none;
+  max-width:3rem;
+  transition:border-color .15s ease, background .15s ease;
+}
+.quick-add-select option { background:#121225; color:#fff; }
+.quick-add-select:hover {
+  border-color:rgba(107,76,255,.7);
+  background:rgba(107,76,255,.22);
+}
+
+/* === Local: Quick-Add Confirmation Checkmark (PR5.2) === */
+/* @keyframes quick-add-pop is defined globally in styles.css */
+.quick-add-confirm {
+  flex-shrink:0;
+  font-size:.8rem;
+  color:#2ecc71;
+  line-height:1;
+  pointer-events:none;
+  text-shadow:0 0 6px rgba(46,204,113,.6);
+  animation:quick-add-pop 900ms ease forwards;
+}

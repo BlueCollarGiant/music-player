@@ -4,7 +4,10 @@
       [song]="song"
       [isActive]="isActive(song)"
       [platform]="platform"
-      (songClicked)="onSongClicked($event)">
+      [localPlaylists]="localPlaylists"
+      (songClicked)="onSongClicked($event)"
+      (removeClicked)="onSongRemoved($event)"
+      (addToPlaylist)="onAddToPlaylist($event)">
     </app-song-item>
   }
 </div>

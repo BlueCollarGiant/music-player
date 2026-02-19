@@ -1,0 +1,317 @@
+<!-- Outer shell — same structure as platform-shell .content -->
+<div class="dashboard-shell">
+  <div class="dashboard">
+
+    <!-- ── Header ───────────────────────────────────────────── -->
+    <div class="dashboard-header">
+      <button class="back-btn" type="button" (click)="goBack()" aria-label="Back to player">
+        ← Back
+      </button>
+      <h2 class="dashboard-title">Local Library</h2>
+
+      <!-- Import button — opens modal -->
+      <button class="import-btn" type="button" (click)="openModal()" aria-label="Import a track">
+        <span class="btn-inner">+ Import</span>
+      </button>
+    </div>
+
+    <!-- ── Playlist Tab Bar ──────────────────────────────────── -->
+    <div class="playlist-tabs" role="tablist" aria-label="Views">
+
+      <!-- Library tab -->
+      <button
+        class="tab-btn"
+        role="tab"
+        [class.active]="isLibraryView()"
+        (click)="selectView(LIBRARY_VIEW)"
+        aria-label="All Tracks">
+        All Tracks
+      </button>
+
+      <!-- Named playlist tabs -->
+      @for (pl of localPlaylists.playlists(); track pl.id) {
+        <button
+          class="tab-btn"
+          role="tab"
+          [class.active]="localPlaylists.activePlaylistId() === pl.id"
+          (click)="selectView(pl.id)"
+          [attr.aria-label]="pl.name">
+          {{ pl.name }}
+        </button>
+      }
+
+      <!-- New Playlist button -->
+      <button class="tab-btn new-playlist-btn" type="button" (click)="onNewPlaylist()" aria-label="New playlist">
+        + New
+      </button>
+
+      <!-- Add Songs button (only when viewing a named playlist) -->
+      @if (!isLibraryView()) {
+        <button class="tab-btn add-songs-tab-btn" type="button" (click)="openAddSongsModal()" aria-label="Add songs to playlist">
+          + Add Songs
+        </button>
+      }
+
+      <!-- Delete active playlist (only when in a named playlist) -->
+      @if (!isLibraryView()) {
+        <button class="tab-btn delete-playlist-btn" type="button" (click)="onDeletePlaylist()" aria-label="Delete playlist">
+          Delete
+        </button>
+      }
+    </div>
+
+    <!-- ── Search ────────────────────────────────────────────── -->
+    <div class="search-row">
+      <input
+        class="search-input"
+        type="search"
+        placeholder="Search tracks or artists…"
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        aria-label="Search local tracks">
+    </div>
+
+    <!-- ── Track List ─────────────────────────────────────────── -->
+    @if (localPlaylists.activePlaylistTracks().length === 0) {
+      <div class="empty-state">
+        @if (isLibraryView()) {
+          <p class="empty-message">No tracks yet — click <strong>+ Import</strong> to add music.</p>
+        } @else {
+          <p class="empty-message">This playlist is empty. Click <strong>+ Add Songs</strong> to add tracks.</p>
+        }
+      </div>
+    } @else {
+      <div class="track-list" role="list">
+        @for (song of filteredTracks(); track song.id) {
+          <div
+            class="track-row"
+            role="listitem"
+            [class.active]="isActive(song)"
+            (click)="onSongSelected(song)">
+
+            <!-- Cover art or placeholder -->
+            @if (song.thumbnailUrl) {
+              <img [src]="song.thumbnailUrl" alt="" class="track-cover" aria-hidden="true">
+            } @else {
+              <div class="track-cover-placeholder" aria-hidden="true">♪</div>
+            }
+
+            <div class="track-info">
+              <span class="track-name">{{ song.name }}</span>
+              @if (song.artist) {
+                <span class="track-artist">{{ song.artist }}</span>
+              }
+            </div>
+
+            <!-- Membership badge (Library view only) -->
+            @if (isLibraryView()) {
+              @let memberCount = getMembership(song.id).length;
+              @if (memberCount > 0) {
+                <span
+                  class="membership-badge"
+                  [title]="getMembershipTooltip(song.id)"
+                  [attr.aria-label]="getMembershipTooltip(song.id)">
+                  ♫ {{ memberCount === 1 ? getMembershipFirstName(song.id) : (memberCount + ' playlists') }}
+                </span>
+              }
+            }
+
+            <!-- Library view actions -->
+            @if (isLibraryView()) {
+              <!-- Add to playlist dropdown + confirmation tick -->
+              @if (localPlaylists.playlists().length > 0) {
+                <select
+                  class="add-to-playlist-select"
+                  (change)="onAddToPlaylist(song, $event)"
+                  (click)="$event.stopPropagation()"
+                  title="Add to playlist"
+                  aria-label="Add {{ song.name }} to playlist">
+                  <option value="">+ Playlist</option>
+                  @for (pl of localPlaylists.playlists(); track pl.id) {
+                    <option [value]="pl.id">{{ pl.name }}</option>
+                  }
+                </select>
+                @if (isJustAdded(song.id)) {
+                  <span class="quick-add-confirm" aria-hidden="true">✓</span>
+                }
+              }
+              <!-- Remove from library -->
+              <button
+                type="button"
+                class="remove-btn"
+                title="Remove from library"
+                aria-label="Remove {{ song.name }} from library"
+                (click)="onSongRemoved($event, song)">
+                ✕
+              </button>
+            }
+
+            <!-- Playlist view actions -->
+            @if (!isLibraryView()) {
+              <button
+                type="button"
+                class="remove-btn playlist-remove-btn"
+                title="Remove from playlist"
+                aria-label="Remove {{ song.name }} from playlist"
+                (click)="onRemoveFromPlaylist($event, song)">
+                −
+              </button>
+            }
+
+          </div>
+        }
+
+        @if (filteredTracks().length === 0 && localPlaylists.activePlaylistTracks().length > 0) {
+          <div class="empty-state">
+            <p class="empty-message">No tracks match "{{ searchQuery() }}".</p>
+          </div>
+        }
+      </div>
+    }
+
+  </div><!-- /.dashboard -->
+</div><!-- /.dashboard-shell -->
+
+
+<!-- ── Import Modal ───────────────────────────────────────────────── -->
+@if (modalOpen()) {
+  <div class="modal-overlay" (click)="closeModal()" role="dialog" aria-modal="true" aria-label="Import track">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h3 class="modal-title">Import Track</h3>
+        <button class="modal-close" type="button" (click)="closeModal()" aria-label="Close">✕</button>
+      </div>
+
+      <!-- Audio file (required) -->
+      <div class="form-field">
+        <span class="form-label">Audio File <span class="required">*</span></span>
+        <label class="file-input-label" [class.has-file]="modal().audioFile">
+          {{ modal().audioFile ? modal().audioFile!.name : 'Choose audio file…' }}
+          <input
+            type="file"
+            accept="audio/*"
+            style="display:none"
+            (change)="onAudioFileChange($event)">
+        </label>
+      </div>
+
+      <!-- Cover image (optional) -->
+      <div class="form-field">
+        <span class="form-label">Cover Art (optional)</span>
+        <label class="file-input-label" [class.has-file]="modal().coverFile" style="gap:0.75rem">
+          @if (modal().coverPreviewUrl) {
+            <img [src]="modal().coverPreviewUrl" alt="Cover preview" class="cover-preview">
+          }
+          {{ modal().coverFile ? modal().coverFile!.name : 'Choose image…' }}
+          <input
+            type="file"
+            accept="image/*"
+            style="display:none"
+            (change)="onCoverFileChange($event)">
+        </label>
+      </div>
+
+      <!-- Title -->
+      <div class="form-field">
+        <label class="form-label" for="modal-title">Title <span class="required">*</span></label>
+        <input
+          id="modal-title"
+          class="form-input"
+          type="text"
+          placeholder="Track title"
+          [value]="modal().title"
+          (input)="onTitleInput($event)">
+      </div>
+
+      <!-- Artist -->
+      <div class="form-field">
+        <label class="form-label" for="modal-artist">Artist</label>
+        <input
+          id="modal-artist"
+          class="form-input"
+          type="text"
+          placeholder="Artist name"
+          [value]="modal().artist"
+          (input)="onArtistInput($event)">
+      </div>
+
+      <!-- Album -->
+      <div class="form-field">
+        <label class="form-label" for="modal-album">Album</label>
+        <input
+          id="modal-album"
+          class="form-input"
+          type="text"
+          placeholder="Album name"
+          [value]="modal().album"
+          (input)="onAlbumInput($event)">
+      </div>
+
+      <!-- Submit -->
+      <button
+        class="modal-submit"
+        type="button"
+        [disabled]="!modal().audioFile || !modal().title.trim() || modal().submitting"
+        (click)="onModalSubmit()">
+        <span class="btn-inner">
+          {{ modal().submitting ? 'Saving…' : 'Add to Library' }}
+        </span>
+      </button>
+
+    </div><!-- /.modal -->
+  </div><!-- /.modal-overlay -->
+}
+
+
+<!-- ── Add Songs Modal (Task B) ───────────────────────────────────── -->
+@if (addSongsModalOpen() && !isLibraryView()) {
+  <div class="modal-overlay" (click)="closeAddSongsModal()" role="dialog" aria-modal="true" aria-label="Add songs to playlist">
+    <div class="modal add-songs-modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h3 class="modal-title">Add Songs — {{ activePlaylistName() }}</h3>
+        <button class="modal-close" type="button" (click)="closeAddSongsModal()" aria-label="Close">✕</button>
+      </div>
+
+      <input
+        class="form-input"
+        type="search"
+        placeholder="Search tracks or artists…"
+        [value]="addSongsQuery()"
+        (input)="addSongsQuery.set($any($event.target).value)"
+        aria-label="Search library tracks">
+
+      <div class="add-songs-list">
+        @for (song of filteredLibraryTracks(); track song.id) {
+          <div class="add-songs-row">
+            @if (song.thumbnailUrl) {
+              <img [src]="song.thumbnailUrl" alt="" class="add-songs-cover" aria-hidden="true">
+            } @else {
+              <div class="add-songs-cover-placeholder" aria-hidden="true">♪</div>
+            }
+            <span class="add-songs-name">{{ song.name }}</span>
+            @if (song.artist) {
+              <span class="add-songs-artist">{{ song.artist }}</span>
+            }
+            <button
+              class="add-songs-btn-inline"
+              type="button"
+              [disabled]="isInActivePlaylist(song.id)"
+              [title]="isInActivePlaylist(song.id) ? 'Already in playlist' : 'Add to playlist'"
+              (click)="onAddSongToActivePlaylist(song)">
+              {{ isInActivePlaylist(song.id) ? '✓' : '+' }}
+            </button>
+            @if (isJustAdded(song.id) && !isInActivePlaylist(song.id)) {
+              <span class="quick-add-confirm" aria-hidden="true">✓</span>
+            }
+          </div>
+        }
+        @if (filteredLibraryTracks().length === 0) {
+          <p class="add-songs-empty">No tracks match "{{ addSongsQuery() }}".</p>
+        }
+      </div>
+
+    </div><!-- /.modal -->
+  </div><!-- /.modal-overlay -->
+}
