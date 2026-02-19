@@ -1,25 +1,41 @@
+/* === Base (mobile-first) ===
+   .app-layout grows with content; body scrolls on mobile.
+   dvh is used where supported (excludes browser chrome). vh is the fallback. */
 .app-layout {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;   /* fallback for browsers without dvh */
+  min-height: 100dvh;  /* dynamic viewport: accounts for mobile address bar */
 }
 
 .main-content {
-  flex: 1;
+  flex: 1;             /* fills remaining height after nav-bar and optional footer */
   display: flex;
   flex-direction: column;
+  min-height: 0;       /* critical — allows children to flex-fill without overflow */
 }
 
 .footer-container {
-  margin-top: auto;
-  padding: 0.5rem; /* Match youtube-container padding */
+  flex-shrink: 0;      /* never shrink; .main-content flex:1 already pushes it to bottom */
+  padding: 0.5rem;
   background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(20,20,20,0.6) 100%);
   border-radius: 1rem;
 }
 
 .footer-container app-player-controls {
   width: 100%;
-  /* padding: 1rem; /* Match content padding */
-  
   border-radius: 1rem;
+}
+
+/* === Desktop (1024px+) ===
+   Exact viewport fill. overflow locked in styles.css; .main-content clips internal
+   scroll to panel level (not page level). */
+@media (min-width: 64rem) {
+  .app-layout {
+    height: 100vh;
+    min-height: unset;  /* override the dvh mobile base */
+  }
+  .main-content {
+    overflow: hidden;   /* desktop: inner panels scroll, not the page */
+  }
 }

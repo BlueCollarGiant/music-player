@@ -56,7 +56,6 @@
 }
 
 /* === Size Variants === */
-/* Removed min-height to allow proper flex scrolling - parent container controls size */
 .song-list.small { }
 .song-list.medium { }
 .song-list.large { height:100%; }
@@ -96,42 +95,29 @@
   font-size:.9rem;
 }
 
-/* === Item Hover Effects (affects child components) === */
-.song-list.small .item:hover {
-  transform:translateY(-.125rem);
-  box-shadow:0 .25rem .75rem rgba(0,0,0,.5);
-}
-
-.song-list.medium .item:hover {
-  transform:translateY(-.0625rem);
-  box-shadow:0 .125rem .25rem rgba(0,0,0,.4);
-}
-
-.song-list.large .item:hover {
-  background:linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(0,0,0,0) 120%);
+/* === Item Hover Effects — pointer devices only === */
+@media (hover: hover) and (pointer: fine) {
+  .song-list.small .item:hover {
+    transform:translateY(-.125rem);
+    box-shadow:0 .25rem .75rem rgba(0,0,0,.5);
+  }
+  .song-list.medium .item:hover {
+    transform:translateY(-.0625rem);
+    box-shadow:0 .125rem .25rem rgba(0,0,0,.4);
+  }
+  .song-list.large .item:hover {
+    background:linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(0,0,0,0) 120%);
+  }
 }
 
 /* === Mobile Responsive === */
 @media (max-width:48rem) {
   .song-list {
     padding:1rem;
-    min-height:auto !important;
-  }
-
-  .song-list.empty {
-    min-height:13.75rem;
-    height:100%;
-  }
-
-  .song-list.small { min-height:17.5rem; }
-  .song-list.medium { min-height:21.875rem; }
-  .song-list.large {
-    min-height:25rem;
-    max-height:65vh;
+    /* min-height determined by platform-shell :has() guards in rem, not vh */
   }
 
   .song-list.empty .items::before {
-    content:"🎵 Choose your playlist to get started!";
     font-size:1rem;
     padding:2rem 1rem;
     margin:.5rem 0;

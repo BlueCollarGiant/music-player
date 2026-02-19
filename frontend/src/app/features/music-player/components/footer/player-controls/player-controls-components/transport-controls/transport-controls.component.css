@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  flex-shrink: 0; /* Don't allow shrinking - maintain fixed width */
+  flex-shrink: 0;
 }
 
 .playback .thumbnail {
@@ -21,7 +21,7 @@
     #f7b7a3   /* Loop back */
   );
   background-size: 1800% 1800%;
-  animation: rainbow-bg 18s ease infinite;
+  animation: rainbow-bg 18s ease infinite; /* defined globally in styles.css */
   border-radius: 0.375rem;
   border: 2px solid rgba(10, 16, 41, 0.25);
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
@@ -40,13 +40,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform .18s ease, box-shadow .24s ease, filter .3s ease;
   box-shadow: rgba(79,107,255,.4) 0 .375rem 1.125rem -.25rem, rgba(0,0,0,.55) 0 .25rem .75rem;
-}
-
-.btn-control:hover {
-  transform: translateY(-.1875rem);
-  box-shadow: rgba(102,126,234,.5) 0 .5rem 1.5rem -.25rem, rgba(0,0,0,.65) 0 .375rem 1rem;
 }
 
 .btn-control:active {
@@ -59,6 +53,7 @@
 }
 
 /* Floating Music Notes dont touch i finally got this to work */
+/* @keyframes floatNote is defined globally in styles.css */
 .playback .thumbnail::before,
 .playback .thumbnail::after {
   content: '🎵';
@@ -80,49 +75,36 @@
   animation-delay: 1.5s;
 }
 
-@keyframes floatNote {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
+/* ===== HOVER — pointer devices only ===== */
+@media (hover: hover) and (pointer: fine) {
+  .btn-control {
+    transition: transform .18s ease, box-shadow .24s ease, filter .3s ease;
   }
-  20% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-3rem);
-    opacity: 0;
+  .btn-control:hover {
+    transform: translateY(-.1875rem);
+    box-shadow: rgba(102,126,234,.5) 0 .5rem 1.5rem -.25rem, rgba(0,0,0,.65) 0 .375rem 1rem;
   }
 }
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
   .playback {
-    gap: 1.5rem; /* Good button spacing */
+    gap: 1.5rem;
     justify-content: center;
-    flex-wrap: wrap; /* allow volume group to wrap beneath */
+    flex-wrap: wrap;
   }
 
   .playback .thumbnail {
-    width: 3rem; /* Medium size thumbnail */
+    width: 3rem;
     height: 3rem;
   }
 
   .btn-control {
-    padding: 0.75rem; /* Comfortable button padding */
+    padding: 0.75rem;
   }
 
   .playback .play-pause {
-    width: 3rem; /* Larger play button for mobile */
+    width: 3rem;
     height: 3rem;
-  }
-
-  /* Disable hover effects on mobile */
-  .btn-control:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    transform: none !important;
-    box-shadow: none !important;
   }
 }

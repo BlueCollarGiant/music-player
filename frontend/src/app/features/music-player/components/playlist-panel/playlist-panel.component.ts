@@ -26,10 +26,8 @@ import { PlaylistOption, PlaylistChangeEvent } from './playlist-panel-logic/play
   ],
   templateUrl: './playlist-panel.component.html',
   styleUrls: [
-    './styles/design-system.css',
     './styles/playlist-panel.css',
     './styles/global-utils.css',
-
   ],
 })
 export class PlaylistPanelComponent {

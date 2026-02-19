@@ -1,86 +1,121 @@
-.youtube-container {
-  height: 100%;
+/* ===== PLATFORM SHELL HOST =====
+   .platform-shell is the outer div in the template. It must flex-fill .main-content so
+   .content can fill it in turn. Without this, the host collapses to intrinsic height and
+   .content has to rely on height:calc(100vh - Npx) to size itself. */
+.platform-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* allow flex child to shrink below intrinsic height for inner scroll */
   padding: 0.5rem;
-  position: relative;
 }
 
+/* ===== CONTENT PANEL =====
+   Base (mobile): flex column, no height constraints. Body scroll handles the page.
+   Desktop (>=1024px via .app-layout chain): .content fills the fixed viewport via flex:1. */
 .content {
   display: flex;
   flex: 1;
-  min-height: 0; /* Critical for flex scrolling */
-  gap: 1.5rem;
-  padding: 1rem;
+  min-height: 0; /* critical — lets children scroll without overflowing parent */
+  flex-direction: column;  /* mobile: stack panels vertically */
+  gap: 1rem;
+  padding: 0.75rem;
   background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(20,20,20,0.6) 100%);
   border-radius: 1rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.1);
-  height: calc(100vh - 200px); /* Account for header and footer */
   position: relative;
-  overflow: hidden; /* Prevent content from overflowing */
+  /* NO height: calc(100vh - 200px) — replaced by flex-fill chain */
+  /* NO overflow: hidden on mobile — body scrolls; desktop overrides below */
 }
 
+/* ===== PANELS (shared base) ===== */
 app-playlist-panel {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0; /* Critical for flex scrolling */
+  min-height: 0;
   background: rgba(255,255,255,0.05);
   border-radius: 0.75rem;
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.1);
-  /* Changed from visible to hidden to prevent overflow */
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, flex 0.3s ease;
-  min-width: 300px;
-  max-width: none;
+  transition: box-shadow 0.3s ease, flex 0.3s ease; /* NO transform */
+  /* Mobile: intrinsic height from content + min-height guards below */
 }
 
-/* Dynamic flex behavior based on playlist content */
-app-playlist-panel:has(.song-list.empty) {
-  flex: 0.8;
-  max-width: 400px;
-}
-
-app-playlist-panel:has(.song-list.small) {
-  flex: 0.9;
-  max-width: 450px;
-}
-
-app-playlist-panel:has(.song-list.medium) {
-  flex: 1;
-}
-
-app-playlist-panel:has(.song-list.large) {
-  flex: 1.2;
-  min-width: 350px;
-}
-
-app-playlist-panel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
+/* Mobile playlist min-height guards (rem-based, no vh) */
+app-playlist-panel:has(.song-list.empty)  { min-height: 17.5rem; }
+app-playlist-panel:has(.song-list.small)  { min-height: 20rem; }
+app-playlist-panel:has(.song-list.medium) { min-height: 25rem; }
+app-playlist-panel:has(.song-list.large)  { min-height: 28rem; }
 
 app-right-panel {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  height: 100%;
-  max-height: 100%;
+  min-height: 0;
   background: rgba(255,255,255,0.05);
   border-radius: 0.75rem;
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.1);
-  overflow: hidden; /* prevent children from bleeding out */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden; /* safe: clips gradient border; iframe fills panel via aspect-ratio */
+  transition: box-shadow 0.3s ease; /* NO transform — direct iframe ancestor */
   box-sizing: border-box;
 }
 
-app-right-panel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+/* ===== HOVER — pointer devices only =====
+   app-playlist-panel: box-shadow only, no transform.
+   app-right-panel: NO hover effect — direct iframe ancestor; transform would break
+   position:fixed overlays (quality menu, CC) inside the YouTube iframe. */
+@media (hover: hover) and (pointer: fine) {
+  app-playlist-panel:hover {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
 }
 
-/* Modern glass morphism effects */
+/* ===== TABLET (768px) — more breathing room, still column ===== */
+@media (min-width: 48rem) {
+  .platform-shell {
+    padding: 0.75rem;
+  }
+  .content {
+    gap: 1.25rem;
+    padding: 1rem;
+  }
+}
+
+/* ===== DESKTOP (1024px) — side-by-side panels, fill fixed viewport ===== */
+@media (min-width: 64rem) {
+  .content {
+    flex-direction: row;   /* side-by-side */
+    gap: 1.5rem;
+    padding: 1rem;
+    overflow: hidden;      /* desktop: clip to panel; children scroll internally */
+    /* flex:1 + min-height:0 already set in base; fills .main-content which is flex:1 */
+  }
+
+  /* Desktop panel sizing — flex ratios drive width */
+  app-playlist-panel {
+    flex: 1;
+    min-width: 300px;
+    max-width: none;
+  }
+
+  /* Dynamic flex based on playlist size — desktop only */
+  app-playlist-panel:has(.song-list.empty)  { flex: 0.8; max-width: 400px; min-height: unset; }
+  app-playlist-panel:has(.song-list.small)  { flex: 0.9; max-width: 450px; min-height: unset; }
+  app-playlist-panel:has(.song-list.medium) { flex: 1;                     min-height: unset; }
+  app-playlist-panel:has(.song-list.large)  { flex: 1.2; min-width: 350px; min-height: unset; }
+
+  app-right-panel {
+    flex: 1;
+    height: 100%; /* fill the row height set by .content's flex container */
+    max-height: 100%;
+    min-height: unset;
+  }
+}
+
+/* ===== GLASSMORPHISM OVERLAY =====
+   pointer-events:none so it never blocks iframe taps. */
 .content::before {
   content: '';
   position: absolute;
@@ -88,80 +123,21 @@ app-right-panel:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg,  /* YouTube-inspired punchy red/pink */
-  rgba(100, 0, 180, 0.25) 45%, /* Deep neon violet */
-  rgba(0, 174, 255, 0.15) 55%, /* Electric blue */
-);
+  background: linear-gradient(135deg,
+    rgba(100, 0, 180, 0.25) 45%,
+    rgba(0, 174, 255, 0.15) 55%
+  );
   border-radius: 1rem;
   pointer-events: none;
   z-index: -1;
-  
 }
 
-/* ===== MOBILE RESPONSIVE - MODERN STACK ===== */
-@media (max-width: 768px) {
-  .youtube-container {
-    padding: 0.25rem;
-  }
-
-  .content {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 0.75rem;
-    height: auto;
-    min-height: calc(100vh - 180px);
-  }
-  
-  app-playlist-panel {
-    flex: unset;
-    order: 1;
-    min-width: unset;
-    max-width: unset;
-    width: 100%;
-  }
-  
-  /* Mobile playlist responsive heights */
-  app-playlist-panel:has(.song-list.empty) {
-    min-height: 280px;
-  }
-  
-  app-playlist-panel:has(.song-list.small) {
-    min-height: 320px;
-  }
-  
-  app-playlist-panel:has(.song-list.medium) {
-    min-height: 400px;
-  }
-  
-  app-playlist-panel:has(.song-list.large) {
-    min-height: 450px;
-    max-height: 70vh;
-  }
-  
-  app-right-panel {
-    display: flex;
-    flex-direction: column;
-    order: 2;
-    align-self: stretch;
-    min-height: 40vh;
-    height: 100%;
-    max-height: 100%;
-    overflow: hidden;
-  }
-
-  app-playlist-panel:hover,
-  app-right-panel:hover {
-    transform: none; /* Disable hover effects on mobile */
-  }
-}
-
-/* Dark theme enhancements */
+/* ===== DARK THEME ===== */
 @media (prefers-color-scheme: dark) {
   .content {
     background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(30,30,30,0.8) 100%);
     border: 1px solid rgba(255,255,255,0.15);
   }
-  
   app-playlist-panel,
   app-right-panel {
     background: rgba(255,255,255,0.08);

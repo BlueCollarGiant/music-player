@@ -15,11 +15,6 @@
   color:#fff;
 }
 .item.clickable { cursor:pointer; }
-.item.clickable:hover {
-  border-color:rgba(255,255,255,.28);
-  background:linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(0,0,0,0) 120%);
-  transform:translateY(-.0625rem);
-}
 .item.placeholder {
   opacity:.7;
   border-style:dashed;
@@ -31,8 +26,30 @@
   background:linear-gradient(90deg,rgba(255,255,255,.18) 0%, rgba(0,0,0,0) 120%);
   border:.125rem solid #fff;
   box-shadow:0 0 0 .0625rem #fff, 0 0 .75rem rgba(96,165,250,.5);
-  transform:translateY(-.0625rem);
   color:#fff;
+}
+
+/* === Hover — pointer devices only (no !important overrides needed) === */
+@media (hover: hover) and (pointer: fine) {
+  .item.clickable:hover {
+    border-color:rgba(255,255,255,.28);
+    background:linear-gradient(90deg, rgba(255,255,255,.08) 0%, rgba(0,0,0,0) 120%);
+    transform:translateY(-.0625rem);
+  }
+  .item.active {
+    transform:translateY(-.0625rem);
+  }
+  .item.active:hover {
+    background:linear-gradient(90deg,rgba(255,255,255,.22) 0%, rgba(0,0,0,0) 120%);
+  }
+  .remove-btn:hover {
+    color:#ff6b6b;
+    background:rgba(255,107,107,.12);
+  }
+  .quick-add-select:hover {
+    border-color:rgba(107,76,255,.7);
+    background:rgba(107,76,255,.22);
+  }
 }
 
 /* === Thumbnail === */
@@ -66,18 +83,15 @@
 }
 
 /* === Active Thumbnail Animated Gradient === */
+/* @keyframes rainbow-bg is defined globally in styles.css */
 .item.active .thumbnail {
   background:linear-gradient(270deg,#f7b7a3,#ffe3a3,#e3f7ca,#b7e3f7,#c8c5f7,#e3caf7,#f7b7d9,#f7b7a3);
   background-size:1800% 1800%;
   animation:rainbow-bg 18s ease infinite;
 }
-@keyframes rainbow-bg {
-  0% { background-position:0% 50%; }
-  50% { background-position:100% 50%; }
-  100% { background-position:0% 50%; }
-}
 
 /* === Floating Music Notes === */
+/* @keyframes floatNote is defined globally in styles.css */
 .item.active .thumbnail::before, .item.active .thumbnail::after {
   content:'🎵';
   position:absolute;
@@ -94,12 +108,6 @@
 .item.active .thumbnail::after {
   right:.3125rem;
   animation-delay:1.5s;
-}
-@keyframes floatNote {
-  0% { transform:translateY(0); opacity:0; }
-  20% { opacity:1; }
-  80% { opacity:1; }
-  100% { transform:translateY(-3rem); opacity:0; }
 }
 
 /* === Item Info === */
@@ -118,41 +126,7 @@
   min-width:0;
 }
 
-/* === Mobile Adjustments === */
-@media (max-width:48rem) {
-  .item {
-    padding:.625rem .9375rem;
-    min-height:4rem;
-    font-size:1rem;
-    color:#fff;
-    width:100%;
-    margin:0;
-  }
-  .item:hover {
-    transform:none !important;
-    box-shadow:none !important;
-    background-color:initial !important;
-  }
-  .item.active {
-    padding:.625rem .9375rem;
-    border-width:.125rem;
-    background:linear-gradient(90deg,rgba(255,255,255,.18) 0%, rgba(0,0,0,0) 120%) !important;
-    box-shadow:0 0 0 .0625rem #fff, 0 0 .75rem rgba(96,165,250,.5) !important;
-    color:#fff !important;
-    margin:0 !important;
-  }
-  .item.active:hover {
-    background-color:rgba(255,255,255,.05) !important;
-    box-shadow:0 0 .75rem rgba(96,165,250,.5) !important;
-    margin:0 !important;
-  }
-  .thumbnail {
-    width:2.5rem;
-    height:2.5rem;
-  }
-}
-
-/* === Local: Remove Button (Task D) === */
+/* === Local: Remove Button === */
 .remove-btn {
   flex-shrink:0;
   background:transparent;
@@ -165,12 +139,8 @@
   transition:color .15s ease, background .15s ease;
   line-height:1;
 }
-.remove-btn:hover {
-  color:#ff6b6b;
-  background:rgba(255,107,107,.12);
-}
 
-/* === Local: Quick Add-to-Playlist Dropdown (Task E) === */
+/* === Local: Quick Add-to-Playlist Dropdown === */
 .quick-add-select {
   flex-shrink:0;
   background:rgba(107,76,255,.15);
@@ -186,10 +156,6 @@
   transition:border-color .15s ease, background .15s ease;
 }
 .quick-add-select option { background:#121225; color:#fff; }
-.quick-add-select:hover {
-  border-color:rgba(107,76,255,.7);
-  background:rgba(107,76,255,.22);
-}
 
 /* === Local: Quick-Add Confirmation Checkmark (PR5.2) === */
 /* @keyframes quick-add-pop is defined globally in styles.css */
